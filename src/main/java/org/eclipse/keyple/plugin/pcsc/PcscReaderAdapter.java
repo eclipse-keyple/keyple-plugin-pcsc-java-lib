@@ -53,7 +53,7 @@ final class PcscReaderAdapter extends AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public void waitForCardPresent() throws TaskCanceledException, ReaderIOException {
+  public void waitForCardInsertion() throws TaskCanceledException, ReaderIOException {
 
     if (logger.isTraceEnabled()) {
       logger.trace(
@@ -93,7 +93,7 @@ final class PcscReaderAdapter extends AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public void stopWaitForCard() {
+  public void stopWaitForCardInsertion() {
     if (logger.isTraceEnabled()) {
       logger.trace("{}: stop waiting for card insertion requested.", this.getName());
     }

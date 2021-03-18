@@ -413,7 +413,7 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public void waitForCardAbsentNative() throws TaskCanceledException, ReaderIOException {
+  public void waitForCardRemoval() throws TaskCanceledException, ReaderIOException {
 
     if (logger.isTraceEnabled()) {
       logger.trace(
