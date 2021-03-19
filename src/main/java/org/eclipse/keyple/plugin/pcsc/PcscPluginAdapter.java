@@ -17,7 +17,7 @@ import javax.smartcardio.TerminalFactory;
 
 /**
  * (package-private)<br>
- * Implementation of AbstractPcscPluginAdapter suitable for platforms other than Windows.
+ * Implementation of {@link AbstractPcscPluginAdapter} suitable for platforms other than Windows.
  *
  * <p>Provides a createInstance method that receives a boolean as an argument to indicate that the
  * platform is MacOS. <br>
@@ -29,10 +29,9 @@ import javax.smartcardio.TerminalFactory;
 final class PcscPluginAdapter extends AbstractPcscPluginAdapter {
 
   /**
-   * Singleton instance of SmartCardService 'volatile' qualifier ensures that read access to the
-   * object will only be allowed once the object has been fully initialized.
-   *
-   * <p>This qualifier is required for "lazy-singleton" pattern with double-check method, to be
+   * The 'volatile' qualifier ensures that read access to the object will only be allowed once the
+   * object has been fully initialized. <br>
+   * This qualifier is required for “lazy-singleton” pattern with double-check method, to be
    * thread-safe.
    */
   private static volatile PcscPluginAdapter instance; // NOSONAR: lazy-singleton pattern.
@@ -70,7 +69,7 @@ final class PcscPluginAdapter extends AbstractPcscPluginAdapter {
    *
    * @since 2.0
    */
-  protected CardTerminals getCardTerminals() {
+  CardTerminals getCardTerminals() {
     return TerminalFactory.getDefault().terminals();
   }
 

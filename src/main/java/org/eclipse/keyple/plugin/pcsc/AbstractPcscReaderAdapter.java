@@ -78,7 +78,7 @@ class AbstractPcscReaderAdapter
    *
    * @return A not null reference.
    */
-  CardTerminal getTerminal() {
+  final CardTerminal getTerminal() {
     return terminal;
   }
 
@@ -88,7 +88,7 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public String getName() {
+  public final String getName() {
     return name;
   }
 
@@ -98,7 +98,7 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public boolean isProtocolSupported(String readerProtocol) {
+  public final boolean isProtocolSupported(String readerProtocol) {
     return pluginAdapter.getProtocolRule(readerProtocol) != null;
   }
 
@@ -108,7 +108,7 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public void activateProtocol(String readerProtocol) {
+  public final void activateProtocol(String readerProtocol) {
     if (!isProtocolSupported(readerProtocol)) {
       throw new IllegalArgumentException("Unsupported protocol " + readerProtocol);
     }
@@ -126,7 +126,7 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public void deactivateProtocol(String readerProtocol) {
+  public final void deactivateProtocol(String readerProtocol) {
     if (logger.isTraceEnabled()) {
       logger.trace(
           "{}: deactivating the {} protocol causes no action to be taken.",
@@ -142,7 +142,7 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public boolean isCurrentProtocol(String readerProtocol) {
+  public final boolean isCurrentProtocol(String readerProtocol) {
     String protocolRule = pluginAdapter.getProtocolRule(readerProtocol);
     boolean isCurrentProtocol;
     if (logger.isTraceEnabled()) {
@@ -173,7 +173,7 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public void openPhysicalChannel() throws ReaderIOException {
+  public final void openPhysicalChannel() throws ReaderIOException {
     if (logger.isTraceEnabled()) {
       logger.trace("{}: attempt to open a physical channel.", getName());
     }
@@ -203,7 +203,7 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public void closePhysicalChannel() throws ReaderIOException {
+  public final void closePhysicalChannel() throws ReaderIOException {
     try {
       if (card != null) {
         logger.debug("{}: closing the physical channel.", this.getName());
@@ -225,7 +225,7 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public boolean isPhysicalChannelOpen() {
+  public final boolean isPhysicalChannelOpen() {
     return card != null;
   }
 
@@ -235,7 +235,7 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public boolean checkCardPresence() throws ReaderIOException {
+  public final boolean checkCardPresence() throws ReaderIOException {
     try {
       return terminal.isCardPresent();
     } catch (CardException e) {
@@ -249,7 +249,7 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public byte[] getATR() {
+  public final byte[] getATR() {
     return card.getATR().getBytes();
   }
 
@@ -259,7 +259,8 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public byte[] transmitApdu(byte[] apduCommandData) throws ReaderIOException, CardIOException {
+  public final byte[] transmitApdu(byte[] apduCommandData)
+      throws ReaderIOException, CardIOException {
     Assert.getInstance().notEmpty(apduCommandData, "apduCommandData");
     if (logger.isTraceEnabled()) {
       logger.trace("{}: APDU  IN: {}", getName(), ByteArrayUtil.toHex(apduCommandData));
@@ -290,7 +291,7 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public boolean isContactless() {
+  public final boolean isContactless() {
     if (isContactless == null) {
       // First time initialisation, the transmission mode has not yet been determined or fixed
       // explicitly, let's ask the plugin to determine it (only once)
@@ -305,7 +306,7 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public void unregister() {
+  public final void unregister() {
     /* Nothing to do here in this reader */
   }
 
@@ -315,7 +316,7 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public void onStartDetection() {
+  public final void onStartDetection() {
     /* Nothing to do here in this reader */
   }
 
@@ -325,19 +326,19 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public void onStopDetection() {
+  public final void onStopDetection() {
     /* Nothing to do here in this reader */
   }
 
   /**
    * {@inheritDoc}
    *
-   * <p>The default value is {@code EXCLUSIVE}.
+   * <p>The default value is {@link SharingMode#EXCLUSIVE}.
    *
    * @since 2.0
    */
   @Override
-  public PcscReader setSharingMode(SharingMode sharingMode) throws ReaderIOException {
+  public final PcscReader setSharingMode(SharingMode sharingMode) throws ReaderIOException {
     Assert.getInstance().notNull(sharingMode, "sharingMode");
     if (logger.isTraceEnabled()) {
       logger.trace("{}: set sharing mode to {}", getName(), sharingMode.name());
@@ -364,7 +365,7 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public PcscReader setContactless(boolean contactless) {
+  public final PcscReader setContactless(boolean contactless) {
     if (logger.isTraceEnabled()) {
       logger.trace("{}: set contactless type: {}", getName(), contactless);
     }
@@ -375,12 +376,12 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * <p>The default value is {@code ANY}.
+   * <p>The default value is {@link IsoProtocol#ANY}.
    *
    * @since 2.0
    */
   @Override
-  public PcscReader setIsoProtocol(IsoProtocol isoProtocol) {
+  public final PcscReader setIsoProtocol(IsoProtocol isoProtocol) {
     Assert.getInstance().notNull(isoProtocol, "isoProtocol");
     if (logger.isTraceEnabled()) {
       logger.trace(
@@ -393,10 +394,12 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
+   * <p>The default value is {@link DisconnectionMode#LEAVE}.
+   *
    * @since 2.0
    */
   @Override
-  public PcscReader setDisconnectionMode(DisconnectionMode disconnectionMode) {
+  public final PcscReader setDisconnectionMode(DisconnectionMode disconnectionMode) {
     Assert.getInstance().notNull(disconnectionMode, "disconnectionMode");
     if (logger.isTraceEnabled()) {
       logger.trace("{}: set disconnection to {}", getName(), disconnectionMode.name());
@@ -408,12 +411,10 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * <p>The default value is {@code LEAVE}.
-   *
    * @since 2.0
    */
   @Override
-  public void waitForCardRemoval() throws TaskCanceledException, ReaderIOException {
+  public final void waitForCardRemoval() throws TaskCanceledException, ReaderIOException {
 
     if (logger.isTraceEnabled()) {
       logger.trace(
@@ -453,7 +454,7 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public void stopWaitForCardRemoval() {
+  public final void stopWaitForCardRemoval() {
     if (logger.isTraceEnabled()) {
       logger.trace("{}: stop waiting for the card removal requested.", this.getName());
     }

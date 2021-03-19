@@ -14,10 +14,9 @@ package org.eclipse.keyple.plugin.pcsc;
 import javax.smartcardio.Card;
 import org.eclipse.keyple.core.common.KeypleReaderExtension;
 import org.eclipse.keyple.core.plugin.ReaderIOException;
-import org.eclipse.keyple.core.service.Reader;
 
 /**
- * PC/SC reader specific interface.
+ * PC/SC specific {@link KeypleReaderExtension}.
  *
  * <p>Provides specific settings and methods for configuring a PC/SC reader.
  *
@@ -149,14 +148,18 @@ public interface PcscReader extends KeypleReaderExtension {
    * what type of technology a reader uses.
    *
    * <p>Thus, it is the responsibility of the application to give the reader the means to know his
-   * own type. This information will be used by the {@link Reader#isContactless()} mode method.<br>
-   * This can be achieved with this method but also by giving the plugin the means to determine the
-   * type from the reader's name. In the latter case, the application does not need to call this
-   * method, the reader itself will determine its type using the plugin's parameters (see {@link
-   * PcscPluginFactoryBuilder}.
+   * own type.
    *
-   * <p>The default value for this parameter if this method is not called is undefined.<br>
-   * The {@link Reader#isContactless()} may raise an {@link IllegalStateException}.
+   * <p>This can be done in two ways:
+   *
+   * <ul>
+   *   <li>by invoking this method,
+   *   <li>by giving the plugin the means to determine the type from the name of the reader. In the
+   *       latter case, the application does not need to call this method, the reader will determine
+   *       its type itself using the plugin parameters (see {@link PcscPluginFactoryBuilder}.
+   * </ul>
+   *
+   * <p>There is no default mode, so it is mandatory to set the mode by any of the above methods.
    *
    * @param contactless true to set contactless mode, false to set contact mode.
    * @return This instance.
@@ -181,7 +184,7 @@ public interface PcscReader extends KeypleReaderExtension {
    * Changes the action to be taken after disconnection (default value {@link
    * DisconnectionMode#LEAVE}).
    *
-   * <p>The cardis either reset or left as is.
+   * <p>The card is either reset or left as is.
    *
    * <p>The default value for this parameter if this method is not called is {@link
    * DisconnectionMode#LEAVE}.

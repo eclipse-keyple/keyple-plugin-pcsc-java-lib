@@ -14,8 +14,8 @@ package org.eclipse.keyple.plugin.pcsc;
 import org.eclipse.keyple.core.common.KeyplePluginExtensionFactory;
 
 /**
- * Factory built by {@link PcscPluginFactoryBuilder}, to be provided to {@link
- * org.eclipse.keyple.core.service.SmartCardService} to register the PC/SC plugin.
+ * PC/SC specific {@link KeyplePluginExtensionFactory} to be provided to the Keyple SmartCard
+ * service to register the PC/SC plugin, built by {@link PcscPluginFactoryBuilder}.
  *
  * @since 2.0
  */

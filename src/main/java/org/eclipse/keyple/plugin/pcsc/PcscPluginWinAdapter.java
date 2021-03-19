@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * (package-private)<br>
- * Implementation of AbstractPcscPluginAdapter suitable for Windows platforms.
+ * Implementation of {@link AbstractPcscPluginAdapter} suitable for Windows platforms.
  *
  * <p>Windows 8/10 platforms have a problem in the management of the smart card service combined
  * with Java smartcard.io. <br>

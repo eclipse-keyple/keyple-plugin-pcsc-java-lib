@@ -100,6 +100,6 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
     return plugin
         .setContactReaderIdentificationFilter(contactReaderIdentificationFilter)
         .setContactlessReaderIdentificationFilter(contactlessReaderIdentificationFilter)
-        .setProtocolRulesMap(protocolRulesMap);
+        .addProtocolRulesMap(protocolRulesMap);
   }
 }

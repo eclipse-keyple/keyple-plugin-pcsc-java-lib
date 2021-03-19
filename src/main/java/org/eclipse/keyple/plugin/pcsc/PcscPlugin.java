@@ -14,7 +14,7 @@ package org.eclipse.keyple.plugin.pcsc;
 import org.eclipse.keyple.core.common.KeyplePluginExtension;
 
 /**
- * PC/SC plugin specific interface.
+ * PC/SC specific {@link KeyplePluginExtension}.
  *
  * @since 2.0
  */

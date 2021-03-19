@@ -12,6 +12,7 @@
 package org.eclipse.keyple.plugin.pcsc;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import javax.smartcardio.CardException;
@@ -35,7 +36,8 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   private static final Logger logger = LoggerFactory.getLogger(AbstractPcscPluginAdapter.class);
   private static final int MONITORING_CYCLE_DURATION_MS = 1000;
 
-  private static final Map<String, String> protocolRulesMap = new HashMap<String, String>();
+  private static final Map<String, String> protocolRulesMap =
+      new ConcurrentHashMap<String, String>();
 
   // initializes the protocol rules map with default values
   static {
@@ -90,11 +92,11 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * (package-private)<br>
    * Sets the filter to identify contact readers.
    *
-   * @param contactReaderIdentificationFilter null if the regex based filter is not set.
+   * @param contactReaderIdentificationFilter A regular expression, null if the filter is not set.
    * @return The object instance.
    * @since 2.0
    */
-  AbstractPcscPluginAdapter setContactReaderIdentificationFilter(
+  final AbstractPcscPluginAdapter setContactReaderIdentificationFilter(
       String contactReaderIdentificationFilter) {
     if (logger.isTraceEnabled()) {
       if (contactReaderIdentificationFilter != null) {
@@ -114,11 +116,12 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * (package-private)<br>
    * Sets the filter to identify contactless readers.
    *
-   * @param contactlessReaderIdentificationFilter null if the regex based filter is not set.
+   * @param contactlessReaderIdentificationFilter A regular expression, null if the filter is not
+   *     set.
    * @return The object instance.
    * @since 2.0
    */
-  AbstractPcscPluginAdapter setContactlessReaderIdentificationFilter(
+  final AbstractPcscPluginAdapter setContactlessReaderIdentificationFilter(
       String contactlessReaderIdentificationFilter) {
     if (logger.isTraceEnabled()) {
       if (contactlessReaderIdentificationFilter != null) {
@@ -144,7 +147,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * @return The object instance.
    * @since 2.0
    */
-  AbstractPcscPluginAdapter setProtocolRulesMap(Map<String, String> protocolRulesMap) {
+  final AbstractPcscPluginAdapter addProtocolRulesMap(Map<String, String> protocolRulesMap) {
     if (protocolRulesMap != null) {
       if (logger.isTraceEnabled()) {
         logger.trace(
@@ -171,13 +174,13 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * @return null if no protocol rules defined for the provided protocol.
    * @since 2.0
    */
-  String getProtocolRule(String readerProtocol) {
+  final String getProtocolRule(String readerProtocol) {
     return protocolRulesMap.get(readerProtocol);
   }
 
   /**
    * (package-private)<br>
-   * Abstract methode to create a new instance of {@link ReaderSpi} from a {@link CardTerminal}.
+   * Creates a new instance of {@link ReaderSpi} from a {@link CardTerminal}.
    *
    * <p>Note: this method is platform dependent.
    *
@@ -209,7 +212,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * @throws PatternSyntaxException If the expression's syntax is invalid
    * @since 2.0
    */
-  boolean isContactless(String readerName) {
+  final boolean isContactless(String readerName) {
 
     Pattern p;
     p = Pattern.compile(contactReaderIdentificationFilter);
@@ -225,7 +228,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   }
 
   /**
-   * Gets the list of terminals provided by smartcard.io.
+   * (private) Gets the list of terminals provided by smartcard.io.
    *
    * <p>The aim is to handle the exception possibly raised by the underlying smartcard.io method.
    *
@@ -267,7 +270,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * @since 2.0
    */
   @Override
-  public Set<ReaderSpi> searchAvailableReaders() throws PluginIOException {
+  public final Set<ReaderSpi> searchAvailableReaders() throws PluginIOException {
     Set<ReaderSpi> readerSpis = new HashSet<ReaderSpi>();
 
     for (CardTerminal terminal : getCardTerminalList()) {
@@ -285,7 +288,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * @since 2.0
    */
   @Override
-  public void unregister() {
+  public final void unregister() {
     /* Nothing to do here in this plugin */
   }
 
@@ -295,7 +298,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * @since 2.0
    */
   @Override
-  public int getMonitoringCycleDuration() {
+  public final int getMonitoringCycleDuration() {
     return MONITORING_CYCLE_DURATION_MS;
   }
 
@@ -305,7 +308,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * @since 2.0
    */
   @Override
-  public Set<String> searchAvailableReadersNames() throws PluginIOException {
+  public final Set<String> searchAvailableReadersNames() throws PluginIOException {
     Set<String> readerNames = new HashSet<String>();
 
     for (CardTerminal terminal : getCardTerminalList()) {
@@ -323,7 +326,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * @since 2.0
    */
   @Override
-  public ReaderSpi searchReader(String readerName) throws PluginIOException {
+  public final ReaderSpi searchReader(String readerName) throws PluginIOException {
     if (logger.isTraceEnabled()) {
       logger.trace("{}: search reader: {}", this.getName(), readerName);
     }

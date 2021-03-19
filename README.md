@@ -1,8 +1,8 @@
-# Keyple Java Service
+# Keyple Java Plugin PC/SC
 
 ## Overview
 
-The **Keyple Service** Java library contains the core Keyple interfaces and classes.
+The **Keyple Java Plugin PC/SC** contains interfaces and classes to manage PC/SC readers within a Keyple application.
 
 This library **should be import explicitly** by the main application.
 
