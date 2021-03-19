@@ -41,28 +41,34 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   static {
     // contactless protocols
     protocolRulesMap.put(
-        PcscSupportedContactlessProtocols.ISO_14443_4.name(),
-        PcscSupportedContactlessProtocols.ISO_14443_4.getDefaultRule());
+        PcscSupportedContactlessProtocol.ISO_14443_4.name(),
+        PcscSupportedContactlessProtocol.ISO_14443_4.getDefaultRule());
     protocolRulesMap.put(
-        PcscSupportedContactlessProtocols.INNOVATRON_B_PRIME_CARD.name(),
-        PcscSupportedContactlessProtocols.INNOVATRON_B_PRIME_CARD.getDefaultRule());
+        PcscSupportedContactlessProtocol.INNOVATRON_B_PRIME_CARD.name(),
+        PcscSupportedContactlessProtocol.INNOVATRON_B_PRIME_CARD.getDefaultRule());
     protocolRulesMap.put(
-        PcscSupportedContactlessProtocols.MIFARE_ULTRA_LIGHT.name(),
-        PcscSupportedContactlessProtocols.MIFARE_ULTRA_LIGHT.getDefaultRule());
+        PcscSupportedContactlessProtocol.MIFARE_ULTRA_LIGHT.name(),
+        PcscSupportedContactlessProtocol.MIFARE_ULTRA_LIGHT.getDefaultRule());
     protocolRulesMap.put(
-        PcscSupportedContactlessProtocols.MIFARE_CLASSIC.name(),
-        PcscSupportedContactlessProtocols.MIFARE_CLASSIC.getDefaultRule());
+        PcscSupportedContactlessProtocol.MIFARE_CLASSIC.name(),
+        PcscSupportedContactlessProtocol.MIFARE_CLASSIC.getDefaultRule());
     protocolRulesMap.put(
-        PcscSupportedContactlessProtocols.MIFARE_DESFIRE.name(),
-        PcscSupportedContactlessProtocols.MIFARE_DESFIRE.getDefaultRule());
+        PcscSupportedContactlessProtocol.MIFARE_DESFIRE.name(),
+        PcscSupportedContactlessProtocol.MIFARE_DESFIRE.getDefaultRule());
     protocolRulesMap.put(
-        PcscSupportedContactlessProtocols.MEMORY_ST25.name(),
-        PcscSupportedContactlessProtocols.MEMORY_ST25.getDefaultRule());
+        PcscSupportedContactlessProtocol.MEMORY_ST25.name(),
+        PcscSupportedContactlessProtocol.MEMORY_ST25.getDefaultRule());
 
     // contacts protocols
-    protocolRulesMap.put(PcscSupportedContactProtocols.ISO_7816_3.name(), "3.*");
-    protocolRulesMap.put(PcscSupportedContactProtocols.ISO_7816_3_T0.name(), "3.*");
-    protocolRulesMap.put(PcscSupportedContactProtocols.ISO_7816_3_T1.name(), "3.*");
+    protocolRulesMap.put(
+        PcscSupportedContactProtocol.ISO_7816_3.name(),
+        PcscSupportedContactProtocol.ISO_7816_3.getDefaultRule());
+    protocolRulesMap.put(
+        PcscSupportedContactProtocol.ISO_7816_3_T0.name(),
+        PcscSupportedContactProtocol.ISO_7816_3_T0.getDefaultRule());
+    protocolRulesMap.put(
+        PcscSupportedContactProtocol.ISO_7816_3_T1.name(),
+        PcscSupportedContactProtocol.ISO_7816_3_T1.getDefaultRule());
   }
 
   private final String name;

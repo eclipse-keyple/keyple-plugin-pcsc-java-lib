@@ -27,39 +27,47 @@ package org.eclipse.keyple.plugin.pcsc;
  *
  * @since 2.0
  */
-public enum PcscSupportedContactlessProtocols {
+public enum PcscSupportedContactlessProtocol {
+
   /**
-   * Fully ISO 14443-4 compliant cards
+   * Fully ISO 14443-4 compliant cards<br>
+   * Default rule = <b>{@code
+   * 3B8880....................|3B8B80.*|3B8C800150.*|.*4F4D4141544C4153.*}</b>
    *
    * @since 2.0
    */
   ISO_14443_4("3B8880....................|3B8B80.*|3B8C800150.*|.*4F4D4141544C4153.*"),
   /**
-   * Innovatron Type B Prime protocol
+   * Innovatron Type B Prime protocol<br>
+   * Default rule = <b>{@code 3B8F8001805A0...................829000..}</b>
    *
    * @since 2.0
    */
   INNOVATRON_B_PRIME_CARD("3B8F8001805A0...................829000.."),
   /**
-   * NXP Mifare Ultralight or UltralightC (as per PC/SC standard part3)
+   * NXP Mifare Ultralight or UltralightC (as per PC/SC standard part3)<br>
+   * Default rule = <b>{@code 3B8F8001804F0CA0000003060300030000000068}</b>
    *
    * @since 2.0
    */
   MIFARE_ULTRA_LIGHT("3B8F8001804F0CA0000003060300030000000068"),
   /**
-   * NXP Mifare Classic 1K (as per PC/SC standard part3)
+   * NXP Mifare Classic 1K (as per PC/SC standard part3)<br>
+   * Default rule = <b>{@code 3B8F8001804F0CA000000306030001000000006A}</b>
    *
    * @since 2.0
    */
   MIFARE_CLASSIC("3B8F8001804F0CA000000306030001000000006A"),
   /**
-   * NXP DESFire or DESFire EV1 or EV2
+   * NXP DESFire or DESFire EV1 or EV2<br>
+   * Default rule = <b>{@code 3B8180018080}</b>
    *
    * @since 2.0
    */
   MIFARE_DESFIRE("3B8180018080"),
   /**
-   * STMicroelectronics ST25 Tag
+   * STMicroelectronics ST25 Tag<br>
+   * Default rule = <b>{@code 3B8F8001804F0CA000000306070007D0020C00B6}</b>
    *
    * @since 2.0
    */
@@ -83,7 +91,7 @@ public enum PcscSupportedContactlessProtocols {
    *
    * @param defaultRule The default rule.
    */
-  PcscSupportedContactlessProtocols(String defaultRule) {
+  PcscSupportedContactlessProtocol(String defaultRule) {
     this.defaultRule = defaultRule;
   }
 }

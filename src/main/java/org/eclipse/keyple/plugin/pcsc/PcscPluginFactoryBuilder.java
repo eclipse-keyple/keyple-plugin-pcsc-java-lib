@@ -28,8 +28,8 @@ import org.eclipse.keyple.core.util.Assert;
  * PcscPluginFactory pcscPluginFactory = new PcscPluginFactoryBuilder()
  *      .useContactReaderIdentificationFilter(".*(Cherry TC|Identive).*")
  *      .useContactlessReaderIdentificationFilter(".*(ASK LoGO|ACS ACR122).*")
- *      .updateProtocolIdentificationRule(PcscSupportedContactlessProtocols).ISO_14443_4("3B8B80.*")
- *      .updateProtocolIdentificationRule(PcscSupportedContactlessProtocols).INNOVATRON_B_PRIME_CARD("3B8F8001805A0.*")
+ *      .updateProtocolIdentificationRule(PcscSupportedContactlessProtocol).ISO_14443_4("3B8B80.*")
+ *      .updateProtocolIdentificationRule(PcscSupportedContactlessProtocol).INNOVATRON_B_PRIME_CARD("3B8F8001805A0.*")
  *      .build();
  * }</pre>
  *
@@ -38,8 +38,8 @@ import org.eclipse.keyple.core.util.Assert;
  * PcscReader#setContactless(boolean)}. <br>
  * A set of default protocol identification rules is also proposed.
  *
- * @see PcscSupportedContactProtocols
- * @see PcscSupportedContactlessProtocols
+ * @see PcscSupportedContactProtocol
+ * @see PcscSupportedContactlessProtocol
  * @since 2.0
  */
 public final class PcscPluginFactoryBuilder {
