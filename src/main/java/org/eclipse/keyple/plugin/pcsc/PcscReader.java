@@ -35,9 +35,17 @@ public interface PcscReader extends KeypleReaderExtension {
    * @since 2.0
    */
   enum SharingMode {
-    /** Allows simultaneous access to the card */
+    /**
+     * Allows simultaneous access to the card
+     *
+     * @since 2.0
+     */
     SHARED,
-    /** Requests exclusive access to the card */
+    /**
+     * Requests exclusive access to the card
+     *
+     * @since 2.0
+     */
     EXCLUSIVE
   }
 
