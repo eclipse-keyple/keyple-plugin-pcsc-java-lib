@@ -31,7 +31,7 @@ final class PcscPluginAdapter extends AbstractPcscPluginAdapter {
   /**
    * The 'volatile' qualifier ensures that read access to the object will only be allowed once the
    * object has been fully initialized. <br>
-   * This qualifier is required for “lazy-singleton” pattern with double-check method, to be
+   * This qualifier is required for 'lazy-singleton' pattern with double-check method, to be
    * thread-safe.
    */
   private static volatile PcscPluginAdapter instance; // NOSONAR: lazy-singleton pattern.
