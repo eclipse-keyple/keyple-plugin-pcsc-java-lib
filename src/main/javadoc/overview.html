@@ -1,0 +1,43 @@
+<html>
+<body>
+<p>This document is the specification of the API dedicated to the integration of the <b>PC/SC plugin</b> in a <b>Keyple
+    Aapplication</b>.</p>
+<h1>Specific extensions</h1>
+<p>The plugin and readers have specific extensions defined in the {@code PcscPlugin} and {@code PcscReader}
+    interfaces</p>
+<p>So far, only the reader has specificities compared to the standard Keyple API.</p>
+<h1>Identification of the type of reader</h1>
+<p>The <b>PC/SC plugin</b> allows an application to use both contact and contactless PC/SC readers.</p>
+<p>The PC/SC standard does not provide a simple way to know the type of reader, it must be deduced from the name
+    assigned by its manufacturer.</p>
+<p>Two methods are proposed to allow the application to assign a type to a reader discovered by the plugin:</p>
+<ul>
+    <li>
+        when building the plugin by providing {@code PcscPluginFactoryBuilder} with regular expression based filters to
+        deduce the type of the reader from its name.
+    </li>
+    <li>
+        once the reader is enumerated by the plugin by calling the {@code setContactless()} method of the specific
+        reader API.
+    </li>
+</ul>
+<p><b>It is mandatory to use either of these two methods.</b></p>
+<p><b>Note:</b> the identification of the reader by its name may also be necessary to assign it a precise functional
+    role, but this is the responsibility of the application.
+</p>
+<h1>Observability</h1>
+<p>The <b>PC/SC plugin</b> implements the Keyple observation pattern at the plugin (reader connection and disconnection)
+    and reader (card insertion and removal) level, in this case it is imperative to cast the {@code Plugin} and
+    {@code Reader} objects as {@code ObservablePlugin} and {@code ObservableReader} and to implement the interfaces
+    defined for this purpose in the Keyple Service SPI package.</p>
+<p>However, the use of these observation features is optional; it is possible to operate in a static mode on both the
+    plugin and the reader side.</p>
+<h1>Card identification</h1>
+<p>It is sometimes necessary to identify the type of card detected by the reader even before sending it an APDU command.
+    Here again PC/SC does not offer much facility and the only information available in a more or less standardized way
+    is the ATR.</p>
+<p>The <b>PC/SC plugin</b> It uses an extensible mechanism of regular expression based rules to determine a protocol
+    type. A number of rules are defined by default for common card technology types, but it is possible to redefine or
+    add rules using {@code PcscPluginFactoryBuilder}.</p>
+</body>
+</html>
