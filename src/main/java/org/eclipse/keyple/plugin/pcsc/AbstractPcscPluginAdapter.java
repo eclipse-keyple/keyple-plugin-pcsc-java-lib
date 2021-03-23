@@ -148,19 +148,17 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * @since 2.0
    */
   final AbstractPcscPluginAdapter addProtocolRulesMap(Map<String, String> protocolRulesMap) {
-    if (protocolRulesMap != null) {
-      if (logger.isTraceEnabled()) {
+    if (logger.isTraceEnabled()) {
+      if (!protocolRulesMap.isEmpty()) {
         logger.trace(
             "{}: protocol identification rules updated with {}",
             getName(),
             JsonUtil.toJson(protocolRulesMap));
-      }
-      AbstractPcscPluginAdapter.protocolRulesMap.putAll(protocolRulesMap);
-    } else {
-      if (logger.isTraceEnabled()) {
+      } else {
         logger.trace("{}: using default protocol identification rules.", getName());
       }
     }
+    AbstractPcscPluginAdapter.protocolRulesMap.putAll(protocolRulesMap);
     return this;
   }
 

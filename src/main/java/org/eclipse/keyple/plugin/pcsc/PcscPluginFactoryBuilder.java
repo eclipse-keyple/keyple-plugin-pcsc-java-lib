@@ -65,13 +65,15 @@ public final class PcscPluginFactoryBuilder {
 
     private String contactReaderIdentificationFilter;
     private String contactlessReaderIdentificationFilter;
-    private final Map<String, String> protocolRulesMap = new HashMap<String, String>();
+    private final Map<String, String> protocolRulesMap;
 
     /**
      * (private) Constructs an empty Builder. The default value of all strings is null, the default
      * value of the map is an empty map.
      */
-    private Builder() {}
+    private Builder() {
+      protocolRulesMap = new HashMap<String, String>();
+    }
 
     /**
      * Sets a filter based on regular expressions to make the plugin able to identify a contact
