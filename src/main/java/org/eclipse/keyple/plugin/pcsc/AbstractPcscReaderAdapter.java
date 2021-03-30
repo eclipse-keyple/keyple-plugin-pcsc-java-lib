@@ -109,9 +109,6 @@ class AbstractPcscReaderAdapter
    */
   @Override
   public final void activateProtocol(String readerProtocol) {
-    if (!isProtocolSupported(readerProtocol)) {
-      throw new IllegalArgumentException("Unsupported protocol " + readerProtocol);
-    }
     if (logger.isTraceEnabled()) {
       logger.trace(
           "{}: activating the {} protocol causes no action to be taken.",
@@ -261,7 +258,6 @@ class AbstractPcscReaderAdapter
   @Override
   public final byte[] transmitApdu(byte[] apduCommandData)
       throws ReaderIOException, CardIOException {
-    Assert.getInstance().notEmpty(apduCommandData, "apduCommandData");
     if (logger.isTraceEnabled()) {
       logger.trace("{}: APDU  IN: {}", getName(), ByteArrayUtil.toHex(apduCommandData));
     }
