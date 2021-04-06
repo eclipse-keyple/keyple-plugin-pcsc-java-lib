@@ -237,9 +237,6 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
 
     // parse the current readers list to create the ReaderSpi(s) associated with new reader(s)
     CardTerminals terminals = getCardTerminals();
-    if (logger.isTraceEnabled()) {
-      logger.trace("{} terminal list: {}", this.getName(), JsonUtil.toJson(terminals));
-    }
     try {
       return terminals.list();
     } catch (CardException e) {
