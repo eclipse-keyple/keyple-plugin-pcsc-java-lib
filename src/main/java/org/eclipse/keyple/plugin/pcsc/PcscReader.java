@@ -13,7 +13,6 @@ package org.eclipse.keyple.plugin.pcsc;
 
 import javax.smartcardio.Card;
 import org.eclipse.keyple.core.common.KeypleReaderExtension;
-import org.eclipse.keyple.core.plugin.ReaderIOException;
 
 /**
  * PC/SC specific {@link KeypleReaderExtension}.
@@ -136,10 +135,10 @@ public interface PcscReader extends KeypleReaderExtension {
    * @param sharingMode The {@link SharingMode} to use (must be not null).
    * @return This instance.
    * @throws IllegalArgumentException If sharingMode is null
-   * @throws ReaderIOException If the sharing mode setting failed.
+   * @throws IllegalStateException If the sharing mode setting failed.
    * @since 2.0
    */
-  PcscReader setSharingMode(SharingMode sharingMode) throws ReaderIOException;
+  PcscReader setSharingMode(SharingMode sharingMode);
 
   /**
    * Sets the reader transmission mode.

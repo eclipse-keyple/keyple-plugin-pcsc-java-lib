@@ -142,21 +142,11 @@ class AbstractPcscReaderAdapter
   public final boolean isCurrentProtocol(String readerProtocol) {
     String protocolRule = pluginAdapter.getProtocolRule(readerProtocol);
     boolean isCurrentProtocol;
-    if (logger.isTraceEnabled()) {
-      logger.trace("{}: check if {} is the current protocol in use.", getName(), readerProtocol);
-    }
     if (protocolRule != null && !protocolRule.isEmpty()) {
       String atr = ByteArrayUtil.toHex(card.getATR().getBytes());
       isCurrentProtocol = Pattern.compile(protocolRule).matcher(atr).matches();
     } else {
       isCurrentProtocol = false;
-    }
-    if (logger.isTraceEnabled()) {
-      logger.trace(
-          "{}: the protocol {} in {}the one in use.",
-          getName(),
-          readerProtocol,
-          isCurrentProtocol ? "not " : "");
     }
     return isCurrentProtocol;
   }
@@ -171,9 +161,6 @@ class AbstractPcscReaderAdapter
    */
   @Override
   public final void openPhysicalChannel() throws ReaderIOException {
-    if (logger.isTraceEnabled()) {
-      logger.trace("{}: attempt to open a physical channel.", getName());
-    }
     /* init of the card physical channel: if not yet established, opening of a new physical channel */
     try {
       if (card == null) {
@@ -189,9 +176,6 @@ class AbstractPcscReaderAdapter
     } catch (CardException e) {
       throw new ReaderIOException("Error while opening Physical Channel", e);
     }
-    if (logger.isTraceEnabled()) {
-      logger.trace("{}: the physical channel with the card is open.", getName());
-    }
   }
 
   /**
@@ -203,7 +187,6 @@ class AbstractPcscReaderAdapter
   public final void closePhysicalChannel() throws ReaderIOException {
     try {
       if (card != null) {
-        logger.debug("{}: closing the physical channel.", this.getName());
         channel = null;
         card.disconnect(disconnectionMode == DisconnectionMode.RESET);
         card = null;
@@ -245,8 +228,7 @@ class AbstractPcscReaderAdapter
    *
    * @since 2.0
    */
-  @Override
-  public final byte[] getATR() {
+  public final byte[] getAtr() {
     return card.getATR().getBytes();
   }
 
@@ -258,9 +240,6 @@ class AbstractPcscReaderAdapter
   @Override
   public final byte[] transmitApdu(byte[] apduCommandData)
       throws ReaderIOException, CardIOException {
-    if (logger.isTraceEnabled()) {
-      logger.trace("{}: APDU  IN: {}", getName(), ByteArrayUtil.toHex(apduCommandData));
-    }
     byte[] apduResponseData;
     if (channel != null) {
       try {
@@ -274,9 +253,6 @@ class AbstractPcscReaderAdapter
     } else {
       // could occur if the card was removed
       throw new CardIOException(this.getName() + ": null channel.");
-    }
-    if (logger.isTraceEnabled()) {
-      logger.trace("{}: APDU  OUT: {}", getName(), ByteArrayUtil.toHex(apduResponseData));
     }
     return apduResponseData;
   }
@@ -334,7 +310,7 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public final PcscReader setSharingMode(SharingMode sharingMode) throws ReaderIOException {
+  public final PcscReader setSharingMode(SharingMode sharingMode) {
     Assert.getInstance().notNull(sharingMode, "sharingMode");
     if (logger.isTraceEnabled()) {
       logger.trace("{}: set sharing mode to {}", getName(), sharingMode.name());
@@ -345,7 +321,7 @@ class AbstractPcscReaderAdapter
         try {
           card.endExclusive();
         } catch (CardException e) {
-          throw new ReaderIOException("Couldn't disable exclusive mode", e);
+          throw new IllegalStateException("Couldn't disable exclusive mode", e);
         }
       }
       isModeExclusive = false;
