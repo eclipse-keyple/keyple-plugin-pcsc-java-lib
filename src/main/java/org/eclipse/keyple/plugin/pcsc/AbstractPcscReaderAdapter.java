@@ -48,7 +48,7 @@ class AbstractPcscReaderAdapter
   private Boolean isContactless;
   private String protocol = IsoProtocol.ANY.getValue();
   private boolean isModeExclusive = true;
-  private DisconnectionMode disconnectionMode = DisconnectionMode.LEAVE;
+  private DisconnectionMode disconnectionMode = DisconnectionMode.RESET;
 
   // the latency delay value (in ms) determines the maximum time during which the
   // waitForCardAbsent blocking functions will execute.
@@ -164,6 +164,7 @@ class AbstractPcscReaderAdapter
     /* init of the card physical channel: if not yet established, opening of a new physical channel */
     try {
       if (card == null) {
+        logger.debug("{}: opening of a card physical channel for protocol '{}'", this.getName(), protocol);
         this.card = this.terminal.connect(protocol);
         if (isModeExclusive) {
           card.beginExclusive();
@@ -174,7 +175,7 @@ class AbstractPcscReaderAdapter
       }
       this.channel = card.getBasicChannel();
     } catch (CardException e) {
-      throw new ReaderIOException("Error while opening Physical Channel", e);
+      throw new ReaderIOException(getName() + ": Error while opening Physical Channel", e);
     }
   }
 
@@ -245,7 +246,11 @@ class AbstractPcscReaderAdapter
       try {
         apduResponseData = channel.transmit(new CommandAPDU(apduCommandData)).getBytes();
       } catch (CardException e) {
-        throw new ReaderIOException(this.getName() + ":" + e.getMessage(), e);
+        if (e.getMessage().contains("REMOVED")) {
+          throw new CardIOException(this.getName() + ":" + e.getMessage(), e);
+        } else {
+          throw new ReaderIOException(this.getName() + ":" + e.getMessage(), e);
+        }
       } catch (IllegalStateException e) {
         // card could have been removed prematurely
         throw new CardIOException(this.getName() + ":" + e.getMessage(), e);
