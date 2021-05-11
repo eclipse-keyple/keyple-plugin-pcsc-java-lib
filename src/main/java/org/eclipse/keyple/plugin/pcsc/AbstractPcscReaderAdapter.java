@@ -164,7 +164,8 @@ class AbstractPcscReaderAdapter
     /* init of the card physical channel: if not yet established, opening of a new physical channel */
     try {
       if (card == null) {
-        logger.debug("{}: opening of a card physical channel for protocol '{}'", this.getName(), protocol);
+        logger.debug(
+            "{}: opening of a card physical channel for protocol '{}'", this.getName(), protocol);
         this.card = this.terminal.connect(protocol);
         if (isModeExclusive) {
           card.beginExclusive();
