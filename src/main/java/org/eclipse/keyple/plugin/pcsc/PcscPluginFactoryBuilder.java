@@ -140,18 +140,20 @@ public final class PcscPluginFactoryBuilder {
      *   <li>If the rule is null, the protocol is disabled.
      * </ul>
      *
-     * @param readerProtocol A not empty String.
+     * @param readerProtocolName A not empty String.
      * @param protocolRule null to disable the protocol.
      * @return This builder.
      * @throws IllegalArgumentException If one of the argument is null or empty
      * @since 2.0
      */
-    public Builder updateProtocolIdentificationRule(String readerProtocol, String protocolRule) {
-      Assert.getInstance().notEmpty(readerProtocol, "readerProtocol");
+    public Builder updateProtocolIdentificationRule(
+        String readerProtocolName, String protocolRule) {
+      Assert.getInstance().notEmpty(readerProtocolName, "readerProtocolName");
       if (protocolRule == null) {
-        protocolRulesMap.remove(readerProtocol);
+        // disable the protocol by defining a regex that always fails.
+        protocolRulesMap.put(readerProtocolName, "X");
       } else {
-        protocolRulesMap.put(readerProtocol, protocolRule);
+        protocolRulesMap.put(readerProtocolName, protocolRule);
       }
       return this;
     }
