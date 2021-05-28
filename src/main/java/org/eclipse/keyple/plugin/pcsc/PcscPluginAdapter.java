@@ -50,7 +50,7 @@ final class PcscPluginAdapter extends AbstractPcscPluginAdapter {
   /**
    * Gets the single instance of PcscPluginAdapter.
    *
-   * @return single instance of PcscPluginAdapter
+   * @return Single instance of PcscPluginAdapter
    * @since 2.0
    */
   static PcscPluginAdapter getInstance() {

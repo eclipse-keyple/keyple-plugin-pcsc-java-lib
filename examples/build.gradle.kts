@@ -30,7 +30,7 @@ repositories {
 }
 dependencies {
     implementation("org.eclipse.keyple:keyple-java-commons-api:2.0-SNAPSHOT")
-    implementation("org.eclipse.keyple:keyple-java-card-api:2.0-SNAPSHOT")
+    implementation("org.eclipse.keyple:keyple-java-card-api:1.0-SNAPSHOT")
     implementation("org.eclipse.keyple:keyple-java-service:2.0.0-SNAPSHOT")
     implementation("org.eclipse.keyple:keyple-java-card-generic:2.0.0-SNAPSHOT")
     implementation("org.eclipse.keyple:keyple-java-plugin-pcsc:2.0.0-SNAPSHOT")

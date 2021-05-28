@@ -103,7 +103,7 @@ public class Main_ChangeProtocolRules_Pcsc {
     // (protocol/ATR/DFName).
     CardSelection cardSelection =
         cardExtension.createCardSelection(
-            CardSelector.builder().filterByCardProtocol(CARD_PROTOCOL_MIFARE_CLASSIC_4_K).build());
+            CalypsoCardSelectorAdapter.builder().filterByCardProtocol(CARD_PROTOCOL_MIFARE_CLASSIC_4_K).build());
 
     // Prepare the selection by adding the created generic selection to the card selection scenario.
     selectionService.prepareSelection(cardSelection);
