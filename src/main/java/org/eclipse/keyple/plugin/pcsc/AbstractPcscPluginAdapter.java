@@ -169,7 +169,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * <p>The protocol rule is a regular expression to be applied on the ATR.
    *
    * @param readerProtocol The reader protocol.
-   * @return null if no protocol rules defined for the provided protocol.
+   * @return Null if no protocol rules defined for the provided protocol.
    * @since 2.0
    */
   final String getProtocolRule(String readerProtocol) {
@@ -303,7 +303,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * @since 2.0
    */
   @Override
-  public final Set<String> searchAvailableReadersNames() throws PluginIOException {
+  public final Set<String> searchAvailableReaderNames() throws PluginIOException {
     Set<String> readerNames = new HashSet<String>();
 
     for (CardTerminal terminal : getCardTerminalList()) {

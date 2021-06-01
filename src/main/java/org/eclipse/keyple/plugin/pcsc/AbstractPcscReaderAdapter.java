@@ -228,9 +228,13 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
+   * <p>In the case of a PC/SC reader, the power-on data is provided by the reader in the form of an
+   * ATR ISO7816 structure whatever the card.
+   *
    * @since 2.0
    */
-  public final byte[] getAtr() {
+  @Override
+  public final byte[] getPowerOnData() {
     return card.getATR().getBytes();
   }
 
