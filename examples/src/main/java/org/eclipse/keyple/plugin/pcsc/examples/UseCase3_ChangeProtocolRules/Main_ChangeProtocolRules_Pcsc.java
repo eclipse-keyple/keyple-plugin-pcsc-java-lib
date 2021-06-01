@@ -11,14 +11,12 @@
  ************************************************************************************** */
 package org.eclipse.keyple.plugin.pcsc.examples.UseCase3_ChangeProtocolRules;
 
+import org.calypsonet.terminal.reader.selection.CardSelectionResult;
+import org.calypsonet.terminal.reader.selection.CardSelectionService;
+import org.calypsonet.terminal.reader.selection.spi.CardSelection;
+import org.calypsonet.terminal.reader.selection.spi.SmartCard;
 import org.eclipse.keyple.card.generic.GenericExtensionService;
-import org.eclipse.keyple.card.generic.GenericExtensionServiceProvider;
 import org.eclipse.keyple.core.service.*;
-import org.eclipse.keyple.core.service.selection.CardSelectionResult;
-import org.eclipse.keyple.core.service.selection.CardSelectionService;
-import org.eclipse.keyple.core.service.selection.CardSelector;
-import org.eclipse.keyple.core.service.selection.spi.CardSelection;
-import org.eclipse.keyple.core.service.selection.spi.SmartCard;
 import org.eclipse.keyple.plugin.pcsc.PcscPluginFactoryBuilder;
 import org.eclipse.keyple.plugin.pcsc.PcscReader;
 import org.slf4j.Logger;
@@ -85,7 +83,7 @@ public class Main_ChangeProtocolRules_Pcsc {
         .setSharingMode(PcscReader.SharingMode.SHARED);
 
     // Get the generic card extension service
-    GenericExtensionService cardExtension = GenericExtensionServiceProvider.getService();
+    GenericExtensionService cardExtension = GenericExtensionService.getInstance();
 
     // Verify that the extension's API level is consistent with the current service.
     smartCardService.checkCardExtension(cardExtension);
@@ -103,7 +101,10 @@ public class Main_ChangeProtocolRules_Pcsc {
     // (protocol/ATR/DFName).
     CardSelection cardSelection =
         cardExtension.createCardSelection(
-            CalypsoCardSelectorAdapter.builder().filterByCardProtocol(CARD_PROTOCOL_MIFARE_CLASSIC_4_K).build());
+            cardExtension
+                .getInstance()
+                .createCardSelector()
+                .filterByCardProtocol(CARD_PROTOCOL_MIFARE_CLASSIC_4_K));
 
     // Prepare the selection by adding the created generic selection to the card selection scenario.
     selectionService.prepareSelection(cardSelection);
