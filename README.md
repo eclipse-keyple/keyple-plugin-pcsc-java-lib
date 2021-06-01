@@ -4,7 +4,7 @@
 
 The **Keyple Java Plugin PC/SC** contains interfaces and classes to manage PC/SC readers within a Keyple application.
 
-This library **should be import explicitly** by the main application.
+This library **should be imported explicitly** by the main application.
 
 ## User Guide & Download Information
 
