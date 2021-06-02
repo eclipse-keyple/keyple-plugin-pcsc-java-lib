@@ -234,7 +234,7 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public final byte[] getPowerOnData() {
+  public final byte[] getPowerOnDataBytes() {
     return card.getATR().getBytes();
   }
 
