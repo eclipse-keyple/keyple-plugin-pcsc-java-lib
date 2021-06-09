@@ -1,5 +1,5 @@
 /* **************************************************************************************
- * Copyright (c) 2018 Calypso Networks Association https://www.calypsonet-asso.org/
+ * Copyright (c) 2018 Calypso Networks Association https://calypsonet.org/
  *
  * See the NOTICE file(s) distributed with this work for additional information
  * regarding copyright ownership.
@@ -100,11 +100,7 @@ public class Main_ChangeProtocolRules_Pcsc {
     // Create a card selection using the generic card extension without specifying any filter
     // (protocol/ATR/DFName).
     CardSelection cardSelection =
-        cardExtension.createCardSelection(
-            cardExtension
-                .getInstance()
-                .createCardSelector()
-                .filterByCardProtocol(CARD_PROTOCOL_MIFARE_CLASSIC_4_K));
+        cardExtension.createCardSelection().filterByCardProtocol(CARD_PROTOCOL_MIFARE_CLASSIC_4_K);
 
     // Prepare the selection by adding the created generic selection to the card selection scenario.
     selectionService.prepareSelection(cardSelection);
@@ -113,7 +109,7 @@ public class Main_ChangeProtocolRules_Pcsc {
     CardSelectionResult selectionResult = selectionService.processCardSelectionScenario(reader);
 
     // Check the selection result.
-    if (!selectionResult.hasActiveSelection()) {
+    if (selectionResult.getActiveSmartCard() == null) {
       logger.error("The selection of the card failed.");
       System.exit(0);
     }

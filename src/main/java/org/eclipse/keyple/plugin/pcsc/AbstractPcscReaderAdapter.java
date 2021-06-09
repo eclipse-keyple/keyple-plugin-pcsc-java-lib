@@ -1,5 +1,5 @@
 /* **************************************************************************************
- * Copyright (c) 2021 Calypso Networks Association https://www.calypsonet-asso.org/
+ * Copyright (c) 2021 Calypso Networks Association https://calypsonet.org/
  *
  * See the NOTICE file(s) distributed with this work for additional information
  * regarding copyright ownership.
@@ -234,8 +234,8 @@ class AbstractPcscReaderAdapter
    * @since 2.0
    */
   @Override
-  public final byte[] getPowerOnDataBytes() {
-    return card.getATR().getBytes();
+  public final String getPowerOnData() {
+    return ByteArrayUtil.toHex(card.getATR().getBytes());
   }
 
   /**
