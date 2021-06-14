@@ -1,1 +1,1 @@
-rootProject.name = "keyple-java-plugin-pcsc"
+rootProject.name = "keyple-plugin-pcsc-java-lib"
