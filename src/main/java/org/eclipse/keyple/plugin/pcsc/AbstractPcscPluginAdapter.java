@@ -283,7 +283,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * @since 2.0
    */
   @Override
-  public final void unregister() {
+  public final void onUnregister() {
     /* Nothing to do here in this plugin */
   }
 
