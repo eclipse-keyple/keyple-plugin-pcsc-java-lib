@@ -34,7 +34,7 @@ final class PcscPluginAdapter extends AbstractPcscPluginAdapter {
    * This qualifier is required for 'lazy-singleton' pattern with double-check method, to be
    * thread-safe.
    */
-  private static volatile PcscPluginAdapter instance; // NOSONAR: lazy-singleton pattern.
+  private static volatile PcscPluginAdapter INSTANCE; // NOSONAR: lazy-singleton pattern.
 
   private final boolean isOsMac;
 
@@ -54,14 +54,14 @@ final class PcscPluginAdapter extends AbstractPcscPluginAdapter {
    * @since 2.0
    */
   static PcscPluginAdapter getInstance() {
-    if (instance == null) {
+    if (INSTANCE == null) {
       synchronized (PcscPluginAdapter.class) {
-        if (instance == null) {
-          instance = new PcscPluginAdapter();
+        if (INSTANCE == null) {
+          INSTANCE = new PcscPluginAdapter();
         }
       }
     }
-    return instance;
+    return INSTANCE;
   }
 
   /**

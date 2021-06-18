@@ -44,7 +44,7 @@ final class PcscPluginWinAdapter extends AbstractPcscPluginAdapter {
    * This qualifier is required for "lazy-singleton" pattern with double-check method, to be
    * thread-safe.
    */
-  private static volatile PcscPluginWinAdapter instance; // NOSONAR: lazy-singleton pattern.
+  private static volatile PcscPluginWinAdapter INSTANCE; // NOSONAR: lazy-singleton pattern.
 
   /**
    * (private)<br>
@@ -62,14 +62,14 @@ final class PcscPluginWinAdapter extends AbstractPcscPluginAdapter {
    * @since 2.0
    */
   static PcscPluginWinAdapter getInstance() {
-    if (instance == null) {
+    if (INSTANCE == null) {
       synchronized (PcscPluginWinAdapter.class) {
-        if (instance == null) {
-          instance = new PcscPluginWinAdapter();
+        if (INSTANCE == null) {
+          INSTANCE = new PcscPluginWinAdapter();
         }
       }
     }
-    return instance;
+    return INSTANCE;
   }
 
   /**
