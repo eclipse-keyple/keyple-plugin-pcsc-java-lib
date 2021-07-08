@@ -19,7 +19,7 @@ import org.eclipse.keyple.core.plugin.CardIOException;
 import org.eclipse.keyple.core.plugin.ReaderIOException;
 import org.eclipse.keyple.core.plugin.TaskCanceledException;
 import org.eclipse.keyple.core.plugin.spi.reader.observable.ObservableReaderSpi;
-import org.eclipse.keyple.core.plugin.spi.reader.observable.state.processing.WaitForCardRemovalBlockingDuringProcessingSpi;
+import org.eclipse.keyple.core.plugin.spi.reader.observable.state.processing.WaitForCardRemovalDuringProcessingBlockingSpi;
 import org.eclipse.keyple.core.plugin.spi.reader.observable.state.removal.WaitForCardRemovalBlockingSpi;
 import org.eclipse.keyple.core.util.Assert;
 import org.eclipse.keyple.core.util.ByteArrayUtil;
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 class AbstractPcscReaderAdapter
     implements PcscReader,
         ObservableReaderSpi,
-        WaitForCardRemovalBlockingDuringProcessingSpi,
+        WaitForCardRemovalDuringProcessingBlockingSpi,
         WaitForCardRemovalBlockingSpi {
 
   private static final Logger logger = LoggerFactory.getLogger(AbstractPcscReaderAdapter.class);
