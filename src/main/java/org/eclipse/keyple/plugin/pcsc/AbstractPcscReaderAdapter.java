@@ -19,7 +19,7 @@ import org.eclipse.keyple.core.plugin.CardIOException;
 import org.eclipse.keyple.core.plugin.ReaderIOException;
 import org.eclipse.keyple.core.plugin.TaskCanceledException;
 import org.eclipse.keyple.core.plugin.spi.reader.observable.ObservableReaderSpi;
-import org.eclipse.keyple.core.plugin.spi.reader.observable.state.processing.WaitForCardRemovalDuringProcessingSpi;
+import org.eclipse.keyple.core.plugin.spi.reader.observable.state.processing.WaitForCardRemovalBlockingDuringProcessingSpi;
 import org.eclipse.keyple.core.plugin.spi.reader.observable.state.removal.WaitForCardRemovalBlockingSpi;
 import org.eclipse.keyple.core.util.Assert;
 import org.eclipse.keyple.core.util.ByteArrayUtil;
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 class AbstractPcscReaderAdapter
     implements PcscReader,
         ObservableReaderSpi,
-        WaitForCardRemovalDuringProcessingSpi,
+        WaitForCardRemovalBlockingDuringProcessingSpi,
         WaitForCardRemovalBlockingSpi {
 
   private static final Logger logger = LoggerFactory.getLogger(AbstractPcscReaderAdapter.class);
@@ -441,5 +441,25 @@ class AbstractPcscReaderAdapter
       logger.trace("{}: stop waiting for the card removal requested.", this.getName());
     }
     loopWaitCardRemoval.set(false);
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @since 2.0
+   */
+  @Override
+  public void waitForCardRemovalDuringProcessing() throws ReaderIOException, TaskCanceledException {
+    waitForCardRemoval();
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @since 2.0
+   */
+  @Override
+  public void stopWaitForCardRemovalDuringProcessing() {
+    stopWaitForCardRemoval();
   }
 }
