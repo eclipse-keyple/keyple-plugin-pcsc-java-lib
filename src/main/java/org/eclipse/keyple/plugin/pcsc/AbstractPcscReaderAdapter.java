@@ -18,6 +18,7 @@ import javax.smartcardio.*;
 import org.eclipse.keyple.core.plugin.CardIOException;
 import org.eclipse.keyple.core.plugin.ReaderIOException;
 import org.eclipse.keyple.core.plugin.TaskCanceledException;
+import org.eclipse.keyple.core.plugin.spi.reader.ConfigurableReaderSpi;
 import org.eclipse.keyple.core.plugin.spi.reader.observable.ObservableReaderSpi;
 import org.eclipse.keyple.core.plugin.spi.reader.observable.state.processing.WaitForCardRemovalDuringProcessingBlockingSpi;
 import org.eclipse.keyple.core.plugin.spi.reader.observable.state.removal.WaitForCardRemovalBlockingSpi;
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 class AbstractPcscReaderAdapter
     implements PcscReader,
+        ConfigurableReaderSpi,
         ObservableReaderSpi,
         WaitForCardRemovalDuringProcessingBlockingSpi,
         WaitForCardRemovalBlockingSpi {

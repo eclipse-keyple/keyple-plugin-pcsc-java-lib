@@ -73,7 +73,8 @@ public class Main_ChangeProtocolRules_Pcsc {
     // Get the first available reader (we assume that a single contactless reader is connected)
     Reader reader = plugin.getReaders().iterator().next();
 
-    reader.activateProtocol(READER_PROTOCOL_MIFARE_CLASSIC_4_K, CARD_PROTOCOL_MIFARE_CLASSIC_4_K);
+    ((ConfigurableReader) reader)
+        .activateProtocol(READER_PROTOCOL_MIFARE_CLASSIC_4_K, CARD_PROTOCOL_MIFARE_CLASSIC_4_K);
 
     // Configure the reader for contactless operations
     reader
