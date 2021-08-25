@@ -22,7 +22,7 @@ import org.eclipse.keyple.core.plugin.spi.reader.observable.state.insertion.Wait
  * performed by the card presence test rather than the usual waiting method ({@link
  * WaitForCardInsertionNonBlockingSpi}).
  *
- * @since 2.0
+ * @since 2.0.0
  */
 final class PcscReaderMacOsAdapter extends AbstractPcscReaderAdapter
     implements WaitForCardInsertionNonBlockingSpi {
@@ -30,7 +30,7 @@ final class PcscReaderMacOsAdapter extends AbstractPcscReaderAdapter
   /**
    * (package-private)<br>
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   PcscReaderMacOsAdapter(CardTerminal terminal, AbstractPcscPluginAdapter pluginAdapter) {
     super(terminal, pluginAdapter);

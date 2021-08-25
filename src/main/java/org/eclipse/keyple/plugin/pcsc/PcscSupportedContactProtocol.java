@@ -16,7 +16,7 @@ package org.eclipse.keyple.plugin.pcsc;
  *
  * <p>TODO Improve protocol identification
  *
- * @since 2.0
+ * @since 2.0.0
  */
 public enum PcscSupportedContactProtocol {
 
@@ -24,21 +24,21 @@ public enum PcscSupportedContactProtocol {
    * ISO7816-3 Card (unspecified communication protocol)<br>
    * Default rule = <b>{@code 3.*}</b>
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   ISO_7816_3("3.*"),
   /**
    * ISO7816-3 Card communicating with T=0 protocol<br>
    * Default rule = <b>{@code 3.*}</b>
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   ISO_7816_3_T0("3.*"),
   /**
    * ISO7816-3 Card communicating with T=1 protocol<br>
    * Default rule = <b>{@code 3.*}</b>
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   ISO_7816_3_T1("3.*");
 
@@ -49,7 +49,7 @@ public enum PcscSupportedContactProtocol {
    * Gets the default associated to the protocol.
    *
    * @return A byte
-   * @since 2.0
+   * @since 2.0.0
    */
   String getDefaultRule() {
     return defaultRule;
@@ -59,7 +59,7 @@ public enum PcscSupportedContactProtocol {
    * Constructor
    *
    * @param defaultRule The default rule.
-   * @since 2.0
+   * @since 2.0.0
    */
   PcscSupportedContactProtocol(String defaultRule) {
     this.defaultRule = defaultRule;

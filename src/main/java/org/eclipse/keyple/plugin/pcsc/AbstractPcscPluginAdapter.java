@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * (package-private) <br>
  * Abstract class for all PC/SC plugin adapters.
  *
- * @since 2.0
+ * @since 2.0.0
  */
 abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
 
@@ -82,7 +82,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * Common constructor for all Pcsc plugin adapters instances.
    *
    * @param name The name of the plugin.
-   * @since 2.0
+   * @since 2.0.0
    */
   AbstractPcscPluginAdapter(String name) {
     this.name = name;
@@ -94,7 +94,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    *
    * @param contactReaderIdentificationFilter A regular expression, null if the filter is not set.
    * @return The object instance.
-   * @since 2.0
+   * @since 2.0.0
    */
   final AbstractPcscPluginAdapter setContactReaderIdentificationFilter(
       String contactReaderIdentificationFilter) {
@@ -119,7 +119,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * @param contactlessReaderIdentificationFilter A regular expression, null if the filter is not
    *     set.
    * @return The object instance.
-   * @since 2.0
+   * @since 2.0.0
    */
   final AbstractPcscPluginAdapter setContactlessReaderIdentificationFilter(
       String contactlessReaderIdentificationFilter) {
@@ -145,7 +145,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    *
    * @param protocolRulesMap The regex based filter.
    * @return The object instance.
-   * @since 2.0
+   * @since 2.0.0
    */
   final AbstractPcscPluginAdapter addProtocolRulesMap(Map<String, String> protocolRulesMap) {
     if (logger.isTraceEnabled()) {
@@ -170,7 +170,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    *
    * @param readerProtocol The reader protocol.
    * @return Null if no protocol rules defined for the provided protocol.
-   * @since 2.0
+   * @since 2.0.0
    */
   final String getProtocolRule(String readerProtocol) {
     return protocolRulesMap.get(readerProtocol);
@@ -184,7 +184,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    *
    * @param terminal A smartcard.io {@link CardTerminal}.
    * @return A not null reference.
-   * @since 2.0
+   * @since 2.0.0
    */
   abstract ReaderSpi createReader(CardTerminal terminal);
 
@@ -195,7 +195,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * <p>Note: this method is platform dependent.
    *
    * @return A {@link CardTerminals} reference
-   * @since 2.0
+   * @since 2.0.0
    */
   abstract CardTerminals getCardTerminals();
 
@@ -208,7 +208,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * @return True if the reader is contactless, false if not.
    * @throws IllegalStateException If the mode of transmission could not be determined
    * @throws PatternSyntaxException If the expression's syntax is invalid
-   * @since 2.0
+   * @since 2.0.0
    */
   final boolean isContactless(String readerName) {
 
@@ -252,7 +252,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final String getName() {
@@ -262,7 +262,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final Set<ReaderSpi> searchAvailableReaders() throws PluginIOException {
@@ -280,7 +280,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final void onUnregister() {
@@ -290,7 +290,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final int getMonitoringCycleDuration() {
@@ -300,7 +300,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final Set<String> searchAvailableReaderNames() throws PluginIOException {
@@ -318,7 +318,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final ReaderSpi searchReader(String readerName) throws PluginIOException {

@@ -40,7 +40,7 @@ import org.eclipse.keyple.core.util.Assert;
  *
  * @see PcscSupportedContactProtocol
  * @see PcscSupportedContactlessProtocol
- * @since 2.0
+ * @since 2.0.0
  */
 public final class PcscPluginFactoryBuilder {
 
@@ -50,7 +50,7 @@ public final class PcscPluginFactoryBuilder {
    * Creates builder to build a {@link PcscPluginFactory}.
    *
    * @return created builder
-   * @since 2.0
+   * @since 2.0.0
    */
   public static Builder builder() {
     return new Builder();
@@ -59,7 +59,7 @@ public final class PcscPluginFactoryBuilder {
   /**
    * Builder to build a {@link PcscPluginFactory}.
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   public static class Builder {
 
@@ -95,7 +95,7 @@ public final class PcscPluginFactoryBuilder {
      * @return This builder.
      * @throws IllegalArgumentException If the provided string is null or empty.
      * @see #useContactlessReaderIdentificationFilter(String)
-     * @since 2.0
+     * @since 2.0.0
      */
     public Builder useContactReaderIdentificationFilter(String contactReaderIdentificationFilter) {
       Assert.getInstance()
@@ -119,7 +119,7 @@ public final class PcscPluginFactoryBuilder {
      * @return This builder.
      * @throws IllegalArgumentException If the provided string is null or empty.
      * @see #useContactReaderIdentificationFilter(String)
-     * @since 2.0
+     * @since 2.0.0
      */
     public Builder useContactlessReaderIdentificationFilter(
         String contactlessReaderIdentificationFilter) {
@@ -144,7 +144,7 @@ public final class PcscPluginFactoryBuilder {
      * @param protocolRule null to disable the protocol.
      * @return This builder.
      * @throws IllegalArgumentException If one of the argument is null or empty
-     * @since 2.0
+     * @since 2.0.0
      */
     public Builder updateProtocolIdentificationRule(
         String readerProtocolName, String protocolRule) {
@@ -162,7 +162,7 @@ public final class PcscPluginFactoryBuilder {
      * Returns an instance of PcscPluginFactory created from the fields set on this builder.
      *
      * @return A {@link PcscPluginFactory}
-     * @since 2.0
+     * @since 2.0.0
      */
     public PcscPluginFactory build() {
       return new PcscPluginFactoryAdapter(

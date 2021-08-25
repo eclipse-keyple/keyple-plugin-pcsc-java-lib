@@ -25,7 +25,7 @@ package org.eclipse.keyple.plugin.pcsc;
  * cards) is defined in the PC/SC standard Part 3, core and supplementary documents. <br>
  * See <a href="https://pcscworkgroup.com/">PC/SC Workgroup</a>
  *
- * @since 2.0
+ * @since 2.0.0
  */
 public enum PcscSupportedContactlessProtocol {
 
@@ -34,42 +34,42 @@ public enum PcscSupportedContactlessProtocol {
    * Default rule = <b>{@code
    * 3B8880....................|3B8B80.*|3B8C800150.*|.*4F4D4141544C4153.*}</b>
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   ISO_14443_4("3B8880....................|3B8B80.*|3B8C800150.*|.*4F4D4141544C4153.*"),
   /**
    * Innovatron Type B Prime protocol<br>
    * Default rule = <b>{@code 3B8F8001805A0...................829000..}</b>
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   INNOVATRON_B_PRIME_CARD("3B8F8001805A0...................829000.."),
   /**
    * NXP Mifare Ultralight or UltralightC (as per PC/SC standard part3)<br>
    * Default rule = <b>{@code 3B8F8001804F0CA0000003060300030000000068}</b>
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   MIFARE_ULTRA_LIGHT("3B8F8001804F0CA0000003060300030000000068"),
   /**
    * NXP Mifare Classic 1K (as per PC/SC standard part3)<br>
    * Default rule = <b>{@code 3B8F8001804F0CA000000306030001000000006A}</b>
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   MIFARE_CLASSIC("3B8F8001804F0CA000000306030001000000006A"),
   /**
    * NXP DESFire or DESFire EV1 or EV2<br>
    * Default rule = <b>{@code 3B8180018080}</b>
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   MIFARE_DESFIRE("3B8180018080"),
   /**
    * STMicroelectronics ST25 Tag<br>
    * Default rule = <b>{@code 3B8F8001804F0CA000000306070007D0020C00B6}</b>
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   MEMORY_ST25("3B8F8001804F0CA000000306070007D0020C00B6");
 
@@ -80,7 +80,7 @@ public enum PcscSupportedContactlessProtocol {
    * Gets the default associated to the protocol.
    *
    * @return A byte
-   * @since 2.0
+   * @since 2.0.0
    */
   String getDefaultRule() {
     return defaultRule;

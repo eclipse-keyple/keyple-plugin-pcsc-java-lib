@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * (package-private)<br>
  * Implementation of AbstractPcscReaderAdapter suitable for platforms other than MacOS.
  *
- * @since 2.0
+ * @since 2.0.0
  */
 final class PcscReaderAdapter extends AbstractPcscReaderAdapter
     implements WaitForCardInsertionBlockingSpi {
@@ -41,7 +41,7 @@ final class PcscReaderAdapter extends AbstractPcscReaderAdapter
   /**
    * (package-private)<br>
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   PcscReaderAdapter(CardTerminal terminal, AbstractPcscPluginAdapter pluginAdapter) {
     super(terminal, pluginAdapter);
@@ -50,7 +50,7 @@ final class PcscReaderAdapter extends AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public void waitForCardInsertion() throws TaskCanceledException, ReaderIOException {
@@ -90,7 +90,7 @@ final class PcscReaderAdapter extends AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public void stopWaitForCardInsertion() {

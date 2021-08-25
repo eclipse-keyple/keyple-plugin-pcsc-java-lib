@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * (package-private) <br>
  * Abstract class for all PC/SC reader adapters.
  *
- * @since 2.0
+ * @since 2.0.0
  */
 class AbstractPcscReaderAdapter
     implements PcscReader,
@@ -66,7 +66,7 @@ class AbstractPcscReaderAdapter
    *
    * @param terminal The terminal from smartcard.io
    * @param pluginAdapter The reference to the parent plugin.
-   * @since 2.0
+   * @since 2.0.0
    */
   AbstractPcscReaderAdapter(CardTerminal terminal, AbstractPcscPluginAdapter pluginAdapter) {
     this.terminal = terminal;
@@ -87,7 +87,7 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final String getName() {
@@ -97,7 +97,7 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final boolean isProtocolSupported(String readerProtocol) {
@@ -107,7 +107,7 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final void activateProtocol(String readerProtocol) {
@@ -122,7 +122,7 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final void deactivateProtocol(String readerProtocol) {
@@ -138,7 +138,7 @@ class AbstractPcscReaderAdapter
    * {@inheritDoc}
    *
    * @throws PatternSyntaxException If the expression's syntax is invalid
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final boolean isCurrentProtocol(String readerProtocol) {
@@ -159,7 +159,7 @@ class AbstractPcscReaderAdapter
    * <p>The physical channel is open using the current sharing mode.
    *
    * @see #setSharingMode(SharingMode)
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final void openPhysicalChannel() throws ReaderIOException {
@@ -185,7 +185,7 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final void closePhysicalChannel() throws ReaderIOException {
@@ -206,7 +206,7 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final boolean isPhysicalChannelOpen() {
@@ -216,7 +216,7 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final boolean checkCardPresence() throws ReaderIOException {
@@ -233,7 +233,7 @@ class AbstractPcscReaderAdapter
    * <p>In the case of a PC/SC reader, the power-on data is provided by the reader in the form of an
    * ATR ISO7816 structure whatever the card.
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final String getPowerOnData() {
@@ -243,7 +243,7 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final byte[] transmitApdu(byte[] apduCommandData)
@@ -272,7 +272,7 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final boolean isContactless() {
@@ -287,7 +287,7 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final void onUnregister() {
@@ -297,7 +297,7 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final void onStartDetection() {
@@ -307,7 +307,7 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final void onStopDetection() {
@@ -319,7 +319,7 @@ class AbstractPcscReaderAdapter
    *
    * <p>The default value is {@link SharingMode#EXCLUSIVE}.
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final PcscReader setSharingMode(SharingMode sharingMode) {
@@ -346,7 +346,7 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final PcscReader setContactless(boolean contactless) {
@@ -362,7 +362,7 @@ class AbstractPcscReaderAdapter
    *
    * <p>The default value is {@link IsoProtocol#ANY}.
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final PcscReader setIsoProtocol(IsoProtocol isoProtocol) {
@@ -380,7 +380,7 @@ class AbstractPcscReaderAdapter
    *
    * <p>The default value is {@link DisconnectionMode#LEAVE}.
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final PcscReader setDisconnectionMode(DisconnectionMode disconnectionMode) {
@@ -395,7 +395,7 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final void waitForCardRemoval() throws TaskCanceledException, ReaderIOException {
@@ -435,7 +435,7 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public final void stopWaitForCardRemoval() {
@@ -448,7 +448,7 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public void waitForCardRemovalDuringProcessing() throws ReaderIOException, TaskCanceledException {
@@ -458,7 +458,7 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public void stopWaitForCardRemovalDuringProcessing() {

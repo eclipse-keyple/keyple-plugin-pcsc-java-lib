@@ -24,7 +24,7 @@ import javax.smartcardio.TerminalFactory;
  * This information is used to create readers capable of handling the technical issues specific to
  * this platform.
  *
- * @since 2.0
+ * @since 2.0.0
  */
 final class PcscPluginAdapter extends AbstractPcscPluginAdapter {
 
@@ -51,7 +51,7 @@ final class PcscPluginAdapter extends AbstractPcscPluginAdapter {
    * Gets the single instance of PcscPluginAdapter.
    *
    * @return Single instance of PcscPluginAdapter
-   * @since 2.0
+   * @since 2.0.0
    */
   static PcscPluginAdapter getInstance() {
     if (INSTANCE == null) {
@@ -67,7 +67,7 @@ final class PcscPluginAdapter extends AbstractPcscPluginAdapter {
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   CardTerminals getCardTerminals() {
     return TerminalFactory.getDefault().terminals();
@@ -81,7 +81,7 @@ final class PcscPluginAdapter extends AbstractPcscPluginAdapter {
    *
    * @param terminal The smartcard.io {@link CardTerminal}.
    * @return A not null reference.
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   AbstractPcscReaderAdapter createReader(CardTerminal terminal) {

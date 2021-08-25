@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * any new connection (SCARD_E_NO_SERVICE CardException). To overcome this problem a hack using
  * reflexivity is used to reset internal variables of smartcard.io.
  *
- * @since 2.0
+ * @since 2.0.0
  */
 final class PcscPluginWinAdapter extends AbstractPcscPluginAdapter {
 
@@ -59,7 +59,7 @@ final class PcscPluginWinAdapter extends AbstractPcscPluginAdapter {
    * Gets the single instance of PcscPluginWinAdapter.
    *
    * @return single instance of PcscPluginWinAdapter
-   * @since 2.0
+   * @since 2.0.0
    */
   static PcscPluginWinAdapter getInstance() {
     if (INSTANCE == null) {
@@ -94,7 +94,7 @@ final class PcscPluginWinAdapter extends AbstractPcscPluginAdapter {
    * <a href="https://stackoverflow.com/a/17209132">https://stackoverflow.com/a/17209132</a><br>
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   CardTerminals getCardTerminals() {
@@ -138,7 +138,7 @@ final class PcscPluginWinAdapter extends AbstractPcscPluginAdapter {
    * (package-private)<br>
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   AbstractPcscReaderAdapter createReader(CardTerminal terminal) {

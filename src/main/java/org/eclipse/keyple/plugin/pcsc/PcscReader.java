@@ -19,7 +19,7 @@ import org.eclipse.keyple.core.common.KeypleReaderExtension;
  *
  * <p>Provides specific settings and methods for configuring a PC/SC reader.
  *
- * @since 2.0
+ * @since 2.0.0
  */
 public interface PcscReader extends KeypleReaderExtension {
 
@@ -30,19 +30,19 @@ public interface PcscReader extends KeypleReaderExtension {
    * <p>Corresponds to the beginExclusive() and endExclusive() methods of smartcard.io and, at a
    * lower level, to the connection mode defined by PC/SC and used in the SCardConnect function.
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   enum SharingMode {
     /**
      * Allows simultaneous access to the card
      *
-     * @since 2.0
+     * @since 2.0.0
      */
     SHARED,
     /**
      * Requests exclusive access to the card
      *
-     * @since 2.0
+     * @since 2.0.0
      */
     EXCLUSIVE
   }
@@ -50,32 +50,32 @@ public interface PcscReader extends KeypleReaderExtension {
   /**
    * Available transmission protocols as defined by the PC/SC standard.
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   enum IsoProtocol {
 
     /**
      * to connect using any available protocol
      *
-     * @since 2.0
+     * @since 2.0.0
      */
     ANY("*"),
     /**
      * to connect using T=0 protocol
      *
-     * @since 2.0
+     * @since 2.0.0
      */
     T0("T=0"),
     /**
      * to connect using T=1 protocol
      *
-     * @since 2.0
+     * @since 2.0.0
      */
     T1("T=1"),
     /**
      * to connect using T=CL protocol
      *
-     * @since 2.0
+     * @since 2.0.0
      */
     TCL("T=CL");
 
@@ -87,7 +87,7 @@ public interface PcscReader extends KeypleReaderExtension {
      * <p>Associates the enum value with its corresponding definition in the PC/SC standard.
      *
      * @param value A string
-     * @since 2.0
+     * @since 2.0.0
      */
     IsoProtocol(String value) {
       this.value = value;
@@ -97,7 +97,7 @@ public interface PcscReader extends KeypleReaderExtension {
      * Gets the string expected by smartcard.io / PC/SC to set the card transmission protocol.
      *
      * @return A not empty string.
-     * @since 2.0
+     * @since 2.0.0
      */
     public String getValue() {
       return value;
@@ -107,19 +107,19 @@ public interface PcscReader extends KeypleReaderExtension {
   /**
    * Action to be taken after the card is disconnected.
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   enum DisconnectionMode {
     /**
      * Resets the card
      *
-     * @since 2.0
+     * @since 2.0.0
      */
     RESET,
     /**
      * Keeps the status of the card unchanged
      *
-     * @since 2.0
+     * @since 2.0.0
      */
     LEAVE
   }
@@ -136,7 +136,7 @@ public interface PcscReader extends KeypleReaderExtension {
    * @return This instance.
    * @throws IllegalArgumentException If sharingMode is null
    * @throws IllegalStateException If the sharing mode setting failed.
-   * @since 2.0
+   * @since 2.0.0
    */
   PcscReader setSharingMode(SharingMode sharingMode);
 
@@ -162,7 +162,7 @@ public interface PcscReader extends KeypleReaderExtension {
    *
    * @param contactless true to set contactless mode, false to set contact mode.
    * @return This instance.
-   * @since 2.0
+   * @since 2.0.0
    */
   PcscReader setContactless(boolean contactless);
 
@@ -175,7 +175,7 @@ public interface PcscReader extends KeypleReaderExtension {
    * @param isoProtocol The {@link IsoProtocol} to use (must be not null).
    * @return This instance.
    * @throws IllegalArgumentException If isoProtocol is null
-   * @since 2.0
+   * @since 2.0.0
    */
   PcscReader setIsoProtocol(IsoProtocol isoProtocol);
 

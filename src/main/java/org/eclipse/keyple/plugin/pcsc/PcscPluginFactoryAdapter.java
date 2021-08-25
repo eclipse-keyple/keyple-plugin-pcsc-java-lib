@@ -21,7 +21,7 @@ import org.eclipse.keyple.core.plugin.spi.PluginSpi;
  * (package-private)<br>
  * Factory of {@link PcscPlugin}.
  *
- * @since 2.0
+ * @since 2.0.0
  */
 final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactorySpi {
 
@@ -29,7 +29,7 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
    * (package-private)<br>
    * The plugin name
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   static final String PLUGIN_NAME = "PcscPlugin";
 
@@ -42,7 +42,7 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
    * (package-private)<br>
    * Creates an instance, sets the fields from the factory builder.
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   PcscPluginFactoryAdapter(
       String contactReaderIdentificationFilter,
@@ -57,7 +57,7 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public String getPluginApiVersion() {
@@ -67,7 +67,7 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public String getCommonApiVersion() {
@@ -77,7 +77,7 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public String getPluginName() {
@@ -87,7 +87,7 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
   /**
    * {@inheritDoc}
    *
-   * @since 2.0
+   * @since 2.0.0
    */
   @Override
   public PluginSpi getPlugin() {
