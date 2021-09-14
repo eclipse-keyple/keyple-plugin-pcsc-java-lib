@@ -2,7 +2,7 @@
 
 ## Overview
 
-The **Keyple Plugin PC/SC Java Library** is an addon to allow an application using Keyple to interact with PC/SC readers.
+The **Keyple Plugin PC/SC Java Library** is an add-on to allow an application using Keyple to interact with PC/SC readers.
 
 ## Documentation & Contribution Guide
 
