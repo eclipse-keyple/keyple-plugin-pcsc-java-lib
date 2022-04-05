@@ -191,6 +191,36 @@ public interface PcscReader extends KeypleReaderExtension {
    * @param disconnectionMode The {@link DisconnectionMode} to use (must be not null).
    * @return This instance.
    * @throws IllegalArgumentException If disconnectionMode is null
+   * @since 2.0.0
    */
   PcscReader setDisconnectionMode(DisconnectionMode disconnectionMode);
+
+  /**
+   * Transmits a control command to the terminal device.
+   *
+   * <p>This can be used to access specific features of the reader such as setting parameters,
+   * controlling LEDs, a buzzer or any other proprietary function defined by the reader
+   * manufacturer.
+   *
+   * <p>The supplied command identifier is internally converted into a control code expected by the
+   * current platform. Its actual value differs if the platform is Windows.
+   *
+   * @param commandId The command identifier.
+   * @param command The command data.
+   * @return The response data.
+   * @throws IllegalStateException If the communication with the reader has failed.
+   * @since 2.1.0
+   */
+  byte[] transmitControlCommand(int commandId, byte[] command);
+
+  /**
+   * Helper method that return the PC/SC CCID Escape command identifier.
+   *
+   * <p>The PC/SC CCID Escape command exists for all platforms but the value of its identifier
+   * differs from one to another (3500 for Windows, 1 for linux/MacOS).
+   *
+   * @return The ESCAPE command identifier adapted to the OS.
+   * @since 2.1.0
+   */
+  int getIoctlCcidEscapeCommandId();
 }
