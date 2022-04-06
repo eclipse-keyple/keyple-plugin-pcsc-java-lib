@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- `PcscReader.transmitControlCommand` and `PcscReader.getIoctlCcidEscapeCommandId` methods (issue [#9]).
 - "CHANGELOG.md" file (issue [eclipse/keyple#6]).
 - CI: Forbid the publication of a version already released (issue [#6]).
 
@@ -17,6 +18,7 @@ It also brings many major API changes.
 [unreleased]: https://github.com/eclipse/keyple-plugin-pcsc-java-lib/compare/2.0.0...HEAD
 [2.0.0]: https://github.com/eclipse/keyple-plugin-pcsc-java-lib/releases/tag/2.0.0
 
+[#9]: https://github.com/eclipse/keyple-plugin-pcsc-java-lib/issues/9
 [#6]: https://github.com/eclipse/keyple-plugin-pcsc-java-lib/issues/6
 
 [eclipse/keyple#6]: https://github.com/eclipse/keyple/issues/6

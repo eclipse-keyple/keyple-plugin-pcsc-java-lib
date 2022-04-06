@@ -45,6 +45,7 @@ class AbstractPcscReaderAdapter
   private final CardTerminal terminal;
   private final String name;
   private final AbstractPcscPluginAdapter pluginAdapter;
+  private final boolean isWindows;
   private Card card;
   private CardChannel channel;
   private Boolean isContactless;
@@ -72,6 +73,7 @@ class AbstractPcscReaderAdapter
     this.terminal = terminal;
     this.pluginAdapter = pluginAdapter;
     this.name = terminal.getName();
+    this.isWindows = System.getProperty("os.name").toLowerCase().contains("win");
   }
 
   /**
@@ -463,5 +465,39 @@ class AbstractPcscReaderAdapter
   @Override
   public void stopWaitForCardRemovalDuringProcessing() {
     stopWaitForCardRemoval();
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @since 2.1.0
+   */
+  @Override
+  public byte[] transmitControlCommand(int commandId, byte[] command) {
+    Assert.getInstance().notNull(command, "command");
+    byte[] response;
+    int controlCode = isWindows ? 0x00310000 | (commandId << 2) : 0x42000000 | commandId;
+    try {
+      if (card != null) {
+        response = card.transmitControlCommand(controlCode, command);
+      } else {
+        Card virtualCard = terminal.connect("DIRECT");
+        response = virtualCard.transmitControlCommand(controlCode, command);
+        virtualCard.disconnect(false);
+      }
+    } catch (CardException e) {
+      throw new IllegalStateException("Reader failure.", e);
+    }
+    return response;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @since 2.1.0
+   */
+  @Override
+  public int getIoctlCcidEscapeCommandId() {
+    return isWindows ? 3500 : 1;
   }
 }
