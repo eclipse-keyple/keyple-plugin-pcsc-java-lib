@@ -32,6 +32,10 @@
     defined for this purpose in the Keyple Service SPI package.</p>
 <p>However, the use of these observation features is optional; it is possible to operate in a static mode on both the
     plugin and the reader side.</p>
+<p><b>Note:</b> because of potential accesses to the same reader from different execution threads of the same
+    application it is sometimes necessary to configure the access in "SHARED" mode using the method <code>PcscReader.setSharingMode</code>.
+    This is especially true when performing card transactions using a SAM (Security Access Module), as the initial
+    connection with the SAM and its use are not done in the same execution thread.</p>
 <h1>Card identification</h1>
 <p>It is sometimes necessary to identify the type of card detected by the reader even before sending it an APDU command.
     Here again PC/SC does not offer much facility and the only information available in a more or less standardized way
@@ -39,5 +43,22 @@
 <p>The <b>PC/SC plugin</b> It uses an extensible mechanism of regular expression based rules to determine a protocol
     type. A number of rules are defined by default for common card technology types, but it is possible to redefine or
     add rules using {@code PcscPluginFactoryBuilder}.</p>
+<h1>Points to consider when the application is running on Windows</h1>
+The Windows operating system (7/8/10/11) starts a number of default services that may interfere with the proper
+functioning of applications using PC/SC card readers.<br>
+To avoid this, we recommend disabling the <b>Smart Card Plug and Play Service</b> as well as the <b>Certification
+    Propagation Service</b> using the group policy editing tool <b>gpedit.msc</b>.<br>
+These parameters are accessible through this path: <b><code>Computer Configuration\Administrative Templates\Windows
+    Components\Smart Card</code></b>.
+<p>The <b>Smart Card Device Enumeration Service</b> can also interfere when readers are connected/disconnected (used or not by the
+    Keyple application).<br>
+    We also recommend disabling this service via the built-in service management tool <b>services.msc</b> or via the
+    following command line:
+<pre>sc config "ScDeviceEnum" start= disabled</pre>
+When using <code>PcscReader.transmitControlCommand</code>, it is also possible that access to the IOCTL CCID ESCAPE
+command is blocked by default.<br>In this case, follow the
+procedure described <a target="_blank"
+                       href="https://docs.microsoft.com/en-us/previous-versions/windows/hardware/design/dn653571(v=vs.85)?redirectedfrom=MSDN#usb-ccid-class-driver-details"><b>here</b></a>
+by Microsoft.
 </body>
 </html>
