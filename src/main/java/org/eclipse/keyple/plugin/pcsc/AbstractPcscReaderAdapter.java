@@ -474,6 +474,8 @@ class AbstractPcscReaderAdapter
    */
   @Override
   public byte[] transmitControlCommand(int commandId, byte[] command) {
+    Assert.getInstance().notNull(command, "command");
+
     byte[] response;
     int controlCode;
     if (isWindows) {

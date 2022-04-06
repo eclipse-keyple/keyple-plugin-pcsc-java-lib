@@ -206,7 +206,7 @@ public interface PcscReader extends KeypleReaderExtension {
    * current platform. Its actual value differs if the platform is Windows.
    *
    * @param commandId The command identifier.
-   * @param command The command data.
+   * @param command A not null byte array containing the command data.
    * @return The response data.
    * @throws IllegalStateException If the communication with the reader has failed.
    * @since 2.1.0
