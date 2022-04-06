@@ -504,10 +504,6 @@ class AbstractPcscReaderAdapter
    */
   @Override
   public int getIoctlCcidEscapeCommandId() {
-    if (isWindows) {
-      return 3500;
-    } else {
-      return 1;
-    }
+    return isWindows ? 3500 : 1;
   }
 }

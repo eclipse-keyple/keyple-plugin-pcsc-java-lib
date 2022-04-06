@@ -214,12 +214,12 @@ public interface PcscReader extends KeypleReaderExtension {
   byte[] transmitControlCommand(int commandId, byte[] command);
 
   /**
-   * Helper method that return the PC/SC CCID Escape command identifier.
+   * Helper method that return the PC/SC IOCtl CCID "Escape" command identifier.
    *
-   * <p>The PC/SC CCID Escape command exists for all platforms but the value of its identifier
+   * <p>The PC/SC IOCtl CCID "Escape" command exists for all platforms but the value of its identifier
    * differs from one to another (3500 for Windows, 1 for linux/MacOS).
    *
-   * @return The ESCAPE command identifier adapted to the OS.
+   * @return The IOCtl CCID "Escape" command identifier adapted to the OS.
    * @since 2.1.0
    */
   int getIoctlCcidEscapeCommandId();
