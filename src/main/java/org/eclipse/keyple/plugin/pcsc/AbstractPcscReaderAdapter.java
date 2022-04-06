@@ -475,14 +475,8 @@ class AbstractPcscReaderAdapter
   @Override
   public byte[] transmitControlCommand(int commandId, byte[] command) {
     Assert.getInstance().notNull(command, "command");
-
     byte[] response;
-    int controlCode;
-    if (isWindows) {
-      controlCode = 0x00310000 | (commandId << 2);
-    } else {
-      controlCode = 0x42000000 | commandId;
-    }
+    int controlCode = isWindows ? 0x00310000 | (commandId << 2) : 0x42000000 | commandId;
     try {
       if (card != null) {
         response = card.transmitControlCommand(controlCode, command);
