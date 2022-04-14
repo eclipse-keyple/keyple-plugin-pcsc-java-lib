@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PcscReader.transmitControlCommand` and `PcscReader.getIoctlCcidEscapeCommandId` methods (issue [#9]).
 - "CHANGELOG.md" file (issue [eclipse/keyple#6]).
 - CI: Forbid the publication of a version already released (issue [#6]).
+### Upgraded
+- "Keyple Util Library" to version `2.1.0` by removing the use of deprecated methods.
 
 ## [2.0.0] - 2021-10-06
 This is the initial release.

@@ -23,7 +23,7 @@ import org.eclipse.keyple.core.plugin.spi.reader.observable.ObservableReaderSpi;
 import org.eclipse.keyple.core.plugin.spi.reader.observable.state.processing.WaitForCardRemovalDuringProcessingBlockingSpi;
 import org.eclipse.keyple.core.plugin.spi.reader.observable.state.removal.WaitForCardRemovalBlockingSpi;
 import org.eclipse.keyple.core.util.Assert;
-import org.eclipse.keyple.core.util.ByteArrayUtil;
+import org.eclipse.keyple.core.util.HexUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,7 +147,7 @@ class AbstractPcscReaderAdapter
     String protocolRule = pluginAdapter.getProtocolRule(readerProtocol);
     boolean isCurrentProtocol;
     if (protocolRule != null && !protocolRule.isEmpty()) {
-      String atr = ByteArrayUtil.toHex(card.getATR().getBytes());
+      String atr = HexUtil.toHex(card.getATR().getBytes());
       isCurrentProtocol = Pattern.compile(protocolRule).matcher(atr).matches();
     } else {
       isCurrentProtocol = false;
@@ -239,7 +239,7 @@ class AbstractPcscReaderAdapter
    */
   @Override
   public final String getPowerOnData() {
-    return ByteArrayUtil.toHex(card.getATR().getBytes());
+    return HexUtil.toHex(card.getATR().getBytes());
   }
 
   /**
