@@ -48,7 +48,13 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
       String contactReaderIdentificationFilter,
       String contactlessReaderIdentificationFilter,
       Map<String, String> protocolRulesMap) {
-    isOsWin = System.getProperty("os.name").toLowerCase().contains("win");
+    String osName = System.getProperty("os.name").toLowerCase();
+    isOsWin = osName.contains("win");
+    if (osName.contains("mac")) {
+      System.setProperty(
+          "sun.security.smartcardio.library",
+          "/System/Library/Frameworks/PCSC.framework/Versions/Current/PCSC");
+    }
     this.contactReaderIdentificationFilter = contactReaderIdentificationFilter;
     this.contactlessReaderIdentificationFilter = contactlessReaderIdentificationFilter;
     this.protocolRulesMap = protocolRulesMap;

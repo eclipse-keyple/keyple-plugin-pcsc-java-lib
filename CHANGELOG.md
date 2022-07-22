@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI: Forbid the publication of a version already released (issue [#6]).
 ### Upgraded
 - "Keyple Util Library" to version `2.1.0` by removing the use of deprecated methods.
+### Fixed
+- Setting the smartcard.io path in the case of MacOS platform.
 
 ## [2.0.0] - 2021-10-06
 This is the initial release.
