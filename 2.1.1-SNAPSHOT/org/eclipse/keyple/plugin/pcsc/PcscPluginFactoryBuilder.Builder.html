@@ -26,8 +26,8 @@
     catch(err) {
     }
 //-->
-var data = {"i0":10,"i1":10,"i2":10,"i3":10};
-var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
+var data = {"i0":10,"i1":10,"i2":10,"i3":42};
+var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
 var tableTab = "tableTab";
@@ -90,13 +90,13 @@ loadScripts(document, 'script');</script>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
 <li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field.detail">Field</a>&nbsp;|&nbsp;</li>
 <li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
@@ -149,6 +149,29 @@ extends java.lang.Object</pre>
 <div class="summary">
 <ul class="blockList">
 <li class="blockList">
+<!-- =========== FIELD SUMMARY =========== -->
+<section role="region">
+<ul class="blockList">
+<li class="blockList"><a id="field.summary">
+<!--   -->
+</a>
+<h3>Field Summary</h3>
+<table class="memberSummary">
+<caption><span>Fields</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colSecond" scope="col">Field</th>
+<th class="colLast" scope="col">Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#DEFAULT_CONTACTLESS_READER_FILTER">DEFAULT_CONTACTLESS_READER_FILTER</a></span></code></th>
+<td class="colLast">&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
+</section>
 <!-- ========== METHOD SUMMARY =========== -->
 <section role="region">
 <ul class="blockList">
@@ -157,7 +180,7 @@ extends java.lang.Object</pre>
 </a>
 <h3>Method Summary</h3>
 <table class="memberSummary">
-<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t6" class="tableTab"><span><a href="javascript:show(32);">Deprecated Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
 <tr>
 <th class="colFirst" scope="col">Modifier and Type</th>
 <th class="colSecond" scope="col">Method</th>
@@ -182,16 +205,17 @@ extends java.lang.Object</pre>
 <td class="colFirst"><code><a href="PcscPluginFactoryBuilder.Builder.html" title="class in org.eclipse.keyple.plugin.pcsc">PcscPluginFactoryBuilder.Builder</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#useContactlessReaderIdentificationFilter(java.lang.String)">useContactlessReaderIdentificationFilter</a></span>&#8203;(java.lang.String&nbsp;contactlessReaderIdentificationFilter)</code></th>
 <td class="colLast">
-<div class="block">Sets a filter based on regular expressions to make the plugin able to identify a contact
- reader from its name.</div>
+<div class="block">Overwrites the default filter with the provided filter based on regular expressions to make
+ the plugin able to identify a contact reader from its name.</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="PcscPluginFactoryBuilder.Builder.html" title="class in org.eclipse.keyple.plugin.pcsc">PcscPluginFactoryBuilder.Builder</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#useContactReaderIdentificationFilter(java.lang.String)">useContactReaderIdentificationFilter</a></span>&#8203;(java.lang.String&nbsp;contactReaderIdentificationFilter)</code></th>
 <td class="colLast">
-<div class="block">Sets a filter based on regular expressions to make the plugin able to identify a contact
- reader from its name.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>
+<div class="deprecationComment">Useless method that will be removed soon, see <a href="#useContactlessReaderIdentificationFilter(java.lang.String)"><code>useContactlessReaderIdentificationFilter(String)</code></a></div>
+</div>
 </td>
 </tr>
 </table>
@@ -211,6 +235,29 @@ extends java.lang.Object</pre>
 <div class="details">
 <ul class="blockList">
 <li class="blockList">
+<!-- ============ FIELD DETAIL =========== -->
+<section role="region">
+<ul class="blockList">
+<li class="blockList"><a id="field.detail">
+<!--   -->
+</a>
+<h3>Field Detail</h3>
+<a id="DEFAULT_CONTACTLESS_READER_FILTER">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>DEFAULT_CONTACTLESS_READER_FILTER</h4>
+<pre>public static final&nbsp;java.lang.String DEFAULT_CONTACTLESS_READER_FILTER</pre>
+<dl>
+<dt><span class="seeLabel">See Also:</span></dt>
+<dd><a href="../../../../../constant-values.html#org.eclipse.keyple.plugin.pcsc.PcscPluginFactoryBuilder.Builder.DEFAULT_CONTACTLESS_READER_FILTER">Constant Field Values</a></dd>
+</dl>
+</li>
+</ul>
+</li>
+</ul>
+</section>
 <!-- ============ METHOD DETAIL ========== -->
 <section role="region">
 <ul class="blockList">
@@ -224,7 +271,11 @@ extends java.lang.Object</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>useContactReaderIdentificationFilter</h4>
-<pre class="methodSignature">public&nbsp;<a href="PcscPluginFactoryBuilder.Builder.html" title="class in org.eclipse.keyple.plugin.pcsc">PcscPluginFactoryBuilder.Builder</a>&nbsp;useContactReaderIdentificationFilter&#8203;(java.lang.String&nbsp;contactReaderIdentificationFilter)</pre>
+<pre class="methodSignature">@Deprecated
+public&nbsp;<a href="PcscPluginFactoryBuilder.Builder.html" title="class in org.eclipse.keyple.plugin.pcsc">PcscPluginFactoryBuilder.Builder</a>&nbsp;useContactReaderIdentificationFilter&#8203;(java.lang.String&nbsp;contactReaderIdentificationFilter)</pre>
+<div class="deprecationBlock"><span class="deprecatedLabel">Deprecated.</span>
+<div class="deprecationComment">Useless method that will be removed soon, see <a href="#useContactlessReaderIdentificationFilter(java.lang.String)"><code>useContactlessReaderIdentificationFilter(String)</code></a></div>
+</div>
 <div class="block">Sets a filter based on regular expressions to make the plugin able to identify a contact
  reader from its name.
 
@@ -244,12 +295,8 @@ extends java.lang.Object</pre>
 <dd><code>contactReaderIdentificationFilter</code> - A string a regular expression.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>This builder.</dd>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code>java.lang.IllegalArgumentException</code> - If the provided string is null or empty.</dd>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2.0.0</dd>
-<dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="#useContactlessReaderIdentificationFilter(java.lang.String)"><code>useContactlessReaderIdentificationFilter(String)</code></a></dd>
 </dl>
 </li>
 </ul>
@@ -260,22 +307,20 @@ extends java.lang.Object</pre>
 <li class="blockList">
 <h4>useContactlessReaderIdentificationFilter</h4>
 <pre class="methodSignature">public&nbsp;<a href="PcscPluginFactoryBuilder.Builder.html" title="class in org.eclipse.keyple.plugin.pcsc">PcscPluginFactoryBuilder.Builder</a>&nbsp;useContactlessReaderIdentificationFilter&#8203;(java.lang.String&nbsp;contactlessReaderIdentificationFilter)</pre>
-<div class="block">Sets a filter based on regular expressions to make the plugin able to identify a contact
- reader from its name.
+<div class="block">Overwrites the default filter with the provided filter based on regular expressions to make
+ the plugin able to identify a contact reader from its name.
 
  <p>Readers whose names match the provided regular expression will be considered contactless
  type readers.
 
- <p>Commonly used contactless readers include the "ASK LoGO" and "ACS ACR 122" models.<br>
- Thus, an application using these readers should call this method a first time with ".*(ASK
- LoGO|ACS ACR122).*" as an argument.</div>
+ <p>The default value is <a href="#DEFAULT_CONTACTLESS_READER_FILTER">"(?i).*(contactless|ask logo|acs acr122).*"</a></div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>contactlessReaderIdentificationFilter</code> - A string a regular expression.</dd>
+<dd><code>contactlessReaderIdentificationFilter</code> - A regular expression.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>This builder.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code>java.lang.IllegalArgumentException</code> - If the provided string is null or empty.</dd>
+<dd><code>java.lang.IllegalArgumentException</code> - If the provided string is null, empty or invalid.</dd>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2.0.0</dd>
 <dt><span class="seeLabel">See Also:</span></dt>
@@ -320,7 +365,12 @@ extends java.lang.Object</pre>
 <li class="blockList">
 <h4>build</h4>
 <pre class="methodSignature">public&nbsp;<a href="PcscPluginFactory.html" title="interface in org.eclipse.keyple.plugin.pcsc">PcscPluginFactory</a>&nbsp;build()</pre>
-<div class="block">Returns an instance of PcscPluginFactory created from the fields set on this builder.</div>
+<div class="block">Returns an instance of PcscPluginFactory created from the fields set on this builder.
+
+ <p>The type of reader is determined using a regular expression applied to its name. <br>
+ The default regular expression is <a href="#DEFAULT_CONTACTLESS_READER_FILTER">"(?i).*(contactless|ask logo|acs acr122).*"</a>.<br>
+ Readers that do not match this regular expression are considered contact type. <br>
+ It is possible to redefine the contactless reader filter via the method <a href="#useContactlessReaderIdentificationFilter(java.lang.String)"><code>useContactlessReaderIdentificationFilter(String)</code></a>.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>A <a href="PcscPluginFactory.html" title="interface in org.eclipse.keyple.plugin.pcsc"><code>PcscPluginFactory</code></a></dd>
@@ -383,13 +433,13 @@ extends java.lang.Object</pre>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
 <li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field.detail">Field</a>&nbsp;|&nbsp;</li>
 <li>Constr&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>

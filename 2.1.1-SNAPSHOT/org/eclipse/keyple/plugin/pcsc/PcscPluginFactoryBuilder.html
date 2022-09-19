@@ -139,19 +139,7 @@ extends java.lang.Object</pre>
  <p>The Builder checks if a value configured by a setter satisfies the syntax requirements defined
  by the <code>PcscPluginFactoryAdapter</code> class.
 
- <p>The following example shows how to create a PcscPluginFactory object with the
- PcscPluginFactoryBuilder.
-
- <pre><code>
- PcscPluginFactory pcscPluginFactory = new PcscPluginFactoryBuilder()
-      .useContactReaderIdentificationFilter(".*(Cherry TC|Identive).*")
-      .useContactlessReaderIdentificationFilter(".*(ASK LoGO|ACS ACR122).*")
-      .updateProtocolIdentificationRule(PcscSupportedContactlessProtocol).ISO_14443_4("3B8B80.*")
-      .updateProtocolIdentificationRule(PcscSupportedContactlessProtocol).INNOVATRON_B_PRIME_CARD("3B8F8001805A0.*")
-      .build();
- </code></pre>
-
- Note: all setters of this class are optional.<br>
+ <p>Note: all setters of this class are optional.<br>
  It is possible to assign later a protocol type at the reader level using the method <a href="PcscReader.html#setContactless(boolean)"><code>PcscReader.setContactless(boolean)</code></a>. <br>
  A set of default protocol identification rules is also proposed.</div>
 <dl>
