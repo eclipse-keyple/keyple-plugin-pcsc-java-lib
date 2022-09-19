@@ -13,6 +13,7 @@ package org.eclipse.keyple.plugin.pcsc;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.eclipse.keyple.core.util.Assert;
 
 /**
@@ -21,19 +22,7 @@ import org.eclipse.keyple.core.util.Assert;
  * <p>The Builder checks if a value configured by a setter satisfies the syntax requirements defined
  * by the {@link PcscPluginFactoryAdapter} class.
  *
- * <p>The following example shows how to create a PcscPluginFactory object with the
- * PcscPluginFactoryBuilder.
- *
- * <pre>{@code
- * PcscPluginFactory pcscPluginFactory = new PcscPluginFactoryBuilder()
- *      .useContactReaderIdentificationFilter(".*(Cherry TC|Identive).*")
- *      .useContactlessReaderIdentificationFilter(".*(ASK LoGO|ACS ACR122).*")
- *      .updateProtocolIdentificationRule(PcscSupportedContactlessProtocol).ISO_14443_4("3B8B80.*")
- *      .updateProtocolIdentificationRule(PcscSupportedContactlessProtocol).INNOVATRON_B_PRIME_CARD("3B8F8001805A0.*")
- *      .build();
- * }</pre>
- *
- * Note: all setters of this class are optional.<br>
+ * <p>Note: all setters of this class are optional.<br>
  * It is possible to assign later a protocol type at the reader level using the method {@link
  * PcscReader#setContactless(boolean)}. <br>
  * A set of default protocol identification rules is also proposed.
@@ -63,13 +52,16 @@ public final class PcscPluginFactoryBuilder {
    */
   public static class Builder {
 
-    private String contactReaderIdentificationFilter;
-    private String contactlessReaderIdentificationFilter;
+    public static final String DEFAULT_CONTACTLESS_READER_FILTER =
+        "(?i).*(contactless|ask logo|acs acr122).*";
+    private Pattern contactlessReaderIdentificationFilterPattern =
+        Pattern.compile(DEFAULT_CONTACTLESS_READER_FILTER);
     private final Map<String, String> protocolRulesMap;
 
     /**
-     * (private) Constructs an empty Builder. The default value of all strings is null, the default
-     * value of the map is an empty map.
+     * (private)<br>
+     * Constructs an empty Builder. The default value of all strings is null, the default value of
+     * the map is an empty map.
      */
     private Builder() {
       protocolRulesMap = new HashMap<String, String>();
@@ -93,31 +85,27 @@ public final class PcscPluginFactoryBuilder {
      *
      * @param contactReaderIdentificationFilter A string a regular expression.
      * @return This builder.
-     * @throws IllegalArgumentException If the provided string is null or empty.
-     * @see #useContactlessReaderIdentificationFilter(String)
      * @since 2.0.0
+     * @deprecated Useless method that will be removed soon, see {@link
+     *     #useContactlessReaderIdentificationFilter(String)}
      */
+    @Deprecated
     public Builder useContactReaderIdentificationFilter(String contactReaderIdentificationFilter) {
-      Assert.getInstance()
-          .notEmpty(contactReaderIdentificationFilter, "contactReaderIdentificationFilter");
-      this.contactReaderIdentificationFilter = contactReaderIdentificationFilter;
       return this;
     }
 
     /**
-     * Sets a filter based on regular expressions to make the plugin able to identify a contact
-     * reader from its name.
+     * Overwrites the default filter with the provided filter based on regular expressions to make
+     * the plugin able to identify a contact reader from its name.
      *
      * <p>Readers whose names match the provided regular expression will be considered contactless
      * type readers.
      *
-     * <p>Commonly used contactless readers include the "ASK LoGO" and "ACS ACR 122" models.<br>
-     * Thus, an application using these readers should call this method a first time with ".*(ASK
-     * LoGO|ACS ACR122).*" as an argument.
+     * <p>The default value is {@value #DEFAULT_CONTACTLESS_READER_FILTER}
      *
-     * @param contactlessReaderIdentificationFilter A string a regular expression.
+     * @param contactlessReaderIdentificationFilter A regular expression.
      * @return This builder.
-     * @throws IllegalArgumentException If the provided string is null or empty.
+     * @throws IllegalArgumentException If the provided string is null, empty or invalid.
      * @see #useContactReaderIdentificationFilter(String)
      * @since 2.0.0
      */
@@ -125,7 +113,12 @@ public final class PcscPluginFactoryBuilder {
         String contactlessReaderIdentificationFilter) {
       Assert.getInstance()
           .notEmpty(contactlessReaderIdentificationFilter, "contactlessReaderIdentificationFilter");
-      this.contactlessReaderIdentificationFilter = contactlessReaderIdentificationFilter;
+      try {
+        this.contactlessReaderIdentificationFilterPattern =
+            Pattern.compile(contactlessReaderIdentificationFilter);
+      } catch (Exception e) {
+        throw new IllegalArgumentException("Bad regular expression.", e);
+      }
       return this;
     }
 
@@ -161,14 +154,18 @@ public final class PcscPluginFactoryBuilder {
     /**
      * Returns an instance of PcscPluginFactory created from the fields set on this builder.
      *
+     * <p>The type of reader is determined using a regular expression applied to its name. <br>
+     * The default regular expression is {@value DEFAULT_CONTACTLESS_READER_FILTER}.<br>
+     * Readers that do not match this regular expression are considered contact type. <br>
+     * It is possible to redefine the contactless reader filter via the method {@link
+     * #useContactlessReaderIdentificationFilter(String)}.
+     *
      * @return A {@link PcscPluginFactory}
      * @since 2.0.0
      */
     public PcscPluginFactory build() {
       return new PcscPluginFactoryAdapter(
-          contactReaderIdentificationFilter,
-          contactlessReaderIdentificationFilter,
-          protocolRulesMap);
+          contactlessReaderIdentificationFilterPattern, protocolRulesMap);
     }
   }
 }

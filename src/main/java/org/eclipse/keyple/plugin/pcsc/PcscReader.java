@@ -158,7 +158,8 @@ public interface PcscReader extends KeypleReaderExtension {
    *       its type itself using the plugin parameters (see {@link PcscPluginFactoryBuilder}.
    * </ul>
    *
-   * <p>There is no default mode, so it is mandatory to set the mode by any of the above methods.
+   * <p>The default mode is the name-based determination performed by the plugin. See {@link
+   * PcscPluginFactoryBuilder.Builder#useContactlessReaderIdentificationFilter(String)}.
    *
    * @param contactless true to set contactless mode, false to set contact mode.
    * @return This instance.

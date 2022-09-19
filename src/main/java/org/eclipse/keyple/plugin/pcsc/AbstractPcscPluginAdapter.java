@@ -14,7 +14,6 @@ package org.eclipse.keyple.plugin.pcsc;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import javax.smartcardio.CardTerminals;
@@ -74,8 +73,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   }
 
   private final String name;
-  private String contactReaderIdentificationFilter;
-  private String contactlessReaderIdentificationFilter;
+  private Pattern contactlessReaderIdentificationFilterPattern;
 
   /**
    * (package-private)<br>
@@ -90,50 +88,16 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
 
   /**
    * (package-private)<br>
-   * Sets the filter to identify contact readers.
-   *
-   * @param contactReaderIdentificationFilter A regular expression, null if the filter is not set.
-   * @return The object instance.
-   * @since 2.0.0
-   */
-  final AbstractPcscPluginAdapter setContactReaderIdentificationFilter(
-      String contactReaderIdentificationFilter) {
-    if (logger.isTraceEnabled()) {
-      if (contactReaderIdentificationFilter != null) {
-        logger.trace(
-            "{}: contact reader identification filter set to {}",
-            getName(),
-            contactReaderIdentificationFilter);
-      } else {
-        logger.trace("{}: no contact reader identification filter set", getName());
-      }
-    }
-    this.contactReaderIdentificationFilter = contactReaderIdentificationFilter;
-    return this;
-  }
-
-  /**
-   * (package-private)<br>
    * Sets the filter to identify contactless readers.
    *
-   * @param contactlessReaderIdentificationFilter A regular expression, null if the filter is not
-   *     set.
+   * @param contactlessReaderIdentificationFilterPattern A regular expression pattern.
    * @return The object instance.
    * @since 2.0.0
    */
-  final AbstractPcscPluginAdapter setContactlessReaderIdentificationFilter(
-      String contactlessReaderIdentificationFilter) {
-    if (logger.isTraceEnabled()) {
-      if (contactlessReaderIdentificationFilter != null) {
-        logger.trace(
-            "{}: contactless reader identification filter set to {}",
-            getName(),
-            contactlessReaderIdentificationFilter);
-      } else {
-        logger.trace("{}: no contactless reader identification filter set", getName());
-      }
-    }
-    this.contactlessReaderIdentificationFilter = contactlessReaderIdentificationFilter;
+  final AbstractPcscPluginAdapter setContactlessReaderIdentificationFilterPattern(
+      Pattern contactlessReaderIdentificationFilterPattern) {
+    this.contactlessReaderIdentificationFilterPattern =
+        contactlessReaderIdentificationFilterPattern;
     return this;
   }
 
@@ -202,27 +166,14 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   /**
    * (package-private)<br>
    * Attempts to determine the transmission mode of the reader whose name is provided.<br>
-   * This determination is made by a test based on the regular expressions.
+   * This determination is made by a test based on a regular expression.
    *
    * @param readerName A string containing the reader name
    * @return True if the reader is contactless, false if not.
-   * @throws IllegalStateException If the mode of transmission could not be determined
-   * @throws PatternSyntaxException If the expression's syntax is invalid
    * @since 2.0.0
    */
   final boolean isContactless(String readerName) {
-
-    Pattern p;
-    p = Pattern.compile(contactReaderIdentificationFilter);
-    if (p.matcher(readerName).matches()) {
-      return false;
-    }
-    p = Pattern.compile(contactlessReaderIdentificationFilter);
-    if (p.matcher(readerName).matches()) {
-      return true;
-    }
-    throw new IllegalStateException(
-        "Unable to determine the transmission mode for reader " + readerName);
+    return contactlessReaderIdentificationFilterPattern.matcher(readerName).matches();
   }
 
   /**

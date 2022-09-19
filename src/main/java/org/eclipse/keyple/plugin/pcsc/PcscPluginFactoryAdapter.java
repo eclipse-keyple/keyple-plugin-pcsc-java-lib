@@ -12,6 +12,7 @@
 package org.eclipse.keyple.plugin.pcsc;
 
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.eclipse.keyple.core.common.CommonApiProperties;
 import org.eclipse.keyple.core.plugin.PluginApiProperties;
 import org.eclipse.keyple.core.plugin.spi.PluginFactorySpi;
@@ -34,8 +35,7 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
   static final String PLUGIN_NAME = "PcscPlugin";
 
   private final boolean isOsWin;
-  private final String contactReaderIdentificationFilter;
-  private final String contactlessReaderIdentificationFilter;
+  private final Pattern contactlessReaderIdentificationFilterPattern;
   private final Map<String, String> protocolRulesMap;
 
   /**
@@ -45,9 +45,7 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
    * @since 2.0.0
    */
   PcscPluginFactoryAdapter(
-      String contactReaderIdentificationFilter,
-      String contactlessReaderIdentificationFilter,
-      Map<String, String> protocolRulesMap) {
+      Pattern contactlessReaderIdentificationFilterPattern, Map<String, String> protocolRulesMap) {
     String osName = System.getProperty("os.name").toLowerCase();
     isOsWin = osName.contains("win");
     if (osName.contains("mac")) {
@@ -55,8 +53,8 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
           "sun.security.smartcardio.library",
           "/System/Library/Frameworks/PCSC.framework/Versions/Current/PCSC");
     }
-    this.contactReaderIdentificationFilter = contactReaderIdentificationFilter;
-    this.contactlessReaderIdentificationFilter = contactlessReaderIdentificationFilter;
+    this.contactlessReaderIdentificationFilterPattern =
+        contactlessReaderIdentificationFilterPattern;
     this.protocolRulesMap = protocolRulesMap;
   }
 
@@ -104,8 +102,8 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
       plugin = PcscPluginAdapter.getInstance();
     }
     return plugin
-        .setContactReaderIdentificationFilter(contactReaderIdentificationFilter)
-        .setContactlessReaderIdentificationFilter(contactlessReaderIdentificationFilter)
+        .setContactlessReaderIdentificationFilterPattern(
+            contactlessReaderIdentificationFilterPattern)
         .addProtocolRulesMap(protocolRulesMap);
   }
 }
