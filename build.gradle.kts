@@ -31,10 +31,8 @@ repositories {
 dependencies {
     implementation("org.eclipse.keyple:keyple-common-java-api:2.0.0")
     implementation("org.eclipse.keyple:keyple-plugin-java-api:2.0.0")
-    implementation("org.eclipse.keyple:keyple-util-java-lib:2.1.0")
+    implementation("org.eclipse.keyple:keyple-util-java-lib:2.3.0")
     implementation("org.slf4j:slf4j-api:1.7.32")
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.assertj:assertj-core:3.15.0")
 }
 
 val javaSourceLevel: String by project

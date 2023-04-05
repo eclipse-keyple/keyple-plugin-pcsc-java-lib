@@ -223,7 +223,11 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
       readerSpis.add(createReader(terminal));
     }
     if (logger.isTraceEnabled()) {
-      logger.trace("{}: available readers {}", this.getName(), JsonUtil.toJson(readerSpis));
+      StringBuilder sb = new StringBuilder();
+      for (ReaderSpi readerSpi : readerSpis) {
+        sb.append(readerSpi.getName()).append(", ");
+      }
+      logger.trace("{}: available readers {}", this.getName(), sb);
     }
     return readerSpis;
   }
