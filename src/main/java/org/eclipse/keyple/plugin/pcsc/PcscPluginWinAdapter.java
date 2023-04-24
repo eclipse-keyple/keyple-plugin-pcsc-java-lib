@@ -46,12 +46,21 @@ final class PcscPluginWinAdapter extends AbstractPcscPluginAdapter {
    */
   private static volatile PcscPluginWinAdapter INSTANCE; // NOSONAR: lazy-singleton pattern.
 
+  private final boolean isReflexivityAllowed;
+
   /**
    * (private)<br>
    * Creates the instance.
    */
   private PcscPluginWinAdapter() {
     super(PcscPluginFactoryAdapter.PLUGIN_NAME);
+    String javaSpecVersion = System.getProperty("java.specification.version");
+    double version = Double.parseDouble(javaSpecVersion);
+    isReflexivityAllowed = version < 16.0;
+    logger.info(
+        "java.specification.version = {}. Reflexivity is {}.",
+        version,
+        isReflexivityAllowed ? "allowed" : "not allowed");
   }
 
   /**
@@ -99,36 +108,40 @@ final class PcscPluginWinAdapter extends AbstractPcscPluginAdapter {
   @Override
   CardTerminals getCardTerminals() {
 
-    /* Some SONAR warnings have been disabled. This code should be reviewed carefully. */
-    try {
-      Class<?> pcscterminal;
-      pcscterminal = Class.forName("sun.security.smartcardio.PCSCTerminals");
-      Field contextId = pcscterminal.getDeclaredField("contextId");
-      contextId.setAccessible(true); // NOSONAR
+    if (isReflexivityAllowed) {
+      /* Some SONAR warnings have been disabled. This code should be reviewed carefully. */
+      try {
+        Class<?> pcscterminal;
+        pcscterminal = Class.forName("sun.security.smartcardio.PCSCTerminals");
+        Field contextId = pcscterminal.getDeclaredField("contextId");
+        contextId.setAccessible(true); // NOSONAR
 
-      if (contextId.getLong(pcscterminal) != 0L) {
+        if (contextId.getLong(pcscterminal) != 0L) {
 
-        Class<?> pcsc = Class.forName("sun.security.smartcardio.PCSC");
-        Method sCardEstablishContext =
-            pcsc.getDeclaredMethod("SCardEstablishContext", Integer.TYPE);
-        sCardEstablishContext.setAccessible(true); // NOSONAR
+          Class<?> pcsc = Class.forName("sun.security.smartcardio.PCSC");
+          Method sCardEstablishContext =
+              pcsc.getDeclaredMethod("SCardEstablishContext", Integer.TYPE);
+          sCardEstablishContext.setAccessible(true); // NOSONAR
 
-        Field sCardScopeUser = pcsc.getDeclaredField("SCARD_SCOPE_USER");
-        sCardScopeUser.setAccessible(true); // NOSONAR
+          Field sCardScopeUser = pcsc.getDeclaredField("SCARD_SCOPE_USER");
+          sCardScopeUser.setAccessible(true); // NOSONAR
 
-        long newId = (Long) sCardEstablishContext.invoke(pcsc, sCardScopeUser.getInt(pcsc));
-        contextId.setLong(pcscterminal, newId); // NOSONAR
+          long newId = (Long) sCardEstablishContext.invoke(pcsc, sCardScopeUser.getInt(pcsc));
+          contextId.setLong(pcscterminal, newId); // NOSONAR
 
-        // clear the terminals in cache
-        TerminalFactory factory = TerminalFactory.getDefault();
-        CardTerminals terminals = factory.terminals();
+          // clear the terminals in cache
+          TerminalFactory factory = TerminalFactory.getDefault();
+          CardTerminals terminals = factory.terminals();
 
-        Field fieldTerminals = pcscterminal.getDeclaredField("terminals");
-        fieldTerminals.setAccessible(true); // NOSONAR
-        ((Map) fieldTerminals.get(terminals)).clear();
+          Field fieldTerminals = pcscterminal.getDeclaredField("terminals");
+          fieldTerminals.setAccessible(true); // NOSONAR
+          ((Map<?, ?>) fieldTerminals.get(terminals)).clear();
+        }
+      } catch (Exception e) {
+        logger.warn(
+            "The attempt to access the internal fields of 'smartcard.io' has failed: {}",
+            e.getMessage());
       }
-    } catch (Exception e) {
-      logger.error("Unexpected exception.", e);
     }
 
     return TerminalFactory.getDefault().terminals();

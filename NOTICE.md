@@ -31,7 +31,7 @@ SPDX-License-Identifier: EPL-2.0
    
 ## Third-party Content
 
-SLF4J API (1.7.32)
+SLF4J API
 
 * License: [MIT](https://spdx.org/licenses/MIT.html)
 * Project: http://www.slf4j.org
