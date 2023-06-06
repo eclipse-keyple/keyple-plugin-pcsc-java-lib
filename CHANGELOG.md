@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Added a note to warn about observability issues when using **Java 16+** to `README.md` file.
+- Added project status badges on `README.md` file.
+### Fixed
+- CI: code coverage report when releasing.
 
 ## [2.1.2] - 2023-04-24
 ### Fixed
