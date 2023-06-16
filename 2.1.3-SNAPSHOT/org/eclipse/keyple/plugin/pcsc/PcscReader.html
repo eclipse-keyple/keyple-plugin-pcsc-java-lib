@@ -215,7 +215,7 @@ extends org.eclipse.keyple.core.common.KeypleReaderExtension</pre>
 <td class="colFirst"><code><a href="PcscReader.html" title="interface in org.eclipse.keyple.plugin.pcsc">PcscReader</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setDisconnectionMode(org.eclipse.keyple.plugin.pcsc.PcscReader.DisconnectionMode)">setDisconnectionMode</a></span>&#8203;(<a href="PcscReader.DisconnectionMode.html" title="enum in org.eclipse.keyple.plugin.pcsc">PcscReader.DisconnectionMode</a>&nbsp;disconnectionMode)</code></th>
 <td class="colLast">
-<div class="block">Changes the action to be taken after disconnection (default value <a href="PcscReader.DisconnectionMode.html#LEAVE"><code>PcscReader.DisconnectionMode.LEAVE</code></a>).</div>
+<div class="block">Changes the action to be taken after disconnection (default value <a href="PcscReader.DisconnectionMode.html#RESET"><code>PcscReader.DisconnectionMode.RESET</code></a>).</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
@@ -345,11 +345,9 @@ extends org.eclipse.keyple.core.common.KeypleReaderExtension</pre>
 <li class="blockList">
 <h4>setDisconnectionMode</h4>
 <pre class="methodSignature"><a href="PcscReader.html" title="interface in org.eclipse.keyple.plugin.pcsc">PcscReader</a>&nbsp;setDisconnectionMode&#8203;(<a href="PcscReader.DisconnectionMode.html" title="enum in org.eclipse.keyple.plugin.pcsc">PcscReader.DisconnectionMode</a>&nbsp;disconnectionMode)</pre>
-<div class="block">Changes the action to be taken after disconnection (default value <a href="PcscReader.DisconnectionMode.html#LEAVE"><code>PcscReader.DisconnectionMode.LEAVE</code></a>).
+<div class="block">Changes the action to be taken after disconnection (default value <a href="PcscReader.DisconnectionMode.html#RESET"><code>PcscReader.DisconnectionMode.RESET</code></a>).
 
- <p>The card is either reset or left as is.
-
- <p>The default value for this parameter if this method is not called is <a href="PcscReader.DisconnectionMode.html#LEAVE"><code>PcscReader.DisconnectionMode.LEAVE</code></a>.</div>
+ <p>The card is either reset or left as is.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>disconnectionMode</code> - The <a href="PcscReader.DisconnectionMode.html" title="enum in org.eclipse.keyple.plugin.pcsc"><code>PcscReader.DisconnectionMode</code></a> to use (must be not null).</dd>
