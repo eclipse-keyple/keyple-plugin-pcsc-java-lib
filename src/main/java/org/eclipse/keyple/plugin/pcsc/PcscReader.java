@@ -182,12 +182,9 @@ public interface PcscReader extends KeypleReaderExtension {
 
   /**
    * Changes the action to be taken after disconnection (default value {@link
-   * DisconnectionMode#LEAVE}).
+   * DisconnectionMode#RESET}).
    *
    * <p>The card is either reset or left as is.
-   *
-   * <p>The default value for this parameter if this method is not called is {@link
-   * DisconnectionMode#LEAVE}.
    *
    * @param disconnectionMode The {@link DisconnectionMode} to use (must be not null).
    * @return This instance.

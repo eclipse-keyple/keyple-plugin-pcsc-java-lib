@@ -380,8 +380,6 @@ class AbstractPcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * <p>The default value is {@link DisconnectionMode#LEAVE}.
-   *
    * @since 2.0.0
    */
   @Override
