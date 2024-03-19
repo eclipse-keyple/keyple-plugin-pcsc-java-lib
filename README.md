@@ -25,7 +25,7 @@ API documentation & class diagram is available online:
 ## Examples
 
 Examples of implementation are available in the following repository: 
-[github.com/eclipse/keyple-java-example](https://github.com/eclipse/keyple-java-example)
+[github.com/eclipse-keyple/keyple-java-example](https://github.com/eclipse-keyple/keyple-java-example)
 
 ##  Limited Observability Support in Java 16+
 Please be aware that the current version of the PC/SC Java plugin has limited support for observability when used with 
