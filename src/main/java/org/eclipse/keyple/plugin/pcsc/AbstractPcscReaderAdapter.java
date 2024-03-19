@@ -176,6 +176,12 @@ class AbstractPcscReaderAdapter
             logger.debug("Reader [{}]: open card physical channel in shared mode", getName());
           }
         }
+        if (logger.isDebugEnabled()) {
+          logger.debug(
+              "{}: opening of a card physical channel for protocol '{}'", this.getName(), protocol);
+        }
+        TimestampLogger.reset();
+        TimestampLogger.addEntry(TimestampLogger.START);
       }
       this.channel = card.getBasicChannel();
     } catch (CardException e) {
@@ -194,6 +200,7 @@ class AbstractPcscReaderAdapter
       if (card != null) {
         channel = null;
         card.disconnect(disconnectionMode == DisconnectionMode.RESET);
+        TimestampLogger.addEntry(TimestampLogger.STOP);
         card = null;
       } else {
         if (logger.isDebugEnabled()) {
@@ -254,7 +261,9 @@ class AbstractPcscReaderAdapter
     byte[] apduResponseData;
     if (channel != null) {
       try {
+        TimestampLogger.addEntry(apduCommandData[1]);
         apduResponseData = channel.transmit(new CommandAPDU(apduCommandData)).getBytes();
+        TimestampLogger.addEntry(apduCommandData[1]);
       } catch (CardException e) {
         if (e.getMessage().contains("REMOVED")) {
           throw new CardIOException(this.getName() + ":" + e.getMessage(), e);

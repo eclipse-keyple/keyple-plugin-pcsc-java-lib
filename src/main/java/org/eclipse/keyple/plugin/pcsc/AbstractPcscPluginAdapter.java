@@ -280,4 +280,14 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
     }
     return null;
   }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @since 2.2.0
+   */
+  @Override
+  public List<Long> getTimestampLog() {
+    return TimestampLogger.getLog();
+  }
 }
