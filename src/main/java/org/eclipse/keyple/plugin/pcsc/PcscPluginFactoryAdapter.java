@@ -19,7 +19,6 @@ import org.eclipse.keyple.core.plugin.spi.PluginFactorySpi;
 import org.eclipse.keyple.core.plugin.spi.PluginSpi;
 
 /**
- * (package-private)<br>
  * Factory of {@link PcscPlugin}.
  *
  * @since 2.0.0
@@ -27,7 +26,6 @@ import org.eclipse.keyple.core.plugin.spi.PluginSpi;
 final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactorySpi {
 
   /**
-   * (package-private)<br>
    * The plugin name
    *
    * @since 2.0.0
@@ -39,7 +37,6 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
   private final Map<String, String> protocolRulesMap;
 
   /**
-   * (package-private)<br>
    * Creates an instance, sets the fields from the factory builder.
    *
    * @since 2.0.0

@@ -16,18 +16,17 @@ import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import org.eclipse.keyple.core.plugin.ReaderIOException;
 import org.eclipse.keyple.core.plugin.TaskCanceledException;
-import org.eclipse.keyple.core.plugin.spi.reader.observable.state.insertion.WaitForCardInsertionBlockingSpi;
+import org.eclipse.keyple.core.plugin.spi.reader.observable.state.insertion.CardInsertionWaiterBlockingSpi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * (package-private)<br>
  * Implementation of AbstractPcscReaderAdapter suitable for platforms other than MacOS.
  *
  * @since 2.0.0
  */
 final class PcscReaderAdapter extends AbstractPcscReaderAdapter
-    implements WaitForCardInsertionBlockingSpi {
+    implements CardInsertionWaiterBlockingSpi {
 
   private static final Logger logger = LoggerFactory.getLogger(PcscReaderAdapter.class);
 
@@ -39,7 +38,7 @@ final class PcscReaderAdapter extends AbstractPcscReaderAdapter
   private final AtomicBoolean loopWaitCard = new AtomicBoolean();
 
   /**
-   * (package-private)<br>
+   * Constructor.
    *
    * @since 2.0.0
    */

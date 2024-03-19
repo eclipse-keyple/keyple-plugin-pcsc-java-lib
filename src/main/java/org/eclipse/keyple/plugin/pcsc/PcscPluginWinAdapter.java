@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * (package-private)<br>
  * Implementation of {@link AbstractPcscPluginAdapter} suitable for Windows platforms.
  *
  * <p>Windows 8/10 platforms have a problem in the management of the smart card service combined
@@ -64,7 +63,6 @@ final class PcscPluginWinAdapter extends AbstractPcscPluginAdapter {
   }
 
   /**
-   * (package-private)<br>
    * Gets the single instance of PcscPluginWinAdapter.
    *
    * @return single instance of PcscPluginWinAdapter
@@ -82,7 +80,6 @@ final class PcscPluginWinAdapter extends AbstractPcscPluginAdapter {
   }
 
   /**
-   * (package-private)<br>
    * In the case of a Windows platform, the retrieval of the list of terminals is preceded by an
    * operation on fields internal to the smartcard.io classes intended to compensate for the loss of
    * smartcard service when the last reader is removed.<br>
@@ -148,7 +145,6 @@ final class PcscPluginWinAdapter extends AbstractPcscPluginAdapter {
   }
 
   /**
-   * (package-private)<br>
    * {@inheritDoc}
    *
    * @since 2.0.0
