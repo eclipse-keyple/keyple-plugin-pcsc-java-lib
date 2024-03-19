@@ -20,15 +20,13 @@ import org.eclipse.keyple.core.plugin.ReaderIOException;
 import org.eclipse.keyple.core.plugin.TaskCanceledException;
 import org.eclipse.keyple.core.plugin.spi.reader.ConfigurableReaderSpi;
 import org.eclipse.keyple.core.plugin.spi.reader.observable.ObservableReaderSpi;
-import org.eclipse.keyple.core.plugin.spi.reader.observable.state.processing.WaitForCardRemovalDuringProcessingBlockingSpi;
-import org.eclipse.keyple.core.plugin.spi.reader.observable.state.removal.WaitForCardRemovalBlockingSpi;
+import org.eclipse.keyple.core.plugin.spi.reader.observable.state.removal.CardRemovalWaiterBlockingSpi;
 import org.eclipse.keyple.core.util.Assert;
 import org.eclipse.keyple.core.util.HexUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * (package-private) <br>
  * Abstract class for all PC/SC reader adapters.
  *
  * @since 2.0.0
@@ -37,8 +35,7 @@ class AbstractPcscReaderAdapter
     implements PcscReader,
         ConfigurableReaderSpi,
         ObservableReaderSpi,
-        WaitForCardRemovalDuringProcessingBlockingSpi,
-        WaitForCardRemovalBlockingSpi {
+        CardRemovalWaiterBlockingSpi {
 
   private static final Logger logger = LoggerFactory.getLogger(AbstractPcscReaderAdapter.class);
 
@@ -61,7 +58,6 @@ class AbstractPcscReaderAdapter
   private final AtomicBoolean loopWaitCardRemoval = new AtomicBoolean();
 
   /**
-   * (package-private)<br>
    * Creates an instance the class, keeps the terminal and parent plugin, extract the reader name
    * from the terminal.
    *
@@ -77,7 +73,6 @@ class AbstractPcscReaderAdapter
   }
 
   /**
-   * (package-private)<br>
    * Gets the smartcard.io terminal.
    *
    * @return A not null reference.
@@ -443,26 +438,6 @@ class AbstractPcscReaderAdapter
       logger.trace("{}: stop waiting for the card removal requested.", this.getName());
     }
     loopWaitCardRemoval.set(false);
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @since 2.0.0
-   */
-  @Override
-  public void waitForCardRemovalDuringProcessing() throws ReaderIOException, TaskCanceledException {
-    waitForCardRemoval();
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @since 2.0.0
-   */
-  @Override
-  public void stopWaitForCardRemovalDuringProcessing() {
-    stopWaitForCardRemoval();
   }
 
   /**

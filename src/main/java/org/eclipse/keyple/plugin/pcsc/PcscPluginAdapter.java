@@ -16,7 +16,6 @@ import javax.smartcardio.CardTerminals;
 import javax.smartcardio.TerminalFactory;
 
 /**
- * (package-private)<br>
  * Implementation of {@link AbstractPcscPluginAdapter} suitable for platforms other than Windows.
  *
  * <p>Provides a createInstance method that receives a boolean as an argument to indicate that the

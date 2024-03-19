@@ -12,27 +12,36 @@
 package org.eclipse.keyple.plugin.pcsc;
 
 import javax.smartcardio.CardTerminal;
-import org.eclipse.keyple.core.plugin.spi.reader.observable.state.insertion.WaitForCardInsertionNonBlockingSpi;
+import org.eclipse.keyple.core.plugin.spi.reader.observable.state.insertion.CardInsertionWaiterNonBlockingSpi;
 
 /**
- * (package-private)<br>
  * Implementation of AbstractPcscReaderAdapter suitable for the MacOS platforms.
  *
  * <p>Due to some issues with Apple's implementation of smartcard.io, card insertion detection is
  * performed by the card presence test rather than the usual waiting method ({@link
- * WaitForCardInsertionNonBlockingSpi}).
+ * CardInsertionWaiterNonBlockingSpi}).
  *
  * @since 2.0.0
  */
 final class PcscReaderMacOsAdapter extends AbstractPcscReaderAdapter
-    implements WaitForCardInsertionNonBlockingSpi {
+    implements CardInsertionWaiterNonBlockingSpi {
 
   /**
-   * (package-private)<br>
+   * Constructor.
    *
    * @since 2.0.0
    */
   PcscReaderMacOsAdapter(CardTerminal terminal, AbstractPcscPluginAdapter pluginAdapter) {
     super(terminal, pluginAdapter);
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @since 2.1.3
+   */
+  @Override
+  public int getCardInsertionMonitoringSleepDuration() {
+    return 10;
   }
 }

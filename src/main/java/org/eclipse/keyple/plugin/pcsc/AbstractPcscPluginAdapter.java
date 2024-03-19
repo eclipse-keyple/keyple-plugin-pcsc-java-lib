@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * (package-private) <br>
  * Abstract class for all PC/SC plugin adapters.
  *
  * @since 2.0.0
@@ -76,7 +75,6 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   private Pattern contactlessReaderIdentificationFilterPattern;
 
   /**
-   * (package-private)<br>
    * Common constructor for all Pcsc plugin adapters instances.
    *
    * @param name The name of the plugin.
@@ -87,7 +85,6 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   }
 
   /**
-   * (package-private)<br>
    * Sets the filter to identify contactless readers.
    *
    * @param contactlessReaderIdentificationFilterPattern A regular expression pattern.
@@ -102,7 +99,6 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   }
 
   /**
-   * (package-private)<br>
    * Adds a map of rules to the current default map.
    *
    * <p>Already existing items are overridden, new items are added.
@@ -127,7 +123,6 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   }
 
   /**
-   * (package-private)<br>
    * Gets the protocol rule associated to the provided protocol.
    *
    * <p>The protocol rule is a regular expression to be applied on the ATR.
@@ -141,7 +136,6 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   }
 
   /**
-   * (package-private)<br>
    * Creates a new instance of {@link ReaderSpi} from a {@link CardTerminal}.
    *
    * <p>Note: this method is platform dependent.
@@ -153,7 +147,6 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   abstract ReaderSpi createReader(CardTerminal terminal);
 
   /**
-   * (package-private)<br>
    * Gets a new {@link CardTerminals} object encapsulating the available terminals.
    *
    * <p>Note: this method is platform dependent.
@@ -164,7 +157,6 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   abstract CardTerminals getCardTerminals();
 
   /**
-   * (package-private)<br>
    * Attempts to determine the transmission mode of the reader whose name is provided.<br>
    * This determination is made by a test based on a regular expression.
    *
