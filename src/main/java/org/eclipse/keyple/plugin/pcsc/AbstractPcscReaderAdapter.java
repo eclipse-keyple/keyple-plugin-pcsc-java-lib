@@ -163,15 +163,16 @@ class AbstractPcscReaderAdapter
     /* init of the card physical channel: if not yet established, opening of a new physical channel */
     try {
       if (card == null) {
-        logger.debug(
-            "{}: opening of a card physical channel for protocol '{}'", this.getName(), protocol);
         this.card = this.terminal.connect(protocol);
         if (isModeExclusive) {
           card.beginExclusive();
-          logger.debug("{}: opening of a card physical channel in exclusive mode.", this.getName());
-        } else {
-          logger.debug("{}: opening of a card physical channel in shared mode.", this.getName());
         }
+        if (logger.isDebugEnabled()) {
+          logger.debug(
+              "{}: opening of a card physical channel for protocol '{}'", this.getName(), protocol);
+        }
+        TimestampLogger.reset();
+        TimestampLogger.addEntry(TimestampLogger.START);
       }
       this.channel = card.getBasicChannel();
     } catch (CardException e) {
@@ -190,10 +191,13 @@ class AbstractPcscReaderAdapter
       if (card != null) {
         channel = null;
         card.disconnect(disconnectionMode == DisconnectionMode.RESET);
+        TimestampLogger.addEntry(TimestampLogger.STOP);
         card = null;
       } else {
-        logger.debug(
-            "{}: card object found null when closing the physical channel.", this.getName());
+        if (logger.isDebugEnabled()) {
+          logger.debug(
+              "{}: card object found null when closing the physical channel.", this.getName());
+        }
       }
     } catch (CardException e) {
       throw new ReaderIOException("Error while closing physical channel", e);
@@ -248,7 +252,9 @@ class AbstractPcscReaderAdapter
     byte[] apduResponseData;
     if (channel != null) {
       try {
+        TimestampLogger.addEntry(apduCommandData[1]);
         apduResponseData = channel.transmit(new CommandAPDU(apduCommandData)).getBytes();
+        TimestampLogger.addEntry(apduCommandData[1]);
       } catch (CardException e) {
         if (e.getMessage().contains("REMOVED")) {
           throw new CardIOException(this.getName() + ":" + e.getMessage(), e);

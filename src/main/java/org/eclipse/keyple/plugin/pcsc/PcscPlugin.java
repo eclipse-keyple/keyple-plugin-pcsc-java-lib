@@ -11,6 +11,7 @@
  ************************************************************************************** */
 package org.eclipse.keyple.plugin.pcsc;
 
+import java.util.List;
 import org.eclipse.keyple.core.common.KeyplePluginExtension;
 
 /**
@@ -18,4 +19,20 @@ import org.eclipse.keyple.core.common.KeyplePluginExtension;
  *
  * @since 2.0.0
  */
-public interface PcscPlugin extends KeyplePluginExtension {}
+public interface PcscPlugin extends KeyplePluginExtension {
+
+  /**
+   * Returns the timestamp log associated with the activity of the readers of the plugin.
+   *
+   * <p>The logger records the current timestamp and a byte value indicating the operation in
+   * progress (0x00 for the card detection step, 0xFF for disconnection step, the INS code of the
+   * current APDU for APDU transmission).
+   *
+   * <p>Two measurement points are recorded for the transmission of APDUs (before and after)
+   * allowing to measure the card execution time.
+   *
+   * @return A list of long values.
+   * @since 2.2.0
+   */
+  List<Long> getTimestampLog();
+}
