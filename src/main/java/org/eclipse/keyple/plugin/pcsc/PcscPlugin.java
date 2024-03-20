@@ -35,4 +35,11 @@ public interface PcscPlugin extends KeyplePluginExtension {
    * @since 2.2.0
    */
   List<Long> getTimestampLog();
+
+  /**
+   * Clears the timestamp log associated with the activity of the readers of the plugin.
+   *
+   * @since 2.2.0
+   */
+  void clearTimestampLog();
 }
