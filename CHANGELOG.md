@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI: code coverage report when releasing.
 - Documentation of `setDisconnectionMode` (the default value indicated was incorrect).
 ### Upgraded
-- Keyple Plugin API `2.0.0` -> `2.2.0`
+- Keyple Plugin API `2.0.0` -> `2.3.0`
 - Keyple Util Library `2.3.0` -> `2.3.1` (source code not impacted)
 
 ## [2.1.2] - 2023-04-24
