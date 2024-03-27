@@ -20,6 +20,7 @@ import org.eclipse.keyple.core.plugin.ReaderIOException;
 import org.eclipse.keyple.core.plugin.TaskCanceledException;
 import org.eclipse.keyple.core.plugin.spi.reader.ConfigurableReaderSpi;
 import org.eclipse.keyple.core.plugin.spi.reader.observable.ObservableReaderSpi;
+import org.eclipse.keyple.core.plugin.spi.reader.observable.state.processing.CardPresenceMonitorBlockingSpi;
 import org.eclipse.keyple.core.plugin.spi.reader.observable.state.removal.CardRemovalWaiterBlockingSpi;
 import org.eclipse.keyple.core.util.Assert;
 import org.eclipse.keyple.core.util.HexUtil;
@@ -35,6 +36,7 @@ class AbstractPcscReaderAdapter
     implements PcscReader,
         ConfigurableReaderSpi,
         ObservableReaderSpi,
+        CardPresenceMonitorBlockingSpi,
         CardRemovalWaiterBlockingSpi {
 
   private static final Logger logger = LoggerFactory.getLogger(AbstractPcscReaderAdapter.class);
@@ -472,5 +474,26 @@ class AbstractPcscReaderAdapter
   @Override
   public int getIoctlCcidEscapeCommandId() {
     return isWindows ? 3500 : 1;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @since 2.2.0
+   */
+  @Override
+  public void monitorCardPresenceDuringProcessing()
+      throws ReaderIOException, TaskCanceledException {
+    waitForCardRemoval();
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @since 2.2.0
+   */
+  @Override
+  public void stopCardPresenceMonitoringDuringProcessing() {
+    stopWaitForCardRemoval();
   }
 }
