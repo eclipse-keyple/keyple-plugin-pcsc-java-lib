@@ -52,7 +52,7 @@ public final class PcscPluginFactoryBuilder {
    */
   public static class Builder {
 
-    public static final String DEFAULT_CONTACTLESS_READER_FILTER =
+    private static final String DEFAULT_CONTACTLESS_READER_FILTER =
         "(?i).*(contactless|ask logo|acs acr122).*";
     private Pattern contactlessReaderIdentificationFilterPattern =
         Pattern.compile(DEFAULT_CONTACTLESS_READER_FILTER);
