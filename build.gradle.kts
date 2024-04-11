@@ -3,14 +3,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 plugins {
     java
-    id("com.diffplug.spotless") version "5.10.2"
+    id("com.diffplug.spotless") version "6.25.0"
     id("org.sonarqube") version "3.1"
     jacoco
 }
 buildscript {
     repositories {
         mavenLocal()
-        maven(url = "https://repo.eclipse.org/service/local/repositories/maven_central/content")
         mavenCentral()
     }
     dependencies {
@@ -24,14 +23,13 @@ apply(plugin = "org.eclipse.keyple")
 ///////////////////////////////////////////////////////////////////////////////
 repositories {
     mavenLocal()
-    maven(url = "https://repo.eclipse.org/service/local/repositories/maven_central/content")
     mavenCentral()
     maven(url = "https://oss.sonatype.org/content/repositories/snapshots")
 }
 dependencies {
-    implementation("org.eclipse.keyple:keyple-common-java-api:2.0.0")
-    implementation("org.eclipse.keyple:keyple-plugin-java-api:2.3.0")
-    implementation("org.eclipse.keyple:keyple-util-java-lib:2.3.1")
+    implementation("org.eclipse.keyple:keyple-common-java-api:2.0.1-SNAPSHOT") {isChanging=true}
+    implementation("org.eclipse.keyple:keyple-plugin-java-api:2.3.1-SNAPSHOT") {isChanging=true}
+    implementation("org.eclipse.keyple:keyple-util-java-lib:2.3.2-SNAPSHOT") {isChanging=true}
     implementation("org.slf4j:slf4j-api:1.7.32")
 }
 

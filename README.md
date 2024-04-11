@@ -20,7 +20,7 @@ on the Keyple website [keyple.org](https://keyple.org).
 ## API documentation
 
 API documentation & class diagram is available online: 
-[eclipse.github.io/keyple-plugin-pcsc-java-lib](https://eclipse.github.io/keyple-plugin-pcsc-java-lib)
+[eclipse-keyple.github.io/keyple-plugin-pcsc-java-lib](https://eclipse-keyple.github.io/keyple-plugin-pcsc-java-lib)
 
 ## Examples
 
@@ -44,4 +44,4 @@ We will provide updates on our progress and the availability of the alternative 
 
 ## About the source code
 
-The code is built with **Gradle** and is compliant with **Java 1.6** in order to address a wide range of applications.
+The code is built with **Gradle** and is compliant with **Java 1.8** in order to address a wide range of applications.
