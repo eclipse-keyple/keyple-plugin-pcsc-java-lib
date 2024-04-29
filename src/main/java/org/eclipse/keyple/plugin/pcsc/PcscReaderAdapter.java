@@ -56,8 +56,8 @@ final class PcscReaderAdapter extends AbstractPcscReaderAdapter
 
     if (logger.isTraceEnabled()) {
       logger.trace(
-          "{}: start waiting for the insertion of a card in a loop with a latency of {} ms.",
-          this.getName(),
+          "Reader [{}]: start waiting card insertion (loop latency: {} ms)",
+          getName(),
           INSERTION_LATENCY);
     }
 
@@ -69,7 +69,7 @@ final class PcscReaderAdapter extends AbstractPcscReaderAdapter
         if (getTerminal().waitForCardPresent(INSERTION_LATENCY)) {
           // card inserted
           if (logger.isTraceEnabled()) {
-            logger.trace("{}: card inserted.", this.getName());
+            logger.trace("Reader [{}]: card inserted", getName());
           }
           return;
         }
@@ -77,13 +77,16 @@ final class PcscReaderAdapter extends AbstractPcscReaderAdapter
           break;
         }
       }
+      if (logger.isTraceEnabled()) {
+        logger.trace("Reader [{}]: waiting card insertion stopped", getName());
+      }
     } catch (CardException e) {
       // here, it is a communication failure with the reader
       throw new ReaderIOException(
-          this.getName() + ": an error occurred while waiting for a card insertion.", e);
+          this.getName() + ": an error occurred while waiting for a card insertion", e);
     }
     throw new TaskCanceledException(
-        this.getName() + ": the wait for a card insertion task has been cancelled.");
+        this.getName() + ": the wait for a card insertion task has been cancelled");
   }
 
   /**
@@ -93,9 +96,6 @@ final class PcscReaderAdapter extends AbstractPcscReaderAdapter
    */
   @Override
   public void stopWaitForCardInsertion() {
-    if (logger.isTraceEnabled()) {
-      logger.trace("{}: stop waiting for card insertion requested.", this.getName());
-    }
     loopWaitCard.set(false);
   }
 }

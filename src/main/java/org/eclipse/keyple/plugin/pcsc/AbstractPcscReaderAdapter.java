@@ -112,9 +112,7 @@ class AbstractPcscReaderAdapter
   public final void activateProtocol(String readerProtocol) {
     if (logger.isTraceEnabled()) {
       logger.trace(
-          "{}: activating the {} protocol causes no action to be taken.",
-          getName(),
-          readerProtocol);
+          "Reader [{}]: activating protocol [{}] takes no action", getName(), readerProtocol);
     }
   }
 
@@ -127,9 +125,7 @@ class AbstractPcscReaderAdapter
   public final void deactivateProtocol(String readerProtocol) {
     if (logger.isTraceEnabled()) {
       logger.trace(
-          "{}: deactivating the {} protocol causes no action to be taken.",
-          getName(),
-          readerProtocol);
+          "Reader [{}]: de-activating protocol [{}] takes no action", getName(), readerProtocol);
     }
   }
 
@@ -165,14 +161,20 @@ class AbstractPcscReaderAdapter
     /* init of the card physical channel: if not yet established, opening of a new physical channel */
     try {
       if (card == null) {
-        logger.debug(
-            "{}: opening of a card physical channel for protocol '{}'", this.getName(), protocol);
+        if (logger.isDebugEnabled()) {
+          logger.debug(
+              "Reader [{}]: open card physical channel for protocol [{}]", getName(), protocol);
+        }
         this.card = this.terminal.connect(protocol);
         if (isModeExclusive) {
           card.beginExclusive();
-          logger.debug("{}: opening of a card physical channel in exclusive mode.", this.getName());
+          if (logger.isDebugEnabled()) {
+            logger.debug("Reader [{}]: open card physical channel in exclusive mode", getName());
+          }
         } else {
-          logger.debug("{}: opening of a card physical channel in shared mode.", this.getName());
+          if (logger.isDebugEnabled()) {
+            logger.debug("Reader [{}]: open card physical channel in shared mode", getName());
+          }
         }
       }
       this.channel = card.getBasicChannel();
@@ -194,8 +196,10 @@ class AbstractPcscReaderAdapter
         card.disconnect(disconnectionMode == DisconnectionMode.RESET);
         card = null;
       } else {
-        logger.debug(
-            "{}: card object found null when closing the physical channel.", this.getName());
+        if (logger.isDebugEnabled()) {
+          logger.debug(
+              "Reader [{}]: card object found null when closing physical channel", getName());
+        }
       }
     } catch (CardException e) {
       throw new ReaderIOException("Error while closing physical channel", e);
@@ -323,9 +327,7 @@ class AbstractPcscReaderAdapter
   @Override
   public final PcscReader setSharingMode(SharingMode sharingMode) {
     Assert.getInstance().notNull(sharingMode, "sharingMode");
-    if (logger.isTraceEnabled()) {
-      logger.trace("{}: set sharing mode to {}", getName(), sharingMode.name());
-    }
+    logger.info("Reader [{}]: set sharing mode to [{}]", getName(), sharingMode.name());
     if (sharingMode == SharingMode.SHARED) {
       // if a card is present, change the mode immediately
       if (card != null) {
@@ -349,9 +351,7 @@ class AbstractPcscReaderAdapter
    */
   @Override
   public final PcscReader setContactless(boolean contactless) {
-    if (logger.isTraceEnabled()) {
-      logger.trace("{}: set contactless type: {}", getName(), contactless);
-    }
+    logger.info("Reader [{}]: set contactless type to [{}]", getName(), contactless);
     this.isContactless = contactless;
     return this;
   }
@@ -366,10 +366,11 @@ class AbstractPcscReaderAdapter
   @Override
   public final PcscReader setIsoProtocol(IsoProtocol isoProtocol) {
     Assert.getInstance().notNull(isoProtocol, "isoProtocol");
-    if (logger.isTraceEnabled()) {
-      logger.trace(
-          "{}: set ISO protocol to {} ({})", getName(), isoProtocol.name(), isoProtocol.getValue());
-    }
+    logger.info(
+        "Reader [{}]: set ISO protocol to [{}] ({})",
+        getName(),
+        isoProtocol.name(),
+        isoProtocol.getValue());
     protocol = isoProtocol.getValue();
     return this;
   }
@@ -382,9 +383,7 @@ class AbstractPcscReaderAdapter
   @Override
   public final PcscReader setDisconnectionMode(DisconnectionMode disconnectionMode) {
     Assert.getInstance().notNull(disconnectionMode, "disconnectionMode");
-    if (logger.isTraceEnabled()) {
-      logger.trace("{}: set disconnection to {}", getName(), disconnectionMode.name());
-    }
+    logger.info("Reader [{}]: set disconnection mode to [{}]", getName(), disconnectionMode.name());
     this.disconnectionMode = disconnectionMode;
     return this;
   }
@@ -399,7 +398,7 @@ class AbstractPcscReaderAdapter
 
     if (logger.isTraceEnabled()) {
       logger.trace(
-          "{}: start waiting for the removal of the card in a loop with a latency of {} ms.",
+          "Reader [{}]: start waiting card removal (loop latency: {} ms)",
           this.getName(),
           REMOVAL_LATENCY);
     }
@@ -412,13 +411,16 @@ class AbstractPcscReaderAdapter
         if (getTerminal().waitForCardAbsent(REMOVAL_LATENCY)) {
           // card removed
           if (logger.isTraceEnabled()) {
-            logger.trace("{}: card removed.", this.getName());
+            logger.trace("Reader [{}]: card removed", this.getName());
           }
           return;
         }
         if (Thread.interrupted()) {
           break;
         }
+      }
+      if (logger.isTraceEnabled()) {
+        logger.trace("Reader [{}]: waiting card removal stopped", this.getName());
       }
     } catch (CardException e) {
       // here, it is a communication failure with the reader
@@ -436,9 +438,6 @@ class AbstractPcscReaderAdapter
    */
   @Override
   public final void stopWaitForCardRemoval() {
-    if (logger.isTraceEnabled()) {
-      logger.trace("{}: stop waiting for the card removal requested.", this.getName());
-    }
     loopWaitCardRemoval.set(false);
   }
 

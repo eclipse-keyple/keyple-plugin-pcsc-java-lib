@@ -57,7 +57,8 @@ final class PcscPluginWinAdapter extends AbstractPcscPluginAdapter {
     double version = Double.parseDouble(javaSpecVersion);
     isReflexivityAllowed = version < 16.0;
     logger.info(
-        "java.specification.version = {}. Reflexivity is {}.",
+        "Plugin [{}]: java.specification.version: {}, reflexivity is {}",
+        getName(),
         version,
         isReflexivityAllowed ? "allowed" : "not allowed");
   }
@@ -136,7 +137,8 @@ final class PcscPluginWinAdapter extends AbstractPcscPluginAdapter {
         }
       } catch (Exception e) {
         logger.warn(
-            "The attempt to access the internal fields of 'smartcard.io' has failed: {}",
+            "Plugin [{}]: failed to access the internal fields of 'smartcard.io': {}",
+            getName(),
             e.getMessage());
       }
     }
