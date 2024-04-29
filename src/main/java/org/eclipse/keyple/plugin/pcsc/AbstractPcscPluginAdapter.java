@@ -34,8 +34,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   private static final Logger logger = LoggerFactory.getLogger(AbstractPcscPluginAdapter.class);
   private static final int MONITORING_CYCLE_DURATION_MS = 1000;
 
-  private static final Map<String, String> protocolRulesMap =
-      new ConcurrentHashMap<String, String>();
+  private static final Map<String, String> protocolRulesMap = new ConcurrentHashMap<>();
 
   // initializes the protocol rules map with default values
   static {
@@ -108,15 +107,13 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * @since 2.0.0
    */
   final AbstractPcscPluginAdapter addProtocolRulesMap(Map<String, String> protocolRulesMap) {
-    if (logger.isTraceEnabled()) {
-      if (!protocolRulesMap.isEmpty()) {
-        logger.trace(
-            "{}: protocol identification rules updated with {}",
-            getName(),
-            JsonUtil.toJson(protocolRulesMap));
-      } else {
-        logger.trace("{}: using default protocol identification rules.", getName());
-      }
+    if (!protocolRulesMap.isEmpty()) {
+      logger.info(
+          "Plugin [{}]: add protocol identification rules: {}",
+          getName(),
+          JsonUtil.toJson(protocolRulesMap));
+    } else {
+      logger.info("Plugin [{}]: use default protocol identification rules", getName());
     }
     AbstractPcscPluginAdapter.protocolRulesMap.putAll(protocolRulesMap);
     return this;
@@ -184,12 +181,12 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
       return terminals.list();
     } catch (CardException e) {
       if (e.getCause().toString().contains("SCARD_E_NO_READERS_AVAILABLE")) {
-        logger.error("No reader available.");
+        logger.error("Plugin [{}]: no reader available", getName());
       } else {
         throw new PluginIOException("Could not access terminals list", e);
       }
     }
-    return new ArrayList<CardTerminal>(0);
+    return new ArrayList<>(0);
   }
 
   /**
@@ -209,17 +206,13 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    */
   @Override
   public final Set<ReaderSpi> searchAvailableReaders() throws PluginIOException {
-    Set<ReaderSpi> readerSpis = new HashSet<ReaderSpi>();
-
+    Set<ReaderSpi> readerSpis = new HashSet<>();
+    logger.info("Plugin [{}]: search available readers", getName());
     for (CardTerminal terminal : getCardTerminalList()) {
       readerSpis.add(createReader(terminal));
     }
-    if (logger.isTraceEnabled()) {
-      StringBuilder sb = new StringBuilder();
-      for (ReaderSpi readerSpi : readerSpis) {
-        sb.append(readerSpi.getName()).append(", ");
-      }
-      logger.trace("{}: available readers {}", this.getName(), sb);
+    for (ReaderSpi readerSpi : readerSpis) {
+      logger.info("Plugin [{}]: reader found: [{}]", getName(), readerSpi.getName());
     }
     return readerSpis;
   }
@@ -251,13 +244,15 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    */
   @Override
   public final Set<String> searchAvailableReaderNames() throws PluginIOException {
-    Set<String> readerNames = new HashSet<String>();
-
+    Set<String> readerNames = new HashSet<>();
+    if (logger.isTraceEnabled()) {
+      logger.trace("Plugin [{}]: search available reader", getName());
+    }
     for (CardTerminal terminal : getCardTerminalList()) {
       readerNames.add(terminal.getName());
     }
     if (logger.isTraceEnabled()) {
-      logger.trace("{}: available readers names {}", this.getName(), JsonUtil.toJson(readerNames));
+      logger.trace("Plugin [{}]: readers found: {}", getName(), JsonUtil.toJson(readerNames));
     }
     return readerNames;
   }
@@ -270,18 +265,18 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   @Override
   public final ReaderSpi searchReader(String readerName) throws PluginIOException {
     if (logger.isTraceEnabled()) {
-      logger.trace("{}: search reader: {}", this.getName(), readerName);
+      logger.trace("Plugin [{}]: search reader [{}]", getName(), readerName);
     }
     for (CardTerminal terminal : getCardTerminalList()) {
       if (readerName.equals(terminal.getName())) {
         if (logger.isTraceEnabled()) {
-          logger.trace("{}: reader: {} found.", this.getName(), readerName);
+          logger.trace("Plugin [{}]: reader found", getName());
         }
         return createReader(terminal);
       }
     }
     if (logger.isTraceEnabled()) {
-      logger.trace("{}: reader: {} not found.", this.getName(), readerName);
+      logger.trace("Plugin [{}]: reader not found", getName());
     }
     return null;
   }

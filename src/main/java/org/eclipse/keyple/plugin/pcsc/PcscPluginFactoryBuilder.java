@@ -64,7 +64,7 @@ public final class PcscPluginFactoryBuilder {
      * the map is an empty map.
      */
     private Builder() {
-      protocolRulesMap = new HashMap<String, String>();
+      protocolRulesMap = new HashMap<>();
     }
 
     /**
