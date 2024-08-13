@@ -15,11 +15,9 @@ import java.security.Security;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
-import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import javax.smartcardio.CardTerminals;
 import javax.smartcardio.TerminalFactory;
-
 import jnasmartcardio.Smartcardio;
 import org.eclipse.keyple.core.plugin.PluginIOException;
 import org.eclipse.keyple.core.plugin.spi.ObservablePluginSpi;
@@ -172,12 +170,16 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   private List<CardTerminal> getCardTerminalList() throws PluginIOException {
 
     // parse the current readers list to create the ReaderSpi(s) associated with new reader(s)
-    CardTerminals terminals = TerminalFactory.getDefault().terminals();
     try {
+      CardTerminals terminals = TerminalFactory.getDefault().terminals();
       return terminals.list();
-    } catch (CardException e) {
+    } catch (Exception e) {
       if (e.getCause().toString().contains("SCARD_E_NO_READERS_AVAILABLE")) {
         logger.error("Plugin [{}]: no reader available", getName());
+      } else if (e.getCause().toString().contains("SCARD_E_NO_SERVICE")) {
+        logger.error("Plugin [{}]: no smart card service error", getName());
+      } else if (e.getCause().toString().contains("SCARD_F_COMM_ERROR")) {
+        logger.error("Plugin [{}]: reader communication error", getName());
       } else {
         throw new PluginIOException("Could not access terminals list", e);
       }
