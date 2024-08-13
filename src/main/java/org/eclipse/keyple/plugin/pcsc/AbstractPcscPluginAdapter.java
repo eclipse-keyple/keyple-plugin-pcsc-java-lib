@@ -11,12 +11,16 @@
  ************************************************************************************** */
 package org.eclipse.keyple.plugin.pcsc;
 
+import java.security.Security;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import javax.smartcardio.CardTerminals;
+import javax.smartcardio.TerminalFactory;
+
+import jnasmartcardio.Smartcardio;
 import org.eclipse.keyple.core.plugin.PluginIOException;
 import org.eclipse.keyple.core.plugin.spi.ObservablePluginSpi;
 import org.eclipse.keyple.core.plugin.spi.reader.ReaderSpi;
@@ -80,6 +84,8 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
    * @since 2.0.0
    */
   AbstractPcscPluginAdapter(String name) {
+    // Use jnasmartcardio as smart card service provider
+    Security.insertProviderAt(new Smartcardio(), 1);
     this.name = name;
   }
 
@@ -144,16 +150,6 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   abstract ReaderSpi createReader(CardTerminal terminal);
 
   /**
-   * Gets a new {@link CardTerminals} object encapsulating the available terminals.
-   *
-   * <p>Note: this method is platform dependent.
-   *
-   * @return A {@link CardTerminals} reference
-   * @since 2.0.0
-   */
-  abstract CardTerminals getCardTerminals();
-
-  /**
    * Attempts to determine the transmission mode of the reader whose name is provided.<br>
    * This determination is made by a test based on a regular expression.
    *
@@ -176,7 +172,7 @@ abstract class AbstractPcscPluginAdapter implements PcscPlugin, ObservablePlugin
   private List<CardTerminal> getCardTerminalList() throws PluginIOException {
 
     // parse the current readers list to create the ReaderSpi(s) associated with new reader(s)
-    CardTerminals terminals = getCardTerminals();
+    CardTerminals terminals = TerminalFactory.getDefault().terminals();
     try {
       return terminals.list();
     } catch (CardException e) {

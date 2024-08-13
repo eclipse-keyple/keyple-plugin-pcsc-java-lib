@@ -12,8 +12,6 @@
 package org.eclipse.keyple.plugin.pcsc;
 
 import javax.smartcardio.CardTerminal;
-import javax.smartcardio.CardTerminals;
-import javax.smartcardio.TerminalFactory;
 
 /**
  * Implementation of {@link AbstractPcscPluginAdapter} suitable for platforms other than Windows.
@@ -61,15 +59,6 @@ final class PcscPluginAdapter extends AbstractPcscPluginAdapter {
       }
     }
     return INSTANCE;
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @since 2.0.0
-   */
-  CardTerminals getCardTerminals() {
-    return TerminalFactory.getDefault().terminals();
   }
 
   /**

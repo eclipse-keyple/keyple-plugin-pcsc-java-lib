@@ -30,6 +30,7 @@ dependencies {
     implementation("org.eclipse.keyple:keyple-common-java-api:2.0.1")
     implementation("org.eclipse.keyple:keyple-plugin-java-api:2.3.1")
     implementation("org.eclipse.keyple:keyple-util-java-lib:2.4.0")
+    implementation("io.github.jnasmartcardio:jnasmartcardio:0.2.7")
     implementation("org.slf4j:slf4j-api:1.7.32")
 }
 

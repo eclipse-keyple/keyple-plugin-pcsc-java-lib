@@ -11,12 +11,8 @@
  ************************************************************************************** */
 package org.eclipse.keyple.plugin.pcsc;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Map;
 import javax.smartcardio.CardTerminal;
-import javax.smartcardio.CardTerminals;
-import javax.smartcardio.TerminalFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,22 +41,12 @@ final class PcscPluginWinAdapter extends AbstractPcscPluginAdapter {
    */
   private static volatile PcscPluginWinAdapter INSTANCE; // NOSONAR: lazy-singleton pattern.
 
-  private final boolean isReflexivityAllowed;
-
   /**
    * (private)<br>
    * Creates the instance.
    */
   private PcscPluginWinAdapter() {
     super(PcscPluginFactoryAdapter.PLUGIN_NAME);
-    String javaSpecVersion = System.getProperty("java.specification.version");
-    double version = Double.parseDouble(javaSpecVersion);
-    isReflexivityAllowed = version < 16.0;
-    logger.info(
-        "Plugin [{}]: java.specification.version: {}, reflexivity is {}",
-        getName(),
-        version,
-        isReflexivityAllowed ? "allowed" : "not allowed");
   }
 
   /**
@@ -78,72 +64,6 @@ final class PcscPluginWinAdapter extends AbstractPcscPluginAdapter {
       }
     }
     return INSTANCE;
-  }
-
-  /**
-   * In the case of a Windows platform, the retrieval of the list of terminals is preceded by an
-   * operation on fields internal to the smartcard.io classes intended to compensate for the loss of
-   * smartcard service when the last reader is removed.<br>
-   *
-   * <p>The service it refers to is the Windows Smart Card service, also known as the smart card
-   * resource manager. If you open the Services MMC console you'll see it there with the startup
-   * type set to Manual (Trigger Start). In Windows 8 this service was changed to run only while a
-   * smart card reader is attached to the system (to save resources) and the service is
-   * automatically stopped when the last reader is removed. Stopping the service invalidates any
-   * outstanding handles.
-   *
-   * <p>The native Windows solution is to call SCardAccessStartedEvent and use the handle it returns
-   * to wait for the service to start before using SCardEstablishContext to connect to the resource
-   * manager again.<br>
-   * <a
-   * href="https://bugs.openjdk.java.net/browse/JDK-8026326">https://bugs.openjdk.java.net/browse/JDK-8026326</a>
-   * <br>
-   * <a href="https://stackoverflow.com/a/17209132">https://stackoverflow.com/a/17209132</a><br>
-   * {@inheritDoc}
-   *
-   * @since 2.0.0
-   */
-  @Override
-  CardTerminals getCardTerminals() {
-
-    if (isReflexivityAllowed) {
-      /* Some SONAR warnings have been disabled. This code should be reviewed carefully. */
-      try {
-        Class<?> pcscterminal;
-        pcscterminal = Class.forName("sun.security.smartcardio.PCSCTerminals");
-        Field contextId = pcscterminal.getDeclaredField("contextId");
-        contextId.setAccessible(true); // NOSONAR
-
-        if (contextId.getLong(pcscterminal) != 0L) {
-
-          Class<?> pcsc = Class.forName("sun.security.smartcardio.PCSC");
-          Method sCardEstablishContext =
-              pcsc.getDeclaredMethod("SCardEstablishContext", Integer.TYPE);
-          sCardEstablishContext.setAccessible(true); // NOSONAR
-
-          Field sCardScopeUser = pcsc.getDeclaredField("SCARD_SCOPE_USER");
-          sCardScopeUser.setAccessible(true); // NOSONAR
-
-          long newId = (Long) sCardEstablishContext.invoke(pcsc, sCardScopeUser.getInt(pcsc));
-          contextId.setLong(pcscterminal, newId); // NOSONAR
-
-          // clear the terminals in cache
-          TerminalFactory factory = TerminalFactory.getDefault();
-          CardTerminals terminals = factory.terminals();
-
-          Field fieldTerminals = pcscterminal.getDeclaredField("terminals");
-          fieldTerminals.setAccessible(true); // NOSONAR
-          ((Map<?, ?>) fieldTerminals.get(terminals)).clear();
-        }
-      } catch (Exception e) {
-        logger.warn(
-            "Plugin [{}]: failed to access the internal fields of 'smartcard.io': {}",
-            getName(),
-            e.getMessage());
-      }
-    }
-
-    return TerminalFactory.getDefault().terminals();
   }
 
   /**
