@@ -116,10 +116,10 @@ final class PcscReaderAdapter
     } catch (CardException e) {
       // here, it is a communication failure with the reader
       throw new ReaderIOException(
-          this.getName() + ": an error occurred while waiting for a card insertion", e);
+          name + ": an error occurred while waiting for a card insertion", e);
     }
     throw new TaskCanceledException(
-        this.getName() + ": the wait for a card insertion task has been cancelled");
+        name + ": the wait for a card insertion task has been cancelled");
   }
 
   /**
@@ -316,19 +316,23 @@ final class PcscReaderAdapter
     if (channel != null) {
       try {
         apduResponseData = channel.transmit(new CommandAPDU(apduCommandData)).getBytes();
+      } catch (CardNotPresentException e) {
+        throw new CardIOException(name + ": " + e.getMessage(), e);
       } catch (CardException e) {
-        if (e.getMessage().contains("REMOVED")) {
-          throw new CardIOException(this.getName() + ":" + e.getMessage(), e);
+        if (e.getMessage().contains("CARD")
+            || e.getMessage().contains("NOT_TRANSACTED")
+            || e.getMessage().contains("INVALID_ATR")) {
+          throw new CardIOException(name + ": " + e.getMessage(), e);
         } else {
-          throw new ReaderIOException(this.getName() + ":" + e.getMessage(), e);
+          throw new ReaderIOException(name + ": " + e.getMessage(), e);
         }
-      } catch (IllegalStateException e) {
+      } catch (IllegalStateException | IllegalArgumentException e) {
         // card could have been removed prematurely
-        throw new CardIOException(this.getName() + ":" + e.getMessage(), e);
+        throw new CardIOException(name + ": " + e.getMessage(), e);
       }
     } else {
       // could occur if the card was removed
-      throw new CardIOException(this.getName() + ": null channel.");
+      throw new CardIOException(name + ": null channel.");
     }
     return apduResponseData;
   }
@@ -389,9 +393,7 @@ final class PcscReaderAdapter
 
     if (logger.isTraceEnabled()) {
       logger.trace(
-          "Reader [{}]: start waiting card removal (loop latency: {} ms)",
-          this.getName(),
-          REMOVAL_LATENCY);
+          "Reader [{}]: start waiting card removal (loop latency: {} ms)", name, REMOVAL_LATENCY);
     }
 
     // activate loop
@@ -402,7 +404,7 @@ final class PcscReaderAdapter
         if (terminal.waitForCardAbsent(REMOVAL_LATENCY)) {
           // card removed
           if (logger.isTraceEnabled()) {
-            logger.trace("Reader [{}]: card removed", this.getName());
+            logger.trace("Reader [{}]: card removed", name);
           }
           return;
         }
@@ -411,15 +413,15 @@ final class PcscReaderAdapter
         }
       }
       if (logger.isTraceEnabled()) {
-        logger.trace("Reader [{}]: waiting card removal stopped", this.getName());
+        logger.trace("Reader [{}]: waiting card removal stopped", name);
       }
     } catch (CardException e) {
       // here, it is a communication failure with the reader
       throw new ReaderIOException(
-          this.getName() + ": an error occurred while waiting for the card removal.", e);
+          name + ": an error occurred while waiting for the card removal.", e);
     }
     throw new TaskCanceledException(
-        this.getName() + ": the wait for the card removal task has been cancelled.");
+        name + ": the wait for the card removal task has been cancelled.");
   }
 
   /**
