@@ -30,6 +30,11 @@ SPDX-License-Identifier: EPL-2.0
    
 ## Third-party Content
 
+JNASMARTCARDIO
+
+* License: [CC0](https://spdx.org/licenses/CC0-1.0.html)
+* Project: https://github.com/jnasmartcardio/jnasmartcardio
+
 SLF4J API
 
 * License: [MIT](https://spdx.org/licenses/MIT.html)
