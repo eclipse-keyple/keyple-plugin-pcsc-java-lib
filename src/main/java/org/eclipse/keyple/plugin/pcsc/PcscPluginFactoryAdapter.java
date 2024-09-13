@@ -25,15 +25,15 @@ import org.eclipse.keyple.core.plugin.spi.PluginSpi;
  */
 final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactorySpi {
 
+  static final String PLUGIN_NAME = "PcscPlugin";
+
   /**
    * The plugin name
    *
    * @since 2.0.0
    */
-  static final String PLUGIN_NAME = "PcscPlugin";
-
-  private final boolean isOsWin;
   private final Pattern contactlessReaderIdentificationFilterPattern;
+
   private final Map<String, String> protocolRulesMap;
 
   /**
@@ -43,13 +43,6 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
    */
   PcscPluginFactoryAdapter(
       Pattern contactlessReaderIdentificationFilterPattern, Map<String, String> protocolRulesMap) {
-    String osName = System.getProperty("os.name").toLowerCase();
-    isOsWin = osName.contains("win");
-    if (osName.contains("mac")) {
-      System.setProperty(
-          "sun.security.smartcardio.library",
-          "/System/Library/Frameworks/PCSC.framework/Versions/Current/PCSC");
-    }
     this.contactlessReaderIdentificationFilterPattern =
         contactlessReaderIdentificationFilterPattern;
     this.protocolRulesMap = protocolRulesMap;
@@ -92,12 +85,7 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
    */
   @Override
   public PluginSpi getPlugin() {
-    AbstractPcscPluginAdapter plugin;
-    if (isOsWin) {
-      plugin = PcscPluginWinAdapter.getInstance();
-    } else {
-      plugin = PcscPluginAdapter.getInstance();
-    }
+    PcscPluginAdapter plugin = PcscPluginAdapter.getInstance();
     return plugin
         .setContactlessReaderIdentificationFilterPattern(
             contactlessReaderIdentificationFilterPattern)
