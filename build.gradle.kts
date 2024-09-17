@@ -31,10 +31,10 @@ dependencies {
     implementation("org.eclipse.keyple:keyple-plugin-java-api:2.3.1")
     implementation("org.eclipse.keyple:keyple-util-java-lib:2.4.0")
     implementation("net.java.dev.jna:jna:5.15.0")
-    implementation("io.github.jnasmartcardio:jnasmartcardio:0.2.7") {
-        exclude(group = "net.java.dev.jna", module = "jna")
-    }
     implementation("org.slf4j:slf4j-api:1.7.32")
+
+    // Add the JARs in the 'libs' directory
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }
 
 val javaSourceLevel: String by project
@@ -86,5 +86,11 @@ tasks {
                 }
             }
         }
+    }
+    jar {
+        duplicatesStrategy = DuplicatesStrategy.WARN
+        from(fileTree("libs").filter { it.exists() && it.name.endsWith(".jar") }
+            .map { zipTree(it) }
+        )
     }
 }
