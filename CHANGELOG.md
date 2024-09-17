@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Force `net.java.dev.jna:jna:5.15.0` to bypass bug [JDK-8313765](https://bugs.openjdk.org/browse/JDK-8313765).
 
 ## [2.2.2] - 2024-09-16
 ### Fixed
