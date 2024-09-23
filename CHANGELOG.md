@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Use jnasmartcardio lib built with Java 8
+### Added
+- Add configurable card monitoring duration cycle through a new method `setCardMonitoringDurationCycle(int durationCycle)` to set the card monitoring duration cycle
+  in `PcscPluginFactoryBuilder`, enabling customization of the default 500ms value. Especially useful under Linux
+  environments.
 
 ## [2.2.3] - 2024-09-18
 ### Fixed

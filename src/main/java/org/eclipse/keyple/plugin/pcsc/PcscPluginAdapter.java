@@ -84,6 +84,7 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
   }
 
   private Pattern contactlessReaderIdentificationFilterPattern;
+  private int cardMonitoringDurationCycle;
 
   /** Constructor. */
   PcscPluginAdapter() {
@@ -118,7 +119,7 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
    * @since 2.0.0
    */
   PcscReaderAdapter createReader(CardTerminal terminal) {
-    return new PcscReaderAdapter(terminal, this);
+    return new PcscReaderAdapter(terminal, this, cardMonitoringDurationCycle);
   }
 
   /**
@@ -299,6 +300,18 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
       logger.info("Plugin [{}]: use default protocol identification rules", getName());
     }
     PcscPluginAdapter.protocolRulesMap.putAll(protocolRulesMap);
+    return this;
+  }
+
+  /**
+   * Sets the duration cycle for card presence/absence monitoring.
+   *
+   * @param cardMonitoringDurationCycle The duration of the card monitoring cycle in milliseconds.
+   * @return The object instance.
+   * @since 2.3.0
+   */
+  PcscPluginAdapter setCardMonitoringDurationCycle(int cardMonitoringDurationCycle) {
+    this.cardMonitoringDurationCycle = cardMonitoringDurationCycle;
     return this;
   }
 }

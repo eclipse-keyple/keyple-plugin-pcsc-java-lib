@@ -46,25 +46,15 @@ final class PcscReaderAdapter
   private final String name;
   private final PcscPluginAdapter pluginAdapter;
   private final boolean isWindows;
+  private final int cardMonitoringDurationCycle;
   private Card card;
   private CardChannel channel;
   private Boolean isContactless;
   private String protocol = IsoProtocol.ANY.getValue();
   private boolean isModeExclusive = true;
   private DisconnectionMode disconnectionMode = DisconnectionMode.RESET;
-
-  // the latency delay value (in ms) determines the maximum time during which the
-  // waitForCardPresent blocking functions will execute.
-  // This will correspond to the capacity to react to the interrupt signal of
-  // the thread.
-  private static final long INSERTION_LATENCY = 500;
   private final AtomicBoolean loopWaitCard = new AtomicBoolean();
 
-  // the latency delay value (in ms) determines the maximum time during which the
-  // waitForCardAbsent blocking functions will execute.
-  // This will correspond to the capacity to react to the interrupt signal of
-  // the thread (see cancel method of the Future object)
-  private static final long REMOVAL_LATENCY = 500;
   private final AtomicBoolean loopWaitCardRemoval = new AtomicBoolean();
 
   /**
@@ -72,11 +62,13 @@ final class PcscReaderAdapter
    *
    * @since 2.0.0
    */
-  PcscReaderAdapter(CardTerminal terminal, PcscPluginAdapter pluginAdapter) {
+  PcscReaderAdapter(
+      CardTerminal terminal, PcscPluginAdapter pluginAdapter, int cardMonitoringDurationCycle) {
     this.terminal = terminal;
     this.pluginAdapter = pluginAdapter;
     this.name = terminal.getName();
     this.isWindows = System.getProperty("os.name").toLowerCase().contains("win");
+    this.cardMonitoringDurationCycle = cardMonitoringDurationCycle;
   }
 
   /**
@@ -91,7 +83,7 @@ final class PcscReaderAdapter
       logger.trace(
           "Reader [{}]: start waiting card insertion (loop latency: {} ms)",
           getName(),
-          INSERTION_LATENCY);
+          cardMonitoringDurationCycle);
     }
 
     // activate loop
@@ -99,7 +91,7 @@ final class PcscReaderAdapter
 
     try {
       while (loopWaitCard.get()) {
-        if (terminal.waitForCardPresent(INSERTION_LATENCY)) {
+        if (terminal.waitForCardPresent(cardMonitoringDurationCycle)) {
           // card inserted
           if (logger.isTraceEnabled()) {
             logger.trace("Reader [{}]: card inserted", getName());
@@ -393,7 +385,9 @@ final class PcscReaderAdapter
 
     if (logger.isTraceEnabled()) {
       logger.trace(
-          "Reader [{}]: start waiting card removal (loop latency: {} ms)", name, REMOVAL_LATENCY);
+          "Reader [{}]: start waiting card removal (loop latency: {} ms)",
+          name,
+          cardMonitoringDurationCycle);
     }
 
     // activate loop
@@ -401,7 +395,7 @@ final class PcscReaderAdapter
 
     try {
       while (loopWaitCardRemoval.get()) {
-        if (terminal.waitForCardAbsent(REMOVAL_LATENCY)) {
+        if (terminal.waitForCardAbsent(cardMonitoringDurationCycle)) {
           // card removed
           if (logger.isTraceEnabled()) {
             logger.trace("Reader [{}]: card removed", name);
