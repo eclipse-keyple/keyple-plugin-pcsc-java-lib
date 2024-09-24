@@ -35,7 +35,7 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
   private final Pattern contactlessReaderIdentificationFilterPattern;
 
   private final Map<String, String> protocolRulesMap;
-  private final int cardMonitoringDurationCycle;
+  private final int cardMonitoringCycleDuration;
 
   /**
    * Creates an instance, sets the fields from the factory builder.
@@ -45,11 +45,11 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
   PcscPluginFactoryAdapter(
       Pattern contactlessReaderIdentificationFilterPattern,
       Map<String, String> protocolRulesMap,
-      int cardMonitoringDurationCycle) {
+      int cardMonitoringCycleDuration) {
     this.contactlessReaderIdentificationFilterPattern =
         contactlessReaderIdentificationFilterPattern;
     this.protocolRulesMap = protocolRulesMap;
-    this.cardMonitoringDurationCycle = cardMonitoringDurationCycle;
+    this.cardMonitoringCycleDuration = cardMonitoringCycleDuration;
   }
 
   /**
@@ -94,6 +94,6 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
         .setContactlessReaderIdentificationFilterPattern(
             contactlessReaderIdentificationFilterPattern)
         .addProtocolRulesMap(protocolRulesMap)
-        .setCardMonitoringDurationCycle(cardMonitoringDurationCycle);
+        .setCardMonitoringCycleDuration(cardMonitoringCycleDuration);
   }
 }

@@ -46,7 +46,7 @@ final class PcscReaderAdapter
   private final String name;
   private final PcscPluginAdapter pluginAdapter;
   private final boolean isWindows;
-  private final int cardMonitoringDurationCycle;
+  private final int cardMonitoringCycleDuration;
   private Card card;
   private CardChannel channel;
   private Boolean isContactless;
@@ -63,12 +63,12 @@ final class PcscReaderAdapter
    * @since 2.0.0
    */
   PcscReaderAdapter(
-      CardTerminal terminal, PcscPluginAdapter pluginAdapter, int cardMonitoringDurationCycle) {
+      CardTerminal terminal, PcscPluginAdapter pluginAdapter, int cardMonitoringCycleDuration) {
     this.terminal = terminal;
     this.pluginAdapter = pluginAdapter;
     this.name = terminal.getName();
     this.isWindows = System.getProperty("os.name").toLowerCase().contains("win");
-    this.cardMonitoringDurationCycle = cardMonitoringDurationCycle;
+    this.cardMonitoringCycleDuration = cardMonitoringCycleDuration;
   }
 
   /**
@@ -83,7 +83,7 @@ final class PcscReaderAdapter
       logger.trace(
           "Reader [{}]: start waiting card insertion (loop latency: {} ms)",
           getName(),
-          cardMonitoringDurationCycle);
+          cardMonitoringCycleDuration);
     }
 
     // activate loop
@@ -91,7 +91,7 @@ final class PcscReaderAdapter
 
     try {
       while (loopWaitCard.get()) {
-        if (terminal.waitForCardPresent(cardMonitoringDurationCycle)) {
+        if (terminal.waitForCardPresent(cardMonitoringCycleDuration)) {
           // card inserted
           if (logger.isTraceEnabled()) {
             logger.trace("Reader [{}]: card inserted", getName());
@@ -387,7 +387,7 @@ final class PcscReaderAdapter
       logger.trace(
           "Reader [{}]: start waiting card removal (loop latency: {} ms)",
           name,
-          cardMonitoringDurationCycle);
+          cardMonitoringCycleDuration);
     }
 
     // activate loop
@@ -395,7 +395,7 @@ final class PcscReaderAdapter
 
     try {
       while (loopWaitCardRemoval.get()) {
-        if (terminal.waitForCardAbsent(cardMonitoringDurationCycle)) {
+        if (terminal.waitForCardAbsent(cardMonitoringCycleDuration)) {
           // card removed
           if (logger.isTraceEnabled()) {
             logger.trace("Reader [{}]: card removed", name);
