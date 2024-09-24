@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Use jnasmartcardio lib built with Java 8
 ### Added
-- Add configurable card monitoring cycle duration through a new method `setCardMonitoringCycleDuration(int cycleDuration)` to set the card monitoring cycle duration
+- Add configurable card monitoring cycle duration through a new method
+  `setCardMonitoringCycleDuration(int cycleDuration)` to set the card monitoring cycle duration
   in `PcscPluginFactoryBuilder`, enabling customization of the default 500ms value. Especially useful under Linux
   environments.
 
