@@ -214,7 +214,8 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
     } catch (Exception e) {
       if (e.getMessage().contains("SCARD_E_NO_READERS_AVAILABLE")) {
         logger.error("Plugin [{}]: no reader available", getName());
-      } else if (e.getMessage().contains("SCARD_E_NO_SERVICE")) {
+      } else if (e.getMessage().contains("SCARD_E_NO_SERVICE")
+          || e.getMessage().contains("SCARD_E_SERVICE_STOPPED")) {
         logger.error("Plugin [{}]: no smart card service error", getName());
         // the CardTerminals object is no more valid
         createCardTerminals = true;
