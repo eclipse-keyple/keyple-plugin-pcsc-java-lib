@@ -83,6 +83,9 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
         PcscSupportedContactProtocol.ISO_7816_3_T1.getDefaultRule());
   }
 
+  private CardTerminals terminals;
+  private boolean createCardTerminals = false; // first created in constructor
+
   private Pattern contactlessReaderIdentificationFilterPattern;
   private int cardMonitoringCycleDuration;
 
@@ -90,6 +93,7 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
   PcscPluginAdapter() {
     // Use jnasmartcardio as smart card service provider
     Security.insertProviderAt(new Smartcardio(), 1);
+    terminals = TerminalFactory.getDefault().terminals();
   }
 
   /**
@@ -202,14 +206,19 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
 
     // parse the current readers list to create the ReaderSpi(s) associated with new reader(s)
     try {
-      CardTerminals terminals = TerminalFactory.getDefault().terminals();
+      if (createCardTerminals) {
+        terminals = TerminalFactory.getDefault().terminals();
+        createCardTerminals = false;
+      }
       return terminals.list();
     } catch (Exception e) {
-      if (e.getCause().toString().contains("SCARD_E_NO_READERS_AVAILABLE")) {
+      if (e.getMessage().contains("SCARD_E_NO_READERS_AVAILABLE")) {
         logger.error("Plugin [{}]: no reader available", getName());
-      } else if (e.getCause().toString().contains("SCARD_E_NO_SERVICE")) {
+      } else if (e.getMessage().contains("SCARD_E_NO_SERVICE")) {
         logger.error("Plugin [{}]: no smart card service error", getName());
-      } else if (e.getCause().toString().contains("SCARD_F_COMM_ERROR")) {
+        // the CardTerminals object is no more valid
+        createCardTerminals = true;
+      } else if (e.getMessage().contains("SCARD_F_COMM_ERROR")) {
         logger.error("Plugin [{}]: reader communication error", getName());
       } else {
         throw new PluginIOException("Could not access terminals list", e);
