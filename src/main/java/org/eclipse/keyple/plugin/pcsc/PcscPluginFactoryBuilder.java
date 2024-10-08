@@ -72,20 +72,6 @@ public final class PcscPluginFactoryBuilder {
     }
 
     /**
-     * Replace the default jnasmartcardio provider by the provider given in argument.
-     *
-     * @param provider The provider to use, must not be null.
-     * @return This builder.
-     * @throws IllegalArgumentException If the argument is null.
-     * @since 2.4.0
-     */
-    public Builder useProvider(Provider provider) {
-      Assert.getInstance().notNull(provider, "provider");
-      this.provider = provider;
-      return this;
-    }
-
-    /**
      * Sets a filter based on regular expressions to make the plugin able to identify a contact
      * reader from its name.
      *
@@ -191,6 +177,20 @@ public final class PcscPluginFactoryBuilder {
     public Builder setCardMonitoringCycleDuration(int cycleDuration) {
       Assert.getInstance().greaterOrEqual(cycleDuration, 1, "cycleDuration");
       cardMonitoringCycleDuration = cycleDuration;
+      return this;
+    }
+
+    /**
+     * Replace the default jnasmartcardio provider by the provider given in argument.
+     *
+     * @param provider The provider to use, must not be null.
+     * @return This builder.
+     * @throws IllegalArgumentException If the argument is null.
+     * @since 2.4.0
+     */
+    public Builder setProvider(Provider provider) {
+      Assert.getInstance().notNull(provider, "provider");
+      this.provider = provider;
       return this;
     }
 

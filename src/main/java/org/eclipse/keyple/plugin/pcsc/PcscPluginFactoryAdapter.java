@@ -93,8 +93,9 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
    */
   @Override
   public PluginSpi getPlugin() {
-    PcscPluginAdapter plugin = PcscPluginAdapter.getInstance(provider);
+    PcscPluginAdapter plugin = PcscPluginAdapter.getInstance();
     return plugin
+        .setProvider(provider)
         .setContactlessReaderIdentificationFilterPattern(
             contactlessReaderIdentificationFilterPattern)
         .addProtocolRulesMap(protocolRulesMap)

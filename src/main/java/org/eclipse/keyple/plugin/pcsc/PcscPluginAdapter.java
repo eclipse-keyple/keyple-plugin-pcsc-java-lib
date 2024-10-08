@@ -84,20 +84,13 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
   }
 
   private CardTerminals terminals;
-  private boolean createCardTerminals = false; // first created in constructor
+  private boolean isCardTerminalsInitialized;
 
   private Pattern contactlessReaderIdentificationFilterPattern;
   private int cardMonitoringCycleDuration;
 
-  /**
-   * Constructor.
-   *
-   * @param provider
-   */
-  PcscPluginAdapter(Provider provider) {
-    Security.insertProviderAt(provider, 1);
-    terminals = TerminalFactory.getDefault().terminals();
-  }
+  /** Constructor. */
+  PcscPluginAdapter() {}
 
   /**
    * Gets the single instance of PcscPluginWinAdapter.
@@ -105,11 +98,11 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
    * @return single instance of PcscPluginWinAdapter
    * @since 2.0.0
    */
-  static PcscPluginAdapter getInstance(Provider provider) {
+  static PcscPluginAdapter getInstance() {
     if (INSTANCE == null) {
       synchronized (PcscPluginAdapter.class) {
         if (INSTANCE == null) {
-          INSTANCE = new PcscPluginAdapter(provider);
+          INSTANCE = new PcscPluginAdapter();
         }
       }
     }
@@ -209,9 +202,9 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
 
     // parse the current readers list to create the ReaderSpi(s) associated with new reader(s)
     try {
-      if (createCardTerminals) {
+      if (!isCardTerminalsInitialized) {
         terminals = TerminalFactory.getDefault().terminals();
-        createCardTerminals = false;
+        isCardTerminalsInitialized = true;
       }
       return terminals.list();
     } catch (Exception e) {
@@ -221,7 +214,7 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
           || e.getMessage().contains("SCARD_E_SERVICE_STOPPED")) {
         logger.error("Plugin [{}]: no smart card service error", getName());
         // the CardTerminals object is no more valid
-        createCardTerminals = true;
+        isCardTerminalsInitialized = false;
       } else if (e.getMessage().contains("SCARD_F_COMM_ERROR")) {
         logger.error("Plugin [{}]: reader communication error", getName());
       } else {
@@ -325,6 +318,18 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
    */
   PcscPluginAdapter setCardMonitoringCycleDuration(int cardMonitoringCycleDuration) {
     this.cardMonitoringCycleDuration = cardMonitoringCycleDuration;
+    return this;
+  }
+
+  /**
+   * Sets the security provider to be used and inserts it at the first position.
+   *
+   * @param provider The security provider to be set.
+   * @return The object instance.
+   * @since 2.4.0
+   */
+  PcscPluginAdapter setProvider(Provider provider) {
+    Security.insertProviderAt(provider, 1);
     return this;
   }
 }
