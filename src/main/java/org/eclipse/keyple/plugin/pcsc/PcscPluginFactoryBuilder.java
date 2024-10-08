@@ -11,9 +11,11 @@
  ************************************************************************************** */
 package org.eclipse.keyple.plugin.pcsc;
 
+import java.security.Provider;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import jnasmartcardio.Smartcardio;
 import org.eclipse.keyple.core.util.Assert;
 
 /**
@@ -58,6 +60,7 @@ public final class PcscPluginFactoryBuilder {
         Pattern.compile(DEFAULT_CONTACTLESS_READER_FILTER);
     private final Map<String, String> protocolRulesMap;
     private int cardMonitoringCycleDuration = 500; // default value 500 ms
+    private Provider provider = new Smartcardio(); // jnasmartcardio is the default provider
 
     /**
      * (private)<br>
@@ -66,6 +69,20 @@ public final class PcscPluginFactoryBuilder {
      */
     private Builder() {
       protocolRulesMap = new HashMap<>();
+    }
+
+    /**
+     * Replace the default jnasmartcardio provider by the provider given in argument.
+     *
+     * @param provider The provider to use, must not be null.
+     * @return This builder.
+     * @throws IllegalArgumentException If the argument is null.
+     * @since 2.4.0
+     */
+    public Builder useProvider(Provider provider) {
+      Assert.getInstance().notNull(provider, "provider");
+      this.provider = provider;
+      return this;
     }
 
     /**
@@ -191,6 +208,7 @@ public final class PcscPluginFactoryBuilder {
      */
     public PcscPluginFactory build() {
       return new PcscPluginFactoryAdapter(
+          provider,
           contactlessReaderIdentificationFilterPattern,
           protocolRulesMap,
           cardMonitoringCycleDuration);

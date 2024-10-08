@@ -11,6 +11,7 @@
  ************************************************************************************** */
 package org.eclipse.keyple.plugin.pcsc;
 
+import java.security.Provider;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.eclipse.keyple.core.common.CommonApiProperties;
@@ -36,6 +37,7 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
 
   private final Map<String, String> protocolRulesMap;
   private final int cardMonitoringCycleDuration;
+  private final Provider provider;
 
   /**
    * Creates an instance, sets the fields from the factory builder.
@@ -43,9 +45,11 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
    * @since 2.0.0
    */
   PcscPluginFactoryAdapter(
+      Provider provider,
       Pattern contactlessReaderIdentificationFilterPattern,
       Map<String, String> protocolRulesMap,
       int cardMonitoringCycleDuration) {
+    this.provider = provider;
     this.contactlessReaderIdentificationFilterPattern =
         contactlessReaderIdentificationFilterPattern;
     this.protocolRulesMap = protocolRulesMap;
@@ -89,7 +93,7 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
    */
   @Override
   public PluginSpi getPlugin() {
-    PcscPluginAdapter plugin = PcscPluginAdapter.getInstance();
+    PcscPluginAdapter plugin = PcscPluginAdapter.getInstance(provider);
     return plugin
         .setContactlessReaderIdentificationFilterPattern(
             contactlessReaderIdentificationFilterPattern)

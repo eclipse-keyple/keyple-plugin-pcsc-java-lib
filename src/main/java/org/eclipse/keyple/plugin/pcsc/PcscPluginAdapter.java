@@ -11,6 +11,7 @@
  ************************************************************************************** */
 package org.eclipse.keyple.plugin.pcsc;
 
+import java.security.Provider;
 import java.security.Security;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,7 +19,6 @@ import java.util.regex.Pattern;
 import javax.smartcardio.CardTerminal;
 import javax.smartcardio.CardTerminals;
 import javax.smartcardio.TerminalFactory;
-import jnasmartcardio.Smartcardio;
 import org.eclipse.keyple.core.plugin.PluginIOException;
 import org.eclipse.keyple.core.plugin.spi.ObservablePluginSpi;
 import org.eclipse.keyple.core.plugin.spi.reader.ReaderSpi;
@@ -89,10 +89,13 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
   private Pattern contactlessReaderIdentificationFilterPattern;
   private int cardMonitoringCycleDuration;
 
-  /** Constructor. */
-  PcscPluginAdapter() {
-    // Use jnasmartcardio as smart card service provider
-    Security.insertProviderAt(new Smartcardio(), 1);
+  /**
+   * Constructor.
+   *
+   * @param provider
+   */
+  PcscPluginAdapter(Provider provider) {
+    Security.insertProviderAt(provider, 1);
     terminals = TerminalFactory.getDefault().terminals();
   }
 
@@ -102,11 +105,11 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
    * @return single instance of PcscPluginWinAdapter
    * @since 2.0.0
    */
-  static PcscPluginAdapter getInstance() {
+  static PcscPluginAdapter getInstance(Provider provider) {
     if (INSTANCE == null) {
       synchronized (PcscPluginAdapter.class) {
         if (INSTANCE == null) {
-          INSTANCE = new PcscPluginAdapter();
+          INSTANCE = new PcscPluginAdapter(provider);
         }
       }
     }
