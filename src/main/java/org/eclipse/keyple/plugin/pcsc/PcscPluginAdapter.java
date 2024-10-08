@@ -93,9 +93,9 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
   PcscPluginAdapter() {}
 
   /**
-   * Gets the single instance of PcscPluginWinAdapter.
+   * Gets the single instance.
    *
-   * @return single instance of PcscPluginWinAdapter
+   * @return This instance.
    * @since 2.0.0
    */
   static PcscPluginAdapter getInstance() {
