@@ -11,6 +11,7 @@
  ************************************************************************************** */
 package org.eclipse.keyple.plugin.pcsc;
 
+import java.security.Provider;
 import java.security.Security;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,7 +19,6 @@ import java.util.regex.Pattern;
 import javax.smartcardio.CardTerminal;
 import javax.smartcardio.CardTerminals;
 import javax.smartcardio.TerminalFactory;
-import jnasmartcardio.Smartcardio;
 import org.eclipse.keyple.core.plugin.PluginIOException;
 import org.eclipse.keyple.core.plugin.spi.ObservablePluginSpi;
 import org.eclipse.keyple.core.plugin.spi.reader.ReaderSpi;
@@ -84,22 +84,18 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
   }
 
   private CardTerminals terminals;
-  private boolean createCardTerminals = false; // first created in constructor
+  private boolean isCardTerminalsInitialized;
 
   private Pattern contactlessReaderIdentificationFilterPattern;
   private int cardMonitoringCycleDuration;
 
   /** Constructor. */
-  PcscPluginAdapter() {
-    // Use jnasmartcardio as smart card service provider
-    Security.insertProviderAt(new Smartcardio(), 1);
-    terminals = TerminalFactory.getDefault().terminals();
-  }
+  PcscPluginAdapter() {}
 
   /**
-   * Gets the single instance of PcscPluginWinAdapter.
+   * Gets the single instance.
    *
-   * @return single instance of PcscPluginWinAdapter
+   * @return This instance.
    * @since 2.0.0
    */
   static PcscPluginAdapter getInstance() {
@@ -206,9 +202,9 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
 
     // parse the current readers list to create the ReaderSpi(s) associated with new reader(s)
     try {
-      if (createCardTerminals) {
+      if (!isCardTerminalsInitialized) {
         terminals = TerminalFactory.getDefault().terminals();
-        createCardTerminals = false;
+        isCardTerminalsInitialized = true;
       }
       return terminals.list();
     } catch (Exception e) {
@@ -218,7 +214,7 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
           || e.getMessage().contains("SCARD_E_SERVICE_STOPPED")) {
         logger.error("Plugin [{}]: no smart card service error", getName());
         // the CardTerminals object is no more valid
-        createCardTerminals = true;
+        isCardTerminalsInitialized = false;
       } else if (e.getMessage().contains("SCARD_F_COMM_ERROR")) {
         logger.error("Plugin [{}]: reader communication error", getName());
       } else {
@@ -322,6 +318,18 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
    */
   PcscPluginAdapter setCardMonitoringCycleDuration(int cardMonitoringCycleDuration) {
     this.cardMonitoringCycleDuration = cardMonitoringCycleDuration;
+    return this;
+  }
+
+  /**
+   * Sets the security provider to be used and inserts it at the first position.
+   *
+   * @param provider The security provider to be set.
+   * @return The object instance.
+   * @since 2.4.0
+   */
+  PcscPluginAdapter setProvider(Provider provider) {
+    Security.insertProviderAt(provider, 1);
     return this;
   }
 }
