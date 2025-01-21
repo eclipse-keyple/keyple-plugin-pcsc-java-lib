@@ -215,26 +215,27 @@ final class PcscReaderAdapter
    */
   @Override
   public void openPhysicalChannel() throws ReaderIOException {
+    if (card != null) {
+      return;
+    }
     /* init of the card physical channel: if not yet established, opening of a new physical channel */
     try {
-      if (card == null) {
+      if (logger.isDebugEnabled()) {
+        logger.debug(
+            "Reader [{}]: open card physical channel for protocol [{}]", getName(), protocol);
+      }
+      card = this.terminal.connect(protocol);
+      if (isModeExclusive) {
+        card.beginExclusive();
         if (logger.isDebugEnabled()) {
-          logger.debug(
-              "Reader [{}]: open card physical channel for protocol [{}]", getName(), protocol);
+          logger.debug("Reader [{}]: open card physical channel in exclusive mode", getName());
         }
-        this.card = this.terminal.connect(protocol);
-        if (isModeExclusive) {
-          card.beginExclusive();
-          if (logger.isDebugEnabled()) {
-            logger.debug("Reader [{}]: open card physical channel in exclusive mode", getName());
-          }
-        } else {
-          if (logger.isDebugEnabled()) {
-            logger.debug("Reader [{}]: open card physical channel in shared mode", getName());
-          }
+      } else {
+        if (logger.isDebugEnabled()) {
+          logger.debug("Reader [{}]: open card physical channel in shared mode", getName());
         }
       }
-      this.channel = card.getBasicChannel();
+      channel = card.getBasicChannel();
     } catch (CardException e) {
       throw new ReaderIOException(getName() + ": Error while opening Physical Channel", e);
     }
@@ -249,17 +250,12 @@ final class PcscReaderAdapter
   public void closePhysicalChannel() throws ReaderIOException {
     try {
       if (card != null) {
-        channel = null;
         card.disconnect(disconnectionMode == DisconnectionMode.RESET);
-        card = null;
-      } else {
-        if (logger.isDebugEnabled()) {
-          logger.debug(
-              "Reader [{}]: card object found null when closing physical channel", getName());
-        }
       }
     } catch (CardException e) {
       throw new ReaderIOException("Error while closing physical channel", e);
+    } finally {
+      resetContext();
     }
   }
 
@@ -281,10 +277,28 @@ final class PcscReaderAdapter
   @Override
   public boolean checkCardPresence() throws ReaderIOException {
     try {
-      return terminal.isCardPresent();
+      boolean isCardPresent = terminal.isCardPresent();
+      closePhysicalChannelSafely();
+      if (isCardPresent) {
+        openPhysicalChannel();
+      }
+      return isCardPresent;
     } catch (CardException e) {
       throw new ReaderIOException("Exception occurred in isCardPresent", e);
     }
+  }
+
+  private void closePhysicalChannelSafely() {
+    try { // NOSONAR
+      closePhysicalChannel();
+    } catch (Exception e) {
+      // NOP
+    }
+  }
+
+  private void resetContext() {
+    card = null;
+    channel = null;
   }
 
   /**

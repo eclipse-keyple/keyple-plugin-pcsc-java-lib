@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Ensures the physical channel is re-established when `checkCardPresence()` (required by the plugin API) is called, in
+  case a card was previously connected.
 
 ## [2.4.0] - 2024-10-08
 ### Added
