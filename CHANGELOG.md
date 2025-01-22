@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.4.1] - 2025-01-22
 ### Fixed
 - Ensures the physical channel is re-established when `checkCardPresence()` (required by the plugin API) is called, in
   case a card was previously connected.
@@ -83,7 +85,8 @@ This is the initial release.
 It follows the extraction of Keyple 1.0 components contained in the `eclipse-keyple/keyple-java` repository to dedicated repositories.
 It also brings many major API changes.
 
-[unreleased]: https://github.com/eclipse-keyple/keyple-plugin-pcsc-java-lib/compare/2.4.0...HEAD
+[unreleased]: https://github.com/eclipse-keyple/keyple-plugin-pcsc-java-lib/compare/2.4.1...HEAD
+[2.4.1]: https://github.com/eclipse-keyple/keyple-plugin-pcsc-java-lib/compare/2.4.0...2.4.1
 [2.4.0]: https://github.com/eclipse-keyple/keyple-plugin-pcsc-java-lib/compare/2.3.1...2.4.0
 [2.3.1]: https://github.com/eclipse-keyple/keyple-plugin-pcsc-java-lib/compare/2.3.0...2.3.1
 [2.3.0]: https://github.com/eclipse-keyple/keyple-plugin-pcsc-java-lib/compare/2.2.3...2.3.0
