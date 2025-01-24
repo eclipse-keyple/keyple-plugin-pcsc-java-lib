@@ -279,9 +279,6 @@ final class PcscReaderAdapter
     try {
       boolean isCardPresent = terminal.isCardPresent();
       closePhysicalChannelSafely();
-      if (isCardPresent) {
-        openPhysicalChannel();
-      }
       return isCardPresent;
     } catch (CardException e) {
       throw new ReaderIOException("Exception occurred in isCardPresent", e);
@@ -290,7 +287,11 @@ final class PcscReaderAdapter
 
   private void closePhysicalChannelSafely() {
     try { // NOSONAR
-      closePhysicalChannel();
+      if (card != null) {
+        // Force reconnection next time
+        // Do not reset the card after disconnecting
+        card.disconnect(false);
+      }
     } catch (Exception e) {
       // NOP
     }
