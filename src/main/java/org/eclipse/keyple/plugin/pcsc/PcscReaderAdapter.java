@@ -294,6 +294,8 @@ final class PcscReaderAdapter
       }
     } catch (Exception e) {
       // NOP
+    } finally {
+      resetContext();
     }
   }
 
