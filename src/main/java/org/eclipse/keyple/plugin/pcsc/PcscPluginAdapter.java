@@ -53,28 +53,22 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
   static {
     // contactless protocols
     protocolRulesMap.put(
-        PcscSupportedContactlessProtocol.TECH_ISO_14443_4.name(),
-        PcscSupportedContactlessProtocol.TECH_ISO_14443_4.getDefaultRule());
+        PcscCardCommunicationProtocol.ISO_14443_4.name(),
+        PcscCardCommunicationProtocol.ISO_14443_4.getDefaultRule());
     protocolRulesMap.put(
-        PcscSupportedContactlessProtocol.TECH_INNOVATRON_B_PRIME.name(),
-        PcscSupportedContactlessProtocol.TECH_INNOVATRON_B_PRIME.getDefaultRule());
+        PcscCardCommunicationProtocol.INNOVATRON_B_PRIME.name(),
+        PcscCardCommunicationProtocol.INNOVATRON_B_PRIME.getDefaultRule());
     protocolRulesMap.put(
-        PcscSupportedContactlessProtocol.TECH_MIFARE_ULTRALIGHT.name(),
-        PcscSupportedContactlessProtocol.TECH_MIFARE_ULTRALIGHT.getDefaultRule());
+        PcscCardCommunicationProtocol.MIFARE_ULTRALIGHT.name(),
+        PcscCardCommunicationProtocol.MIFARE_ULTRALIGHT.getDefaultRule());
     protocolRulesMap.put(
-        PcscSupportedContactlessProtocol.TECH_ST25_SRT512.name(),
-        PcscSupportedContactlessProtocol.TECH_ST25_SRT512.getDefaultRule());
+        PcscCardCommunicationProtocol.ST25_SRT512.name(),
+        PcscCardCommunicationProtocol.ST25_SRT512.getDefaultRule());
 
     // contacts protocols
     protocolRulesMap.put(
-        PcscSupportedContactProtocol.ISO_7816_3.name(),
-        PcscSupportedContactProtocol.ISO_7816_3.getDefaultRule());
-    protocolRulesMap.put(
-        PcscSupportedContactProtocol.ISO_7816_3_T0.name(),
-        PcscSupportedContactProtocol.ISO_7816_3_T0.getDefaultRule());
-    protocolRulesMap.put(
-        PcscSupportedContactProtocol.ISO_7816_3_T1.name(),
-        PcscSupportedContactProtocol.ISO_7816_3_T1.getDefaultRule());
+        PcscCardCommunicationProtocol.ISO_7816_3.name(),
+        PcscCardCommunicationProtocol.ISO_7816_3.getDefaultRule());
   }
 
   private CardTerminals terminals;
