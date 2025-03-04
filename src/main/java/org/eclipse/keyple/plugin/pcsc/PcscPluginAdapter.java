@@ -53,23 +53,17 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
   static {
     // contactless protocols
     protocolRulesMap.put(
-        PcscSupportedContactlessProtocol.ISO_14443_4.name(),
-        PcscSupportedContactlessProtocol.ISO_14443_4.getDefaultRule());
+        PcscSupportedContactlessProtocol.TECH_ISO_14443_4.name(),
+        PcscSupportedContactlessProtocol.TECH_ISO_14443_4.getDefaultRule());
     protocolRulesMap.put(
-        PcscSupportedContactlessProtocol.INNOVATRON_B_PRIME_CARD.name(),
-        PcscSupportedContactlessProtocol.INNOVATRON_B_PRIME_CARD.getDefaultRule());
+        PcscSupportedContactlessProtocol.TECH_INNOVATRON_B_PRIME.name(),
+        PcscSupportedContactlessProtocol.TECH_INNOVATRON_B_PRIME.getDefaultRule());
     protocolRulesMap.put(
-        PcscSupportedContactlessProtocol.MIFARE_ULTRA_LIGHT.name(),
-        PcscSupportedContactlessProtocol.MIFARE_ULTRA_LIGHT.getDefaultRule());
+        PcscSupportedContactlessProtocol.TECH_MIFARE_ULTRALIGHT.name(),
+        PcscSupportedContactlessProtocol.TECH_MIFARE_ULTRALIGHT.getDefaultRule());
     protocolRulesMap.put(
-        PcscSupportedContactlessProtocol.MIFARE_CLASSIC.name(),
-        PcscSupportedContactlessProtocol.MIFARE_CLASSIC.getDefaultRule());
-    protocolRulesMap.put(
-        PcscSupportedContactlessProtocol.MIFARE_DESFIRE.name(),
-        PcscSupportedContactlessProtocol.MIFARE_DESFIRE.getDefaultRule());
-    protocolRulesMap.put(
-        PcscSupportedContactlessProtocol.MEMORY_ST25.name(),
-        PcscSupportedContactlessProtocol.MEMORY_ST25.getDefaultRule());
+        PcscSupportedContactlessProtocol.TECH_ST25_SRT512.name(),
+        PcscSupportedContactlessProtocol.TECH_ST25_SRT512.getDefaultRule());
 
     // contacts protocols
     protocolRulesMap.put(
