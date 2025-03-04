@@ -99,7 +99,7 @@ public enum PcscSupportedContactlessProtocol {
    *
    * @since 2.5.0
    */
-  TECH_ST25_SRT512("3B8F8001804F0CA000000306070007.*");
+  TECH_ST25_SRT512("3B8F8001804F0CA0000003060(5|6|7)0007.*");
 
   private final String defaultRule;
 
