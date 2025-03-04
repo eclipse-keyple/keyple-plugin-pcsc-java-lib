@@ -5,6 +5,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Refactored `PcscSupportedContactlessProtocol` enum:
+  - Improved alignment with PC/SC standards for better accuracy.
+  - Enhanced compatibility with a wider range of cards and NFC devices.
+- Deprecated old enum values in `PcscSupportedContactlessProtocol`:
+  - `ISO_14443_4`
+  - `INNOVATRON_B_PRIME_CARD`
+  - `MIFARE_ULTRA_LIGHT`
+  - `MEMORY_ST25`
+### Added
+- Introduced new enum values to `PcscSupportedContactlessProtocol` with more descriptive names:
+  - `TECH_ISO_14443_4` (formerly `ISO_14443_4`)
+  - `TECH_INNOVATRON_B_PRIME` (formerly `INNOVATRON_B_PRIME_CARD`)
+  - `TECH_MIFARE_ULTRALIGHT` (formerly `MIFARE_ULTRA_LIGHT`)
+  - `TECH_ST25_SRT512` (formerly `MEMORY_ST25`)
+### Removed
+- Unusable protocol items
+  - `MIFARE_CLASSIC`
+  - `MIFARE_DESFIRE`
 
 ## [2.4.2] - 2025-01-27
 ### Fixed
