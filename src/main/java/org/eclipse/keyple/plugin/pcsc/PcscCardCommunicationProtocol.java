@@ -15,9 +15,11 @@ package org.eclipse.keyple.plugin.pcsc;
  * List of contactless protocols and technologies identifiable through PC/SC readers.
  *
  * <p>Each enum value associates a protocol or technology with a specific ATR pattern. These
- * patterns follow the PC/SC standard Part 3 for contactless card identification. The ATR patterns
- * can identify both physical cards and virtual cards emulated by NFC devices. <br>
- * See <a href="https://pcscworkgroup.com/">PC/SC Workgroup</a> for more details.
+ * patterns follow the PC/SC standard Part 3 for contactless card identification.
+ *
+ * <p>The ATR patterns can identify both physical cards and virtual cards emulated by NFC devices.
+ *
+ * <p>See <a href="https://pcscworkgroup.com/">PC/SC Workgroup</a> for more details.
  *
  * @since 2.5.0
  */
@@ -26,18 +28,24 @@ public enum PcscCardCommunicationProtocol {
   /**
    * Any ISO 14443-4 compliant card or device (both Type A and Type B).
    *
-   * <p>According to PC/SC Part 3, ISO 14443-4 devices start with the following historical bytes:
+   * <p>According to PC/SC specifications, ISO 14443-4 contactless cards have a specific ATR
+   * structure:
    *
    * <ul>
-   *   <li>Type A: 3B8880... or 3B8B80...
-   *   <li>Type B: 3B8C80...
+   *   <li>TS (Initial character): 0x3B - Direct convention
+   *   <li>T0 (Format character): 0x8X - Where X varies based on the number of historical bytes
+   *   <li>TD1: 0x80 - Indicates protocol T=0 at first level and presence of TD2
+   *   <li>TD2: 0x01 - Indicates final protocol T=1
    * </ul>
    *
-   * <p>Default rule = <b>{@code 3B8880.*|3B8B80.*|3B8C80.*}</b>
+   * <p>This structure allows for recognition of both Type A and Type B ISO 14443-4 cards,
+   * regardless of the number of historical bytes they contain.
+   *
+   * <p>Default rule = <b>{@code 3B8.8001.*}</b>
    *
    * @since 2.5.0
    */
-  ISO_14443_4("3B8880.*|3B8B80.*|3B8C80.*"),
+  ISO_14443_4("3B8.8001.*"),
 
   /**
    * Calypso cards using Innovatron B Prime protocol.
@@ -47,24 +55,24 @@ public enum PcscCardCommunicationProtocol {
    * <ul>
    *   <li>Initial bytes: 3B8F8001805A0
    *   <li>Historical bytes encoding Calypso data
-   *   <li>End marker: 829000
+   *   <li>End marker: 829000.*
    * </ul>
    *
-   * <p>Default rule = <b>{@code 3B8F8001805A0.*.829000}</b>
+   * <p>Default rule = <b>{@code 3B8F8001805A0.*.829000.*}</b>
    *
    * @since 2.5.0
    */
-  INNOVATRON_B_PRIME("3B8F8001805A0.*.829000"),
+  INNOVATRON_B_PRIME("3B8F8001805A0.*.829000.*"),
 
   /**
-   * NXP MIFARE Ultralight and UltralightC technologies.
+   * NXP MIFARE Ultralight technologies.
    *
    * <p>According to PC/SC Part 3 Supplemental Document:
    *
    * <ul>
    *   <li>Initial bytes: 3B8F8001804F0CA0000003
-   *   <li>Card protocol: 0603 (Type A-3)
-   *   <li>Card type: 0003 (for Mifare UL/ULC)
+   *   <li>Card protocol: 0603 (ISO 14443 A part 3)
+   *   <li>Card type: 0003 (for Mifare UL)
    * </ul>
    *
    * <p>Default rule = <b>{@code 3B8F8001804F0CA0000003060300030.*}</b>
@@ -80,7 +88,7 @@ public enum PcscCardCommunicationProtocol {
    *
    * <ul>
    *   <li>Initial bytes: 3B8F8001804F0CA0000003
-   *   <li>Card protocol: 0605, 0606, 0607 (Type B-1/2/3)
+   *   <li>Card protocol: 0605, 0606, 0607 (ISO 14443 B part 1/2/3)
    *   <li>Card type: 0007 (ST25 tag)
    * </ul>
    *
