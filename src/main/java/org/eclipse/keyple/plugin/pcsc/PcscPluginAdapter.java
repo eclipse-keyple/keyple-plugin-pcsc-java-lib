@@ -69,6 +69,15 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
     protocolRulesMap.put(
         PcscCardCommunicationProtocol.ISO_7816_3.name(),
         PcscCardCommunicationProtocol.ISO_7816_3.getDefaultRule());
+
+    // legacy protocols for compatibility
+    protocolRulesMap.put(
+            PcscSupportedContactProtocol.ISO_7816_3_T0.name(),
+            PcscSupportedContactProtocol.ISO_7816_3_T0.getDefaultRule());
+    protocolRulesMap.put(
+            PcscSupportedContactProtocol.ISO_7816_3_T1.name(),
+            PcscSupportedContactProtocol.ISO_7816_3_T1.getDefaultRule());
+
   }
 
   private CardTerminals terminals;
