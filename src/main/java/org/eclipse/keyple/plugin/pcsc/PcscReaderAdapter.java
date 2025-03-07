@@ -48,7 +48,7 @@ final class PcscReaderAdapter
   private final PcscPluginAdapter pluginAdapter;
   private final boolean isWindows;
   private final int cardMonitoringCycleDuration;
-  private final byte[] getResponseApdu = HexUtil.toByteArray("00C0000000");
+  private final byte[] pingApdu = HexUtil.toByteArray("00C0000000"); // GET RESPONSE
   private Card card;
   private CardChannel channel;
   private Boolean isContactless;
@@ -58,7 +58,7 @@ final class PcscReaderAdapter
   private final AtomicBoolean loopWaitCard = new AtomicBoolean();
 
   private final AtomicBoolean loopWaitCardRemoval = new AtomicBoolean();
-  private boolean isObserving;
+  private boolean isObservationActive;
 
   /**
    * Constructor.
@@ -188,7 +188,7 @@ final class PcscReaderAdapter
    */
   @Override
   public void onStartDetection() {
-    isObserving = true;
+    isObservationActive = true;
   }
 
   /**
@@ -198,7 +198,7 @@ final class PcscReaderAdapter
    */
   @Override
   public void onStopDetection() {
-    isObserving = false;
+    isObservationActive = false;
   }
 
   /**
@@ -252,7 +252,7 @@ final class PcscReaderAdapter
   @Override
   public void closePhysicalChannel() throws ReaderIOException {
     // If the reader is observed, the actual disconnection will be done in the card removal sequence
-    if (!isObserving) {
+    if (!isObservationActive) {
       disconnect();
     }
   }
@@ -474,62 +474,63 @@ final class PcscReaderAdapter
     if (logger.isTraceEnabled()) {
       logger.trace("Reader [{}]: start waiting card removal)", name);
     }
-
-    // activate loop
     loopWaitCardRemoval.set(true);
-
-    boolean isWaitingStopped;
     try {
       if (disconnectionMode == DisconnectionMode.UNPOWER) {
-        isWaitingStopped = waitForCardRemovalByPolling();
+        waitForCardRemovalByPolling();
       } else {
-        isWaitingStopped = waitForCardRemovalStandard();
+        waitForCardRemovalStandard();
       }
-    } catch (CardException e) {
-      throw new ReaderIOException(
-          name + ": an error occurred while waiting for the card removal.", e);
     } finally {
-      disconnect();
+      try {
+        disconnect();
+      } catch (Exception e) {
+        logger.warn("Error while disconnecting card during card removal: {}", e.getMessage());
+      }
     }
     if (logger.isTraceEnabled()) {
-      if (isWaitingStopped) {
+      if (!loopWaitCardRemoval.get()) {
         logger.trace("Reader [{}]: waiting card removal stopped", name);
-        throw new TaskCanceledException(
-            name + ": the wait for the card removal task has been cancelled.");
       } else {
         logger.trace("Reader [{}]: card removed", name);
       }
     }
+    if (!loopWaitCardRemoval.get()) {
+      throw new TaskCanceledException(
+          name + ": the wait for the card removal task has been cancelled.");
+    }
   }
 
-  private boolean waitForCardRemovalByPolling() throws ReaderIOException {
-    while (loopWaitCardRemoval.get()) {
-      try {
-        transmitApdu(getResponseApdu);
+  private void waitForCardRemovalByPolling() throws ReaderIOException {
+    try {
+      while (loopWaitCardRemoval.get()) {
+        transmitApdu(pingApdu);
         Thread.sleep(25);
-      } catch (CardIOException e) {
-        return false;
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        break;
+        if (Thread.interrupted()) {
+          return;
+        }
       }
-      if (Thread.interrupted()) {
-        break;
-      }
+    } catch (CardIOException e) {
+      // NOP
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
     }
-    return true;
   }
 
-  private boolean waitForCardRemovalStandard() throws CardException {
-    while (loopWaitCardRemoval.get()) {
-      if (terminal.waitForCardAbsent(cardMonitoringCycleDuration)) {
-        return false;
+  private void waitForCardRemovalStandard() throws ReaderIOException {
+    try {
+      while (loopWaitCardRemoval.get()) {
+        if (terminal.waitForCardAbsent(cardMonitoringCycleDuration)) {
+          return;
+        }
+        if (Thread.interrupted()) {
+          return;
+        }
       }
-      if (Thread.interrupted()) {
-        break;
-      }
+    } catch (CardException e) {
+      throw new ReaderIOException(
+          name + ": an error occurred while waiting for the card removal.", e);
     }
-    return true;
   }
 
   /**
