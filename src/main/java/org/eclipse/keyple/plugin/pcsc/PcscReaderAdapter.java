@@ -510,9 +510,10 @@ final class PcscReaderAdapter
           return;
         }
       }
-    } catch (CardIOException e) {
-      // NOP
+    } catch (CardIOException | ReaderIOException e) {
+      logger.trace("Expected IOException while waiting for card removal: {}", e.getMessage());
     } catch (InterruptedException e) {
+      logger.trace("InterruptedException while waiting for card removal: {}", e.getMessage());
       Thread.currentThread().interrupt();
     }
   }
