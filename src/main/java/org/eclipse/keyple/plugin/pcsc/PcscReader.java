@@ -146,8 +146,7 @@ public interface PcscReader extends KeypleReaderExtension {
      * <p>Corresponds to PC/SC `SCARD_EJECT_CARD`.
      *
      * <p>This mode is only available with the default security provider (jnasmartcardio/cna).
-     * Depending on the provider used, a {@link ClassNotFoundException} may be thrown during reader
-     * enumeration.
+     * Depending on the provider used, a runtime error may occur during reader enumeration.
      *
      * @since 2.5.0
      */
