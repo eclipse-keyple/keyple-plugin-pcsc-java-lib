@@ -74,7 +74,7 @@ public enum PcscCardCommunicationProtocol {
   MIFARE_ULTRALIGHT("3B8F8001804F0CA0000003060300030.*"),
 
   /**
-   * STMicroelectronics ST25 memory tags.
+   * STMicroelectronics ST25/SRT512 memory tags.
    *
    * <p>According to PC/SC Part 3 Supplemental Document:
    *
