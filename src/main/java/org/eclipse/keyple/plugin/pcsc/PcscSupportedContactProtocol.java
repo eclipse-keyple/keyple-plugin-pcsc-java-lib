@@ -20,6 +20,7 @@ package org.eclipse.keyple.plugin.pcsc;
  * @deprecated This enum is deprecated and may be removed in future versions. Use {@link
  *     PcscCardCommunicationProtocol} instead.
  */
+@Deprecated
 public enum PcscSupportedContactProtocol {
 
   /**
