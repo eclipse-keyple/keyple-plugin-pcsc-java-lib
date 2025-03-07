@@ -41,11 +41,13 @@ public enum PcscCardCommunicationProtocol {
    * <p>This structure allows for recognition of both Type A and Type B ISO 14443-4 cards,
    * regardless of the number of historical bytes they contain.
    *
-   * <p>Default rule = <b>{@code 3B8.8001.*}</b>
+   * <p>Excludes Innovatron B Prime cards which have their own specific category.
+   *
+   * <p>Default rule = <b>{@code 3B8.8001(?!.*5A0A).*}</b>
    *
    * @since 2.5.0
    */
-  ISO_14443_4("3B8.8001.*"),
+  ISO_14443_4("3B8.8001(?!.*5A0A).*"),
 
   /**
    * Calypso cards using Innovatron B Prime protocol.
@@ -53,16 +55,17 @@ public enum PcscCardCommunicationProtocol {
    * <p>According to PC/SC Part 3, B Prime cards use a specific ATR format:
    *
    * <ul>
-   *   <li>Initial bytes: 3B8F8001805A0
-   *   <li>Historical bytes encoding Calypso data
-   *   <li>End marker: 829000.*
+   *   <li>Starting with 3B8 followed by any hex digit - Indicating direct convention with a
+   *       variable number of historical bytes
+   *   <li>Followed by 8001 - Indicating TD1=0x80 and TD2=0x01 (protocol T=1)
+   *   <li>Followed immediately by the specific B Prime signature 5A0A in the first historical bytes
    * </ul>
    *
-   * <p>Default rule = <b>{@code 3B8F8001805A0.*.829000.*}</b>
+   * <p>Default rule = <b>{@code 3B8.8001(80)?5A0A.*}</b>
    *
    * @since 2.5.0
    */
-  INNOVATRON_B_PRIME("3B8F8001805A0.*.829000.*"),
+  INNOVATRON_B_PRIME("3B8.8001(80)?5A0A.*"),
 
   /**
    * NXP MIFARE Ultralight technologies.
