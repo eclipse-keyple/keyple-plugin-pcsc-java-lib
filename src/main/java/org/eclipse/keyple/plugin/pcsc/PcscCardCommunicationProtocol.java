@@ -80,7 +80,7 @@ public enum PcscCardCommunicationProtocol {
    *
    * <ul>
    *   <li>Initial bytes: 3B8F8001804F0CA0000003
-   *   <li>Card protocol: 0605, 0606, 0607 (Type B-1,2 or 3)
+   *   <li>Card protocol: 0605, 0606, 0607 (Type B-1/2/3)
    *   <li>Card type: 0007 (ST25 tag)
    * </ul>
    *
