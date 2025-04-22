@@ -501,7 +501,7 @@ final class PcscReaderAdapter
     }
   }
 
-  private void waitForCardRemovalByPolling() throws ReaderIOException {
+  private void waitForCardRemovalByPolling() {
     try {
       while (loopWaitCardRemoval.get()) {
         transmitApdu(pingApdu);
