@@ -30,8 +30,9 @@ Examples of implementation are available in the following repository:
 ## Limitations
 
 This plugin accesses the machine's PC/SC driver using
-the [jnasmartcardio](https://github.com/jnasmartcardio/jnasmartcardio) library, which resolves some of the limitations
-of the standard `javax.smartcardio` library.
+the [calypsonet/jnasmartcardio](https://github.com/calypsonet/jnasmartcardio/) library, which is a fork of
+[jnasmartcardio](https://github.com/jnasmartcardio/jnasmartcardio). This fork resolves some of the limitations of the standard `javax.smartcardio` library and adds 
+support for missing disconnect modes (`UNPOWER` and `EJECT`) that are absent in standard implementations.
 
 However, several limitations remain under the Linux operating system, whose PC/SC layer is based on the `pcsclite`
 library.
