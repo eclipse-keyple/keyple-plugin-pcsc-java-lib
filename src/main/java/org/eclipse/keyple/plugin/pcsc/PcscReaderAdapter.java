@@ -358,16 +358,10 @@ final class PcscReaderAdapter
   }
 
   private void closePhysicalChannelSafely() {
-    try { // NOSONAR
-      if (card != null) {
-        // Force reconnection next time
-        // Do not reset the card after disconnecting
-        card.disconnect(false);
-      }
+    try {
+      disconnect();
     } catch (Exception e) {
       // NOP
-    } finally {
-      resetContext();
     }
   }
 
