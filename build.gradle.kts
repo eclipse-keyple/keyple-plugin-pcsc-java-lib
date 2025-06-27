@@ -22,6 +22,13 @@ dependencies {
   implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }
 
+tasks {
+  jar {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+    from(fileTree("libs").filter { it.exists() && it.name.endsWith(".jar") }.map { zipTree(it) })
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 //  STANDARD CONFIGURATION FOR JAVA PROJECTS
 ///////////////////////////////////////////////////////////////////////////////

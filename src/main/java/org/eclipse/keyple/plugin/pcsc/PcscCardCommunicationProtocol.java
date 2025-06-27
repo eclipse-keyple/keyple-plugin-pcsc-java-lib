@@ -43,11 +43,11 @@ public enum PcscCardCommunicationProtocol {
    *
    * <p>Excludes Innovatron B Prime cards which have their own specific category.
    *
-   * <p>Default rule = <b>{@code 3B8.8001(?!.*5A0A).*}</b>
+   * <p>Default rule = <b>{@code 3B8[0-9A-F]8001(?!.*5A0A)(?!804F0CA000000306).*}</b>
    *
    * @since 2.5.0
    */
-  ISO_14443_4("3B8.8001(?!.*5A0A).*"),
+  ISO_14443_4("3B8[0-9A-F]8001(?!.*5A0A)(?!804F0CA000000306).*"),
 
   /**
    * Calypso cards using Innovatron B Prime protocol.
