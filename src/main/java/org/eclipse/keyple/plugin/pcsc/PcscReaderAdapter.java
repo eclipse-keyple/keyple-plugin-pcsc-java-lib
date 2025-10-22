@@ -217,7 +217,7 @@ final class PcscReaderAdapter
    * @since 2.0.0
    */
   @Override
-  public void openPhysicalChannel() throws ReaderIOException {
+  public void openPhysicalChannel() throws ReaderIOException, CardIOException {
     if (card != null) {
       return;
     }
@@ -239,6 +239,8 @@ final class PcscReaderAdapter
         }
       }
       channel = card.getBasicChannel();
+    } catch (CardNotPresentException e) {
+      throw new CardIOException(getName() + ": Card removed", e);
     } catch (CardException e) {
       throw new ReaderIOException(getName() + ": Error while opening Physical Channel", e);
     }
