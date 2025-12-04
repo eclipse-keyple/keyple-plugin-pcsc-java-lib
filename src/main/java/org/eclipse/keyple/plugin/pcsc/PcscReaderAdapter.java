@@ -43,7 +43,8 @@ final class PcscReaderAdapter
 
   private static final Logger logger = LoggerFactory.getLogger(PcscReaderAdapter.class);
 
-  private final CardTerminal terminal;
+  private final CardTerminal communicationTerminal; // For connect/transmit operations
+  private final CardTerminal monitoringTerminal; // For waitForCardPresent/Absent operations
   private final String name;
   private final PcscPluginAdapter pluginAdapter;
   private final boolean isWindows;
@@ -67,11 +68,66 @@ final class PcscReaderAdapter
    */
   PcscReaderAdapter(
       CardTerminal terminal, PcscPluginAdapter pluginAdapter, int cardMonitoringCycleDuration) {
-    this.terminal = terminal;
+    this.communicationTerminal = terminal;
     this.pluginAdapter = pluginAdapter;
     this.name = terminal.getName();
     this.isWindows = System.getProperty("os.name").toLowerCase().contains("win");
     this.cardMonitoringCycleDuration = cardMonitoringCycleDuration;
+
+    // Create a separate PC/SC context for monitoring operations to avoid contention under Linux
+    // This is critical because Linux pcsc-lite does not handle concurrent access to a single
+    // SCARDCONTEXT as robustly as Windows (see threading differences documentation)
+    this.monitoringTerminal = createMonitoringTerminal(terminal.getName());
+  }
+
+  /**
+   * Creates a separate CardTerminal instance for monitoring operations using a dedicated PC/SC
+   * context.
+   *
+   * <p>Under Linux with pcsc-lite, sharing the same SCARDCONTEXT between blocking monitoring calls
+   * (waitForCardPresent/Absent) and communication operations (transmit) can cause thread contention
+   * and SCARD_E_SHARING_VIOLATION errors due to the self-pipe trick mechanism used for
+   * cancellation.
+   *
+   * <p>This method attempts to create a new TerminalFactory instance to obtain a separate context.
+   * If this fails (e.g., on older JRE versions or with certain security providers), it falls back
+   * to using the same terminal, which may cause issues on Linux but will still work on Windows.
+   *
+   * @param terminalName The name of the terminal to create a monitoring instance for.
+   * @return A CardTerminal instance for monitoring, either with a separate context or the same one.
+   */
+  private CardTerminal createMonitoringTerminal(String terminalName) {
+    try {
+      // Attempt to create a new TerminalFactory instance to get a separate PC/SC context
+      TerminalFactory monitoringFactory = TerminalFactory.getDefault();
+      CardTerminals monitoringTerminals = monitoringFactory.terminals();
+
+      // Find the terminal with the same name in the new context
+      for (CardTerminal t : monitoringTerminals.list()) {
+        if (t.getName().equals(terminalName)) {
+          if (logger.isDebugEnabled()) {
+            logger.debug(
+                "Reader [{}]: created separate monitoring context for improved Linux compatibility",
+                terminalName);
+          }
+          return t;
+        }
+      }
+
+      // Terminal not found in new context, fall back to same terminal
+      logger.warn(
+          "Reader [{}]: could not find terminal in separate context, using shared context (may cause issues on Linux)",
+          terminalName);
+      return communicationTerminal;
+
+    } catch (Exception e) {
+      // Failed to create separate context, fall back to same terminal
+      logger.warn(
+          "Reader [{}]: could not create separate monitoring context ({}), using shared context (may cause issues on Linux)",
+          terminalName,
+          e.getMessage());
+      return communicationTerminal;
+    }
   }
 
   /**
@@ -94,7 +150,7 @@ final class PcscReaderAdapter
 
     try {
       while (loopWaitCard.get()) {
-        if (terminal.waitForCardPresent(cardMonitoringCycleDuration)) {
+        if (monitoringTerminal.waitForCardPresent(cardMonitoringCycleDuration)) {
           // card inserted
           if (logger.isTraceEnabled()) {
             logger.trace("Reader [{}]: card inserted", getName());
@@ -227,7 +283,7 @@ final class PcscReaderAdapter
         logger.debug(
             "Reader [{}]: open card physical channel for protocol [{}]", getName(), protocol);
       }
-      card = this.terminal.connect(protocol);
+      card = this.communicationTerminal.connect(protocol);
       if (isModeExclusive) {
         card.beginExclusive();
         if (logger.isDebugEnabled()) {
@@ -326,7 +382,7 @@ final class PcscReaderAdapter
   private void resetReaderState() {
     try {
       if (disconnectionMode == DisconnectionMode.UNPOWER) {
-        terminal.connect("*").disconnect(false);
+        communicationTerminal.connect("*").disconnect(false);
       }
     } catch (CardException e) {
       // NOP
@@ -351,7 +407,7 @@ final class PcscReaderAdapter
   @Override
   public boolean checkCardPresence() throws ReaderIOException {
     try {
-      boolean isCardPresent = terminal.isCardPresent();
+      boolean isCardPresent = communicationTerminal.isCardPresent();
       closePhysicalChannelSafely();
       return isCardPresent;
     } catch (CardException e) {
@@ -517,7 +573,7 @@ final class PcscReaderAdapter
   private void waitForCardRemovalStandard() throws ReaderIOException {
     try {
       while (loopWaitCardRemoval.get()) {
-        if (terminal.waitForCardAbsent(cardMonitoringCycleDuration)) {
+        if (monitoringTerminal.waitForCardAbsent(cardMonitoringCycleDuration)) {
           return;
         }
         if (Thread.interrupted()) {
@@ -623,7 +679,7 @@ final class PcscReaderAdapter
       if (card != null) {
         response = card.transmitControlCommand(controlCode, command);
       } else {
-        Card virtualCard = terminal.connect("DIRECT");
+        Card virtualCard = communicationTerminal.connect("DIRECT");
         response = virtualCard.transmitControlCommand(controlCode, command);
         virtualCard.disconnect(false);
       }
