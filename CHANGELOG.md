@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Fixed PC/SC context contention on Linux by implementing separate contexts for monitoring and communication operations,
+  preventing `SCARD_E_SHARING_VIOLATION` errors and thread blocking when using card presence detection concurrently with
+  APDU transmission (especially with `waitForCardRemoval()` in a separate thread).
 
 ## [2.5.3] - 2025-10-22
 ### Fixed
