@@ -78,7 +78,7 @@ public enum PcscCardCommunicationProtocol {
    *   <li>Card type: Variable (depends on memory capacity)
    * </ul>
    *
-   * <p>Default rule = <b>{@code 3B8F8001804F0CA00000030603000(1|2).*</b>
+   * <p>Default rule = <b>{@code 3B8F8001804F0CA00000030603000(1|2).*}</b>
    *
    * @since 2.6.0
    */
