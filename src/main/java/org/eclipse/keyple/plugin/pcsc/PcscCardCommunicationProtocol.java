@@ -68,6 +68,23 @@ public enum PcscCardCommunicationProtocol {
   INNOVATRON_B_PRIME("3B8.8001(80)?5A0A.*"),
 
   /**
+   * NXP MIFARE Classic technologies (1K, 4K variants).
+   *
+   * <p>According to PC/SC Part 3 Supplemental Document:
+   *
+   * <ul>
+   *   <li>Initial bytes: 3B8F8001804F0CA0000003
+   *   <li>Card protocol: 0603 (ISO 14443 A part 3)
+   *   <li>Card type: Variable (depends on memory capacity)
+   * </ul>
+   *
+   * <p>Default rule = <b>{@code 3B8F8001804F0CA00000030603000(1|2).*</b>
+   *
+   * @since 2.6.0
+   */
+  MIFARE_CLASSIC("3B8F8001804F0CA00000030603000(1|2).*"),
+
+  /**
    * NXP MIFARE Ultralight technologies.
    *
    * <p>According to PC/SC Part 3 Supplemental Document:
@@ -78,11 +95,11 @@ public enum PcscCardCommunicationProtocol {
    *   <li>Card type: 0003 (for Mifare UL)
    * </ul>
    *
-   * <p>Default rule = <b>{@code 3B8F8001804F0CA0000003060300030.*}</b>
+   * <p>Default rule = <b>{@code 3B8F8001804F0CA000000306030003.*}</b>
    *
    * @since 2.5.0
    */
-  MIFARE_ULTRALIGHT("3B8F8001804F0CA0000003060300030.*"),
+  MIFARE_ULTRALIGHT("3B8F8001804F0CA000000306030003.*"),
 
   /**
    * STMicroelectronics ST25/SRT512 memory tags.

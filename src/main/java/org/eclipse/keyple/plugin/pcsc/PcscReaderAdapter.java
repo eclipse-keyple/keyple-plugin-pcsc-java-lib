@@ -54,7 +54,7 @@ final class PcscReaderAdapter
   private CardChannel channel;
   private Boolean isContactless;
   private String protocol = IsoProtocol.ANY.getValue();
-  private boolean isModeExclusive = true;
+  private boolean isModeExclusive = false;
   private DisconnectionMode disconnectionMode = DisconnectionMode.RESET;
   private final AtomicBoolean loopWaitCard = new AtomicBoolean();
 
@@ -599,7 +599,7 @@ final class PcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * <p>The default value is {@link SharingMode#EXCLUSIVE}.
+   * <p>The default value is {@link SharingMode#SHARED}.
    *
    * @since 2.0.0
    */
