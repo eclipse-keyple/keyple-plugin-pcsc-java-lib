@@ -154,7 +154,7 @@ public interface PcscReader extends KeypleReaderExtension {
   }
 
   /**
-   * Changes the PC/SC sharing mode (default value {@link SharingMode#EXCLUSIVE}).
+   * Changes the PC/SC sharing mode (default value {@link SharingMode#SHARED}).
    *
    * <p>This mode will be used when a new {@link Card} is created.
    *

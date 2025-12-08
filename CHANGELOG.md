@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Added support for NXP MIFARE Classic (1K, 4K variants) in `PcscCardCommunicationProtocol` with ATR pattern
+  `3B8F8001804F0CA00000030603000(1|2).*` according to PC/SC Part 3 Supplemental Document.
+### Changed
+- Changed default sharing mode from `EXCLUSIVE` to `SHARED` in `PcscReader.setSharingMode()` to improve compatibility
+  with multi-threaded applications.
 ### Fixed
 - Fixed PC/SC context contention on Linux by implementing separate contexts for monitoring and communication operations,
   preventing `SCARD_E_SHARING_VIOLATION` errors and thread blocking when using card presence detection concurrently with
