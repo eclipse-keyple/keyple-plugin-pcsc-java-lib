@@ -1,7 +1,7 @@
 | Version | Documents |
 |:---:|---|
-| 2.6.1-SNAPSHOT | [API documentation](2.6.1-SNAPSHOT) |
-| **2.6.0 (latest stable)** | [API documentation](latest-stable) |
+| **2.6.1 (latest stable)** | [API documentation](latest-stable) |
+| 2.6.0 | [API documentation](2.6.0) |
 | 2.5.3 | [API documentation](2.5.3) |
 | 2.5.2 | [API documentation](2.5.2) |
 | 2.5.1 | [API documentation](2.5.1) |
