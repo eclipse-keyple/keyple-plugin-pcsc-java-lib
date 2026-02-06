@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `MIFARE_CLASSIC_1K` with ATR pattern `3B8F8001804F0CA000000306030001.*` (card type 0001)
   - `MIFARE_CLASSIC_4K` with ATR pattern `3B8F8001804F0CA000000306030002.*` (card type 0002)
 - Added `MIFARE_CLASSIC_1K` and `MIFARE_CLASSIC_4K` to the default enabled protocols in `PcscPluginAdapter`.
+- Normalize logging.
 ### Upgraded
 - `keyple-common-java-api` from `2.0.1` to `2.0.2`
 - `keyple-plugin-java-api` from `2.3.1` to `2.3.2`

@@ -143,13 +143,13 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
   public Set<String> searchAvailableReaderNames() throws PluginIOException {
     Set<String> readerNames = new HashSet<>();
     if (logger.isTraceEnabled()) {
-      logger.trace("Plugin [{}]: search available reader", getName());
+      logger.trace("Searching available reader names");
     }
     for (CardTerminal terminal : getCardTerminalList()) {
       readerNames.add(terminal.getName());
     }
     if (logger.isTraceEnabled()) {
-      logger.trace("Plugin [{}]: readers found: {}", getName(), JsonUtil.toJson(readerNames));
+      logger.trace("Readers found [names={}]", JsonUtil.toJson(readerNames));
     }
     return readerNames;
   }
@@ -172,12 +172,14 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
   @Override
   public Set<ReaderSpi> searchAvailableReaders() throws PluginIOException {
     Set<ReaderSpi> readerSpis = new HashSet<>();
-    logger.info("Plugin [{}]: search available readers", getName());
+    if (logger.isTraceEnabled()) {
+      logger.trace("Searching available readers");
+    }
     for (CardTerminal terminal : getCardTerminalList()) {
       readerSpis.add(createReader(terminal));
     }
     for (ReaderSpi readerSpi : readerSpis) {
-      logger.info("Plugin [{}]: reader found: [{}]", getName(), readerSpi.getName());
+      logger.info("Reader found [name={}]", readerSpi.getName());
     }
     return readerSpis;
   }
@@ -211,14 +213,14 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
       return terminals.list();
     } catch (Exception e) {
       if (e.getMessage().contains("SCARD_E_NO_READERS_AVAILABLE")) {
-        logger.error("Plugin [{}]: no reader available", getName());
+        logger.error("No reader available");
       } else if (e.getMessage().contains("SCARD_E_NO_SERVICE")
           || e.getMessage().contains("SCARD_E_SERVICE_STOPPED")) {
-        logger.error("Plugin [{}]: no smart card service error", getName());
+        logger.error("No running smart card service");
         // the CardTerminals object is no more valid
         isCardTerminalsInitialized = false;
       } else if (e.getMessage().contains("SCARD_F_COMM_ERROR")) {
-        logger.error("Plugin [{}]: reader communication error", getName());
+        logger.error("Reader communication error");
       } else {
         throw new PluginIOException("Could not access terminals list", e);
       }
