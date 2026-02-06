@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.6.1] - 2026-02-06
+### Changed
+- Split `MIFARE_CLASSIC` into two distinct protocols in `PcscCardCommunicationProtocol`:
+  - `MIFARE_CLASSIC_1K` with ATR pattern `3B8F8001804F0CA000000306030001.*` (card type 0001)
+  - `MIFARE_CLASSIC_4K` with ATR pattern `3B8F8001804F0CA000000306030002.*` (card type 0002)
+- Added `MIFARE_CLASSIC_1K` and `MIFARE_CLASSIC_4K` to the default enabled protocols in `PcscPluginAdapter`.
+- Normalize logging.
+### Upgraded
+- `keyple-common-java-api` from `2.0.1` to `2.0.2`
+- `keyple-plugin-java-api` from `2.3.1` to `2.3.2`
+- `keyple-util-java-lib` from `2.4.0` to `2.4.1`
+- `slf4j-api` from `1.7.32` to `1.7.36` (compileOnly)
+
 ## [2.6.0] - 2025-12-12
 ### Added
 - Added support for NXP MIFARE Classic (1K, 4K variants) in `PcscCardCommunicationProtocol` with ATR pattern
@@ -134,7 +147,8 @@ This is the initial release.
 It follows the extraction of Keyple 1.0 components contained in the `eclipse-keyple/keyple-java` repository to dedicated repositories.
 It also brings many major API changes.
 
-[unreleased]: https://github.com/eclipse-keyple/keyple-plugin-pcsc-java-lib/compare/2.6.0...HEAD
+[unreleased]: https://github.com/eclipse-keyple/keyple-plugin-pcsc-java-lib/compare/2.6.1...HEAD
+[2.6.1]: https://github.com/eclipse-keyple/keyple-plugin-pcsc-java-lib/compare/2.6.0...2.6.1
 [2.6.0]: https://github.com/eclipse-keyple/keyple-plugin-pcsc-java-lib/compare/2.5.3...2.6.0
 [2.5.3]: https://github.com/eclipse-keyple/keyple-plugin-pcsc-java-lib/compare/2.5.2...2.5.3
 [2.5.2]: https://github.com/eclipse-keyple/keyple-plugin-pcsc-java-lib/compare/2.5.1...2.5.2
