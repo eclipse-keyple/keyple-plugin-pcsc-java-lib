@@ -8,7 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.6.1] - 2026-02-06
 ### Changed
-- Added `MIFARE_CLASSIC` to the default enabled protocols in `PcscPluginAdapter`.
+- Split `MIFARE_CLASSIC` into two distinct protocols in `PcscCardCommunicationProtocol`:
+  - `MIFARE_CLASSIC_1K` with ATR pattern `3B8F8001804F0CA000000306030001.*` (card type 0001)
+  - `MIFARE_CLASSIC_4K` with ATR pattern `3B8F8001804F0CA000000306030002.*` (card type 0002)
+- Added `MIFARE_CLASSIC_1K` and `MIFARE_CLASSIC_4K` to the default enabled protocols in `PcscPluginAdapter`.
 
 ## [2.6.0] - 2025-12-12
 ### Added

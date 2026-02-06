@@ -68,21 +68,38 @@ public enum PcscCardCommunicationProtocol {
   INNOVATRON_B_PRIME("3B8.8001(80)?5A0A.*"),
 
   /**
-   * NXP MIFARE Classic technologies (1K, 4K variants).
+   * NXP MIFARE Classic 1K technology.
    *
    * <p>According to PC/SC Part 3 Supplemental Document:
    *
    * <ul>
    *   <li>Initial bytes: 3B8F8001804F0CA0000003
    *   <li>Card protocol: 0603 (ISO 14443 A part 3)
-   *   <li>Card type: Variable (depends on memory capacity)
+   *   <li>Card type: 0001 (1K variant)
    * </ul>
    *
-   * <p>Default rule = <b>{@code 3B8F8001804F0CA00000030603000(1|2).*}</b>
+   * <p>Default rule = <b>{@code 3B8F8001804F0CA000000306030001.*}</b>
    *
    * @since 2.6.0
    */
-  MIFARE_CLASSIC("3B8F8001804F0CA00000030603000(1|2).*"),
+  MIFARE_CLASSIC_1K("3B8F8001804F0CA000000306030001.*"),
+
+  /**
+   * NXP MIFARE Classic 4K technology.
+   *
+   * <p>According to PC/SC Part 3 Supplemental Document:
+   *
+   * <ul>
+   *   <li>Initial bytes: 3B8F8001804F0CA0000003
+   *   <li>Card protocol: 0603 (ISO 14443 A part 3)
+   *   <li>Card type: 0002 (4K variant)
+   * </ul>
+   *
+   * <p>Default rule = <b>{@code 3B8F8001804F0CA000000306030002.*}</b>
+   *
+   * @since 2.6.0
+   */
+  MIFARE_CLASSIC_4K("3B8F8001804F0CA000000306030002.*"),
 
   /**
    * NXP MIFARE Ultralight technologies.

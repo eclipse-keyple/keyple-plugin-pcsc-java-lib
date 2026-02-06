@@ -62,8 +62,11 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
         PcscCardCommunicationProtocol.MIFARE_ULTRALIGHT.name(),
         PcscCardCommunicationProtocol.MIFARE_ULTRALIGHT.getDefaultRule());
     protocolRulesMap.put(
-        PcscCardCommunicationProtocol.MIFARE_CLASSIC.name(),
-        PcscCardCommunicationProtocol.MIFARE_CLASSIC.getDefaultRule());
+        PcscCardCommunicationProtocol.MIFARE_CLASSIC_1K.name(),
+        PcscCardCommunicationProtocol.MIFARE_CLASSIC_1K.getDefaultRule());
+    protocolRulesMap.put(
+        PcscCardCommunicationProtocol.MIFARE_CLASSIC_4K.name(),
+        PcscCardCommunicationProtocol.MIFARE_CLASSIC_4K.getDefaultRule());
     protocolRulesMap.put(
         PcscCardCommunicationProtocol.ST25_SRT512.name(),
         PcscCardCommunicationProtocol.ST25_SRT512.getDefaultRule());
