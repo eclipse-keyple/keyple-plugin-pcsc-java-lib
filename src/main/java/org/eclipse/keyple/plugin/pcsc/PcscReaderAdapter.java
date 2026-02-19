@@ -107,7 +107,7 @@ final class PcscReaderAdapter
         if (t.getName().equals(terminalName)) {
           if (logger.isDebugEnabled()) {
             logger.debug(
-                "[{}] creating separate monitoring context for improved Linux compatibility",
+                "[readerExt={}] Separate monitoring context created to improve Linux compatibility",
                 terminalName);
           }
           return t;
@@ -116,14 +116,14 @@ final class PcscReaderAdapter
 
       // Terminal not found in new context, fall back to same terminal
       logger.warn(
-          "[{}] could not find terminal in separate context, using shared context (may cause issues on Linux)",
+          "[readerExt={}] Could not find terminal in separate context, using shared context (may cause issues on Linux)",
           terminalName);
       return communicationTerminal;
 
     } catch (Exception e) {
       // Failed to create separate context, fall back to same terminal
       logger.warn(
-          "[{}] could not create separate monitoring context [reason={}], using shared context (may cause issues on Linux)",
+          "[readerExt={}] Could not create separate monitoring context [reason={}], using shared context (may cause issues on Linux)",
           terminalName,
           e.getMessage());
       return communicationTerminal;
@@ -140,7 +140,7 @@ final class PcscReaderAdapter
 
     if (logger.isTraceEnabled()) {
       logger.trace(
-          "[{}] start waiting card insertion (loop latency: {} ms)...",
+          "[readerExt={}] Starting waiting card insertion [loopLatencyMs={}]",
           getName(),
           cardMonitoringCycleDuration);
     }
@@ -153,7 +153,7 @@ final class PcscReaderAdapter
         if (monitoringTerminal.waitForCardPresent(cardMonitoringCycleDuration)) {
           // card inserted
           if (logger.isTraceEnabled()) {
-            logger.trace("[{}] card inserted", getName());
+            logger.trace("[readerExt={}] Card inserted", getName());
           }
           return;
         }
@@ -162,15 +162,14 @@ final class PcscReaderAdapter
         }
       }
       if (logger.isTraceEnabled()) {
-        logger.trace("[{}] waiting card insertion stopped", getName());
+        logger.trace("[readerExt={}] Waiting card insertion stopped", getName());
       }
     } catch (CardException e) {
       // here, it is a communication failure with the reader
-      throw new ReaderIOException(
-          name + ": an error occurred while waiting for a card insertion", e);
+      throw new ReaderIOException("Failed to wait for a card insertion. Reader: " + name, e);
     }
     throw new TaskCanceledException(
-        name + ": the wait for a card insertion task has been cancelled");
+        "The wait for a card insertion task has been cancelled. Reader: " + name);
   }
 
   /**
@@ -201,7 +200,10 @@ final class PcscReaderAdapter
   @Override
   public void activateProtocol(String readerProtocol) {
     if (logger.isTraceEnabled()) {
-      logger.trace("[{}] activating protocol [{}] takes no action", getName(), readerProtocol);
+      logger.trace(
+          "[readerExt={}] Activating protocol takes no action [protocol={}]",
+          getName(),
+          readerProtocol);
     }
   }
 
@@ -213,7 +215,10 @@ final class PcscReaderAdapter
   @Override
   public void deactivateProtocol(String readerProtocol) {
     if (logger.isTraceEnabled()) {
-      logger.trace("[{}] de-activating protocol [{}] takes no action", getName(), readerProtocol);
+      logger.trace(
+          "[readerExt={}] de-activating protocol takes no action [protocol={}]",
+          getName(),
+          readerProtocol);
     }
   }
 
@@ -278,24 +283,25 @@ final class PcscReaderAdapter
     /* init of the card physical channel: if not yet established, opening of a new physical channel */
     try {
       if (logger.isDebugEnabled()) {
-        logger.debug("[{}] opening card physical channel for protocol [{}]", getName(), protocol);
+        logger.debug(
+            "[readerExt={}] Opening card physical channel [protocol={}]", getName(), protocol);
       }
       card = this.communicationTerminal.connect(protocol);
       if (isModeExclusive) {
         card.beginExclusive();
         if (logger.isDebugEnabled()) {
-          logger.debug("[{}] card physical channel opened in EXCLUSIVE mode", getName());
+          logger.debug("[readerExt={}] Card physical channel opened [mode=EXCLUSIVE]", getName());
         }
       } else {
         if (logger.isDebugEnabled()) {
-          logger.debug("[{}] card physical channel opened in SHARED mode", getName());
+          logger.debug("[readerExt={}] Card physical channel opened [mode=SHARED]", getName());
         }
       }
       channel = card.getBasicChannel();
     } catch (CardNotPresentException e) {
-      throw new CardIOException(getName() + ": Card removed", e);
+      throw new CardIOException("Card removed. Reader: " + name, e);
     } catch (CardException e) {
-      throw new ReaderIOException(getName() + ": Error while opening Physical Channel", e);
+      throw new ReaderIOException("Failed to open the physical channel. Reader: " + name, e);
     }
   }
 
@@ -341,7 +347,7 @@ final class PcscReaderAdapter
         }
       }
     } catch (CardException e) {
-      throw new ReaderIOException("Error while closing physical channel", e);
+      throw new ReaderIOException("Failed to close the physical channel. Reader: " + name, e);
     } finally {
       resetContext();
     }
@@ -408,7 +414,7 @@ final class PcscReaderAdapter
       closePhysicalChannelSafely();
       return isCardPresent;
     } catch (CardException e) {
-      throw new ReaderIOException("Exception occurred in isCardPresent", e);
+      throw new ReaderIOException("Failed to check card presence. Reader: " + name, e);
     }
   }
 
@@ -447,22 +453,28 @@ final class PcscReaderAdapter
       try {
         apduResponseData = channel.transmit(new CommandAPDU(apduCommandData)).getBytes();
       } catch (CardNotPresentException e) {
-        throw new CardIOException(name + ": " + e.getMessage(), e);
+        throw new CardIOException(
+            "Card is not present. Unable to transmit APDU. Reader: " + name, e);
       } catch (CardException e) {
         if (e.getMessage().contains("CARD")
             || e.getMessage().contains("NOT_TRANSACTED")
             || e.getMessage().contains("INVALID_ATR")) {
-          throw new CardIOException(name + ": " + e.getMessage(), e);
+          throw new CardIOException(
+              "Failed to communicate with card. Unable to transmit APDU. Reader: " + name, e);
         } else {
-          throw new ReaderIOException(name + ": " + e.getMessage(), e);
+          throw new ReaderIOException(
+              "Failed to communicate with card reader. Unable to transmit APDU. Reader: " + name,
+              e);
         }
       } catch (IllegalStateException | IllegalArgumentException e) {
         // card could have been removed prematurely
-        throw new CardIOException(name + ": " + e.getMessage(), e);
+        throw new CardIOException(
+            "Card could have been removed prematurely. Unable to transmit APDU. Reader: " + name,
+            e);
       }
     } else {
       // could occur if the card was removed
-      throw new CardIOException(name + ": null channel.");
+      throw new CardIOException("Card channel is null. Unable to transmit APDU. Reader: " + name);
     }
     return apduResponseData;
   }
@@ -521,7 +533,7 @@ final class PcscReaderAdapter
   @Override
   public void waitForCardRemoval() throws ReaderIOException, TaskCanceledException {
     if (logger.isTraceEnabled()) {
-      logger.trace("[{}] start waiting card removal)", name);
+      logger.trace("[readerExt={}] Starting waiting card removal", name);
     }
     loopWaitCardRemoval.set(true);
     try {
@@ -535,19 +547,21 @@ final class PcscReaderAdapter
         disconnect();
       } catch (Exception e) {
         logger.warn(
-            "[{}] error while disconnecting card during card removal: {}", name, e.getMessage());
+            "[readerExt={}] Failed to disconnect card during card removal sequence [reason={}]",
+            name,
+            e.getMessage());
       }
     }
     if (logger.isTraceEnabled()) {
       if (!loopWaitCardRemoval.get()) {
-        logger.trace("[{}] waiting card removal stopped", name);
+        logger.trace("[readerExt={}] Waiting card removal stopped", name);
       } else {
-        logger.trace("[{}] card removed", name);
+        logger.trace("[readerExt={}] Card removed", name);
       }
     }
     if (!loopWaitCardRemoval.get()) {
       throw new TaskCanceledException(
-          name + ": the wait for the card removal task has been cancelled.");
+          "The wait for the card removal task has been cancelled. Reader: " + name);
     }
   }
 
@@ -561,9 +575,19 @@ final class PcscReaderAdapter
         }
       }
     } catch (CardIOException | ReaderIOException e) {
-      logger.trace("Expected IOException while waiting for card removal: {}", e.getMessage());
+      if (logger.isTraceEnabled()) {
+        logger.trace(
+            "[readerExt={}] Expected IOException received while waiting for card removal [reason={}]",
+            getName(),
+            e.getMessage());
+      }
     } catch (InterruptedException e) {
-      logger.trace("InterruptedException while waiting for card removal: {}", e.getMessage());
+      if (logger.isTraceEnabled()) {
+        logger.trace(
+            "[readerExt={}] InterruptedException received while waiting for card removal: {}",
+            getName(),
+            e.getMessage());
+      }
       Thread.currentThread().interrupt();
     }
   }
@@ -579,8 +603,7 @@ final class PcscReaderAdapter
         }
       }
     } catch (CardException e) {
-      throw new ReaderIOException(
-          name + ": an error occurred while waiting for the card removal.", e);
+      throw new ReaderIOException("Failed to wait for the card removal. Reader: " + name, e);
     }
   }
 
@@ -604,14 +627,14 @@ final class PcscReaderAdapter
   @Override
   public PcscReader setSharingMode(SharingMode sharingMode) {
     Assert.getInstance().notNull(sharingMode, "sharingMode");
-    logger.info("[{}] set sharing mode [newValue={}]", getName(), sharingMode.name());
+    logger.info("[readerExt={}] Set sharing mode [value={}]", getName(), sharingMode.name());
     if (sharingMode == SharingMode.SHARED) {
       // if a card is present, change the mode immediately
       if (card != null) {
         try {
           card.endExclusive();
         } catch (CardException e) {
-          throw new IllegalStateException("Couldn't disable exclusive mode", e);
+          throw new IllegalStateException("Failed to disable exclusive mode. Reader: " + name, e);
         }
       }
       isModeExclusive = false;
@@ -628,7 +651,7 @@ final class PcscReaderAdapter
    */
   @Override
   public PcscReader setContactless(boolean contactless) {
-    logger.info("[{}] set contactless type [newValue={}]", getName(), contactless);
+    logger.info("[readerExt={}] Set contactless type [value={}]", getName(), contactless);
     this.isContactless = contactless;
     return this;
   }
@@ -642,7 +665,7 @@ final class PcscReaderAdapter
   public PcscReader setIsoProtocol(IsoProtocol isoProtocol) {
     Assert.getInstance().notNull(isoProtocol, "isoProtocol");
     logger.info(
-        "[{}] set ISO protocol [protocolName={}, newValue={}]",
+        "[readerExt={}] Set ISO protocol [protocol={}, value={}]",
         getName(),
         isoProtocol.name(),
         isoProtocol.getValue());
@@ -658,7 +681,8 @@ final class PcscReaderAdapter
   @Override
   public PcscReader setDisconnectionMode(DisconnectionMode disconnectionMode) {
     Assert.getInstance().notNull(disconnectionMode, "disconnectionMode");
-    logger.info("[{}] set disconnection mode [newValue={}]", getName(), disconnectionMode.name());
+    logger.info(
+        "[readerExt={}] Set disconnection mode [value={}]", getName(), disconnectionMode.name());
     this.disconnectionMode = disconnectionMode;
     return this;
   }
@@ -682,7 +706,7 @@ final class PcscReaderAdapter
         virtualCard.disconnect(false);
       }
     } catch (CardException e) {
-      throw new IllegalStateException("Reader failure.", e);
+      throw new IllegalStateException("Failed to transmit control command. Reader: " + name, e);
     }
     return response;
   }

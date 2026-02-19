@@ -220,7 +220,7 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
         // the CardTerminals object is no more valid
         isCardTerminalsInitialized = false;
       } else if (e.getMessage().contains("SCARD_F_COMM_ERROR")) {
-        logger.error("Reader communication error");
+        logger.error("Reader communication error occurred");
       } else {
         throw new PluginIOException("Could not access terminals list", e);
       }
@@ -236,18 +236,18 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
   @Override
   public ReaderSpi searchReader(String readerName) throws PluginIOException {
     if (logger.isTraceEnabled()) {
-      logger.trace("Plugin [{}]: search reader [{}]", getName(), readerName);
+      logger.trace("Searching reader [reader={}]", readerName);
     }
     for (CardTerminal terminal : getCardTerminalList()) {
       if (readerName.equals(terminal.getName())) {
         if (logger.isTraceEnabled()) {
-          logger.trace("Plugin [{}]: reader found", getName());
+          logger.trace("Reader found");
         }
         return createReader(terminal);
       }
     }
     if (logger.isTraceEnabled()) {
-      logger.trace("Plugin [{}]: reader not found", getName());
+      logger.trace("Reader not found");
     }
     return null;
   }
@@ -303,11 +303,9 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
   PcscPluginAdapter addProtocolRulesMap(Map<String, String> protocolRulesMap) {
     if (!protocolRulesMap.isEmpty()) {
       logger.info(
-          "Plugin [{}]: add protocol identification rules: {}",
-          getName(),
-          JsonUtil.toJson(protocolRulesMap));
+          "Adding protocol identification rules [rules={}]", JsonUtil.toJson(protocolRulesMap));
     } else {
-      logger.info("Plugin [{}]: use default protocol identification rules", getName());
+      logger.info("Using default protocol identification rules");
     }
     PcscPluginAdapter.protocolRulesMap.putAll(protocolRulesMap);
     return this;
