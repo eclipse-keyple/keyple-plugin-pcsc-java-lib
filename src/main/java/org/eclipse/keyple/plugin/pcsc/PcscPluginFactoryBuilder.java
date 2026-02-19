@@ -120,7 +120,7 @@ public final class PcscPluginFactoryBuilder {
         this.contactlessReaderIdentificationFilterPattern =
             Pattern.compile(contactlessReaderIdentificationFilter);
       } catch (Exception e) {
-        throw new IllegalArgumentException("Bad regular expression.", e);
+        throw new IllegalArgumentException("Bad regular expression", e);
       }
       return this;
     }
