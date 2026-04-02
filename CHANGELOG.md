@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Fixed card removal wait for `INNOVATRON_B_PRIME` protocol cards: APDU polling is now bypassed in favor of the
+  standard PC/SC absence detection, and disconnection is unconditionally performed with `UNPOWER` regardless of the
+  configured disconnection mode.
 
 ## [2.6.2] - 2026-02-20
 ### Changed

@@ -322,10 +322,12 @@ final class PcscReaderAdapter
    * Disconnects the current card and resets the context and reader state.
    *
    * <p>This method handles the disconnection of a card, taking into account the specific
-   * disconnection mode. If the card is an instance of {@link Smartcardio.JnaCard}, it disconnects
+   * disconnection mode. If the card uses the {@code INNOVATRON_B_PRIME} protocol, the disconnection
+   * mode is unconditionally overridden to {@link DisconnectionMode#UNPOWER}, regardless of the
+   * configured mode. If the card is an instance of {@link Smartcardio.JnaCard}, it disconnects
    * using the extended mode specified by {@link #getDisposition(DisconnectionMode)} and resets the
    * reader state to avoid incorrect card detection in subsequent operations. For other card types,
-   * it disconnects using the specified disconnection mode directly.
+   * it disconnects using the effective disconnection mode directly.
    *
    * <p>If a {@link CardException} occurs during the operation, a {@link ReaderIOException} is
    * thrown with the associated error message.
@@ -337,13 +339,17 @@ final class PcscReaderAdapter
   private void disconnect() throws ReaderIOException {
     try {
       if (card != null) {
+        DisconnectionMode effectiveMode =
+            isCurrentProtocol(PcscCardCommunicationProtocol.INNOVATRON_B_PRIME.name())
+                ? DisconnectionMode.UNPOWER
+                : disconnectionMode;
         if (card instanceof Smartcardio.JnaCard) {
           // disconnect using the extended mode allowing UNPOWER
-          ((Smartcardio.JnaCard) card).disconnect(getDisposition(disconnectionMode));
+          ((Smartcardio.JnaCard) card).disconnect(getDisposition(effectiveMode));
           // reset the reader state to avoid bad card detection next time
-          resetReaderState();
+          resetReaderState(effectiveMode);
         } else {
-          card.disconnect(disconnectionMode == DisconnectionMode.RESET);
+          card.disconnect(effectiveMode == DisconnectionMode.RESET);
         }
       }
     } catch (CardException e) {
@@ -377,14 +383,19 @@ final class PcscReaderAdapter
   /**
    * Resets the state of the card reader.
    *
-   * <p>This method attempts to reset the reader state based on the current disconnection mode. If
-   * the disconnection mode is set to UNPOWER, it reconnects to the terminal and then disconnects
+   * <p>This method attempts to reset the reader state based on the effective disconnection mode. If
+   * the effective mode is {@link DisconnectionMode#UNPOWER} (either configured or forced by the
+   * {@code INNOVATRON_B_PRIME} protocol), it reconnects to the terminal and then disconnects
    * without powering off the reader. If any {@link CardException} occurs during this process, it is
    * handled silently.
+   *
+   * @param effectiveMode The disconnection mode actually applied, which may differ from the
+   *     configured {@link #disconnectionMode} when the card uses the {@code INNOVATRON_B_PRIME}
+   *     protocol.
    */
-  private void resetReaderState() {
+  private void resetReaderState(DisconnectionMode effectiveMode) {
     try {
-      if (disconnectionMode == DisconnectionMode.UNPOWER) {
+      if (effectiveMode == DisconnectionMode.UNPOWER) {
         communicationTerminal.connect("*").disconnect(false);
       }
     } catch (CardException e) {
@@ -512,7 +523,8 @@ final class PcscReaderAdapter
   @Override
   public void monitorCardPresenceDuringProcessing()
       throws ReaderIOException, TaskCanceledException {
-    waitForCardRemoval();
+    doWaitForCardRemoval(
+        !isCurrentProtocol(PcscCardCommunicationProtocol.INNOVATRON_B_PRIME.name()));
   }
 
   /**
@@ -532,12 +544,17 @@ final class PcscReaderAdapter
    */
   @Override
   public void waitForCardRemoval() throws ReaderIOException, TaskCanceledException {
+    doWaitForCardRemoval(true);
+  }
+
+  private void doWaitForCardRemoval(boolean allowPolling)
+      throws ReaderIOException, TaskCanceledException {
     if (logger.isTraceEnabled()) {
       logger.trace("[readerExt={}] Starting waiting card removal", name);
     }
     loopWaitCardRemoval.set(true);
     try {
-      if (disconnectionMode == DisconnectionMode.UNPOWER) {
+      if (allowPolling && disconnectionMode == DisconnectionMode.UNPOWER) {
         waitForCardRemovalByPolling();
       } else {
         waitForCardRemovalStandard();
