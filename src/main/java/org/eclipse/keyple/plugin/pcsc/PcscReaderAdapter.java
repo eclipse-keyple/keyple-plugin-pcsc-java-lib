@@ -349,7 +349,9 @@ final class PcscReaderAdapter
           // reset the reader state to avoid bad card detection next time
           resetReaderState(effectiveMode);
         } else {
-          card.disconnect(effectiveMode == DisconnectionMode.RESET);
+          card.disconnect(
+              effectiveMode == DisconnectionMode.UNPOWER
+                  || effectiveMode == DisconnectionMode.RESET);
         }
       }
     } catch (CardException e) {
