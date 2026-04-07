@@ -562,13 +562,15 @@ final class PcscReaderAdapter
         waitForCardRemovalStandard();
       }
     } finally {
-      try {
-        disconnect();
-      } catch (Exception e) {
-        logger.warn(
-            "[readerExt={}] Failed to disconnect card during card removal sequence [reason={}]",
-            name,
-            e.getMessage());
+      if (loopWaitCardRemoval.get()) {
+        try {
+          disconnect();
+        } catch (Exception e) {
+          logger.warn(
+              "[readerExt={}] Failed to disconnect card during card removal sequence [reason={}]",
+              name,
+              e.getMessage());
+        }
       }
     }
     if (logger.isTraceEnabled()) {
