@@ -16,7 +16,7 @@ plugins {
 dependencies {
   implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
   implementation("org.eclipse.keyple:keyple-common-java-api:2.0.2")
-  implementation("org.eclipse.keyple:keyple-plugin-java-api:2.3.2")
+  implementation("org.eclipse.keyple:keyple-plugin-java-api:3.0.0-SNAPSHOT") { isChanging = true }
   implementation("org.eclipse.keyple:keyple-util-java-lib:2.4.1")
   implementation("net.java.dev.jna:jna:5.15.0")
   compileOnly("org.slf4j:slf4j-api:1.7.36")
