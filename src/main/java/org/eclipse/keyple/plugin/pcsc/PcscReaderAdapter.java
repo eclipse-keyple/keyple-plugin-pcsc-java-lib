@@ -49,18 +49,19 @@ final class PcscReaderAdapter
   private final PcscPluginAdapter pluginAdapter;
   private final boolean isWindows;
   private final int cardMonitoringCycleDuration;
-  private final byte[] pingApdu = HexUtil.toByteArray("00C0000000"); // GET RESPONSE
   private Card card;
   private CardChannel channel;
   private Boolean isContactless;
   private String protocol = IsoProtocol.ANY.getValue();
   private boolean isModeExclusive = false;
   private DisconnectionMode disconnectionMode = DisconnectionMode.RESET;
-  private final AtomicBoolean loopWaitCard = new AtomicBoolean();
+  private boolean physicalChannelOpen = false;
+  private byte[] cachedPowerOnData = null;
 
+  private final AtomicBoolean loopWaitCard = new AtomicBoolean();
   private final AtomicBoolean loopWaitCardRemoval = new AtomicBoolean();
   private boolean isObservationActive;
-  private boolean isProtocolInnovatronBPrime;
+  private boolean isProtocolInnovatronBPrime = false;
 
   /**
    * Constructor.
@@ -233,7 +234,7 @@ final class PcscReaderAdapter
     String protocolRule = pluginAdapter.getProtocolRule(readerProtocol);
     boolean isCurrentProtocol;
     if (protocolRule != null && !protocolRule.isEmpty()) {
-      String atr = HexUtil.toHex(card.getATR().getBytes());
+      String atr = cachedPowerOnData != null ? HexUtil.toHex(cachedPowerOnData) : "";
       isCurrentProtocol = Pattern.compile(protocolRule).matcher(atr).matches();
       isProtocolInnovatronBPrime =
           readerProtocol.equals(PcscCardCommunicationProtocol.INNOVATRON_B_PRIME.name());
@@ -266,25 +267,40 @@ final class PcscReaderAdapter
   /**
    * {@inheritDoc}
    *
+   * <p>Sends S(DESELECT) to put the PICC in HALT state (via SCARD_UNPOWER_CARD). The ATR cache is
+   * preserved so the framework can still log it after deselection while the card remains physically
+   * present.
+   *
    * @since 3.0.0
    */
   @Override
   public void deselectCard() {
+    if (!physicalChannelOpen) {
+      return;
+    }
     try {
-      if (card != null) {
-        if (card instanceof Smartcardio.JnaCard) {
-          // disconnect using the extended mode allowing UNPOWER
-          ((Smartcardio.JnaCard) card).disconnect(getDisposition(DisconnectionMode.UNPOWER));
-          // reset the reader state to avoid bad card detection next time
+      if (card instanceof Smartcardio.JnaCard) {
+        ((Smartcardio.JnaCard) card).disconnect(getDisposition(DisconnectionMode.UNPOWER));
+        // reset the driver state to avoid stale reader state after UNPOWER on some drivers
+        try {
           communicationTerminal.connect("*").disconnect(false);
-        } else {
-          card.disconnect(true);
+        } catch (CardException ignored) {
+          // NOP
         }
+      } else {
+        card.disconnect(true);
       }
     } catch (CardException e) {
-      logger.warn("Failed to close the physical channel. Reader: " + name, e);
+      // Card already removed before deselect: treat silently (spec §4.3 pt 5)
+      if (logger.isDebugEnabled()) {
+        logger.debug(
+            "[readerExt={}] deselectCard: card already removed [reason={}]", name, e.getMessage());
+      }
     } finally {
-      resetContext();
+      // cachedPowerOnData is intentionally kept: card is physically present in HALT state
+      physicalChannelOpen = false;
+      card = null;
+      channel = null;
     }
   }
 
@@ -301,20 +317,23 @@ final class PcscReaderAdapter
   /**
    * {@inheritDoc}
    *
+   * <p>No-op if the channel was already opened by {@link #checkCardPresence()} during
+   * anti-collision.
+   *
    * @since 2.0.0
    */
   @Override
   public void openPhysicalChannel() throws ReaderIOException, CardIOException {
-    if (card != null) {
+    if (physicalChannelOpen) {
       return;
     }
-    /* init of the card physical channel: if not yet established, opening of a new physical channel */
+    isProtocolInnovatronBPrime = false;
     try {
       if (logger.isDebugEnabled()) {
         logger.debug(
             "[readerExt={}] Opening card physical channel [protocol={}]", getName(), protocol);
       }
-      card = this.communicationTerminal.connect(protocol);
+      card = communicationTerminal.connect(protocol);
       if (isModeExclusive) {
         card.beginExclusive();
         if (logger.isDebugEnabled()) {
@@ -326,6 +345,8 @@ final class PcscReaderAdapter
         }
       }
       channel = card.getBasicChannel();
+      cachedPowerOnData = card.getATR().getBytes();
+      physicalChannelOpen = true;
     } catch (CardNotPresentException e) {
       throw new CardIOException("Card removed. Reader: " + name, e);
     } catch (CardException e) {
@@ -336,53 +357,39 @@ final class PcscReaderAdapter
   /**
    * {@inheritDoc}
    *
+   * <p>Forced close using the configured {@link DisconnectionMode}. No-op if the channel is already
+   * closed. For contactless readers, {@link #deselectCard()} (SCARD_UNPOWER_CARD) should be called
+   * first for a protocol-clean HALT transition; this method is then a no-op in normal flow.
+   *
+   * <p>UNPOWER and EJECT modes require jnasmartcardio; they silently fall back to RESET with other
+   * providers.
+   *
    * @since 2.0.0
    */
   @Override
   public void closePhysicalChannel() throws ReaderIOException {
-    if (!isProtocolInnovatronBPrime || !isObservationActive) {
-      disconnect();
+    if (!physicalChannelOpen) {
+      return;
     }
-  }
-
-  /**
-   * Disconnects the current card and resets the context and reader state.
-   *
-   * <p>This method handles the disconnection of a card, taking into account the specific
-   * disconnection mode. If the card uses the {@code INNOVATRON_B_PRIME} protocol, the disconnection
-   * mode is unconditionally overridden to {@link DisconnectionMode#UNPOWER}, regardless of the
-   * configured mode. If the card is an instance of {@link Smartcardio.JnaCard}, it disconnects
-   * using the extended mode specified by {@link #getDisposition(DisconnectionMode)} and resets the
-   * reader state to avoid incorrect card detection in subsequent operations. For other card types,
-   * it disconnects using the effective disconnection mode directly.
-   *
-   * <p>If a {@link CardException} occurs during the operation, a {@link ReaderIOException} is
-   * thrown with the associated error message.
-   *
-   * <p>Once the disconnection is handled, the method ensures that the context is reset.
-   *
-   * @throws ReaderIOException If an error occurs while closing the physical channel.
-   */
-  private void disconnect() throws ReaderIOException {
     try {
-      if (card != null) {
-        DisconnectionMode effectiveMode =
-            isProtocolInnovatronBPrime ? DisconnectionMode.UNPOWER : disconnectionMode;
-        if (card instanceof Smartcardio.JnaCard) {
-          // disconnect using the extended mode allowing UNPOWER
-          ((Smartcardio.JnaCard) card).disconnect(getDisposition(effectiveMode));
-          // reset the reader state to avoid bad card detection next time
-          resetReaderState(effectiveMode);
-        } else {
-          card.disconnect(
-              effectiveMode == DisconnectionMode.UNPOWER
-                  || effectiveMode == DisconnectionMode.RESET);
-        }
+      if (card instanceof Smartcardio.JnaCard) {
+        ((Smartcardio.JnaCard) card).disconnect(getDisposition(disconnectionMode));
+      } else {
+        // UNPOWER and EJECT are not available outside jnasmartcardio: fall back to RESET
+        card.disconnect(true);
       }
     } catch (CardException e) {
-      throw new ReaderIOException("Failed to close the physical channel. Reader: " + name, e);
+      String msg = e.getMessage() != null ? e.getMessage() : "";
+      if (!msg.contains("SCARD_E_NO_SMARTCARD")
+          && !msg.contains("REMOVED")
+          && !msg.contains("NO_SMARTCARD")) {
+        throw new ReaderIOException("Failed to close the physical channel. Reader: " + name, e);
+      }
     } finally {
-      resetContext();
+      physicalChannelOpen = false;
+      card = null;
+      channel = null;
+      cachedPowerOnData = null;
     }
   }
 
@@ -396,8 +403,6 @@ final class PcscReaderAdapter
     switch (mode) {
       case RESET:
         return Smartcardio.JnaCard.SCARD_RESET_CARD;
-      case LEAVE:
-        return Smartcardio.JnaCard.SCARD_LEAVE_CARD;
       case UNPOWER:
         return Smartcardio.JnaCard.SCARD_UNPOWER_CARD;
       case EJECT:
@@ -408,67 +413,59 @@ final class PcscReaderAdapter
   }
 
   /**
-   * Resets the state of the card reader.
-   *
-   * <p>This method attempts to reset the reader state based on the effective disconnection mode. If
-   * the effective mode is {@link DisconnectionMode#UNPOWER} (either configured or forced by the
-   * {@code INNOVATRON_B_PRIME} protocol), it reconnects to the terminal and then disconnects
-   * without powering off the reader. If any {@link CardException} occurs during this process, it is
-   * handled silently.
-   *
-   * @param effectiveMode The disconnection mode actually applied, which may differ from the
-   *     configured {@link #disconnectionMode} when the card uses the {@code INNOVATRON_B_PRIME}
-   *     protocol.
-   */
-  private void resetReaderState(DisconnectionMode effectiveMode) {
-    try {
-      if (effectiveMode == DisconnectionMode.UNPOWER) {
-        communicationTerminal.connect("*").disconnect(false);
-      }
-    } catch (CardException e) {
-      // NOP
-    }
-  }
-
-  /**
    * {@inheritDoc}
    *
    * @since 2.0.0
    */
   @Override
   public boolean isPhysicalChannelOpen() {
-    return card != null;
+    return physicalChannelOpen;
   }
 
   /**
    * {@inheritDoc}
+   *
+   * <p>When the channel is closed (canal fermé), attempts a full {@code SCardConnect()} to perform
+   * anti-collision for contactless readers. On success the channel is marked open and a subsequent
+   * call to {@link #openPhysicalChannel()} is a no-op. When the channel is open (canal ouvert),
+   * checks physical presence via {@code SCardGetStatusChange} and calls {@link
+   * #closePhysicalChannel()} internally if the card is no longer present.
    *
    * @since 2.0.0
    */
   @Override
   public boolean checkCardPresence() throws ReaderIOException {
     try {
-      boolean isCardPresent = communicationTerminal.isCardPresent();
-      if (!isCardPresent && card != null) {
-        closePhysicalChannelSafely();
+      if (!physicalChannelOpen) {
+        // Canal fermé: attempt connection (performs anti-collision for contactless readers)
+        try {
+          isProtocolInnovatronBPrime = false;
+          card = communicationTerminal.connect(protocol);
+          if (isModeExclusive) {
+            card.beginExclusive();
+          }
+          channel = card.getBasicChannel();
+          cachedPowerOnData = card.getATR().getBytes();
+          physicalChannelOpen = true;
+          return true;
+        } catch (CardNotPresentException e) {
+          return false;
+        }
+      } else {
+        // Canal ouvert: verify card still responds
+        boolean isPresent = communicationTerminal.isCardPresent();
+        if (!isPresent) {
+          try {
+            closePhysicalChannel();
+          } catch (ReaderIOException ignored) {
+            // card already gone; flags are reset in closePhysicalChannel finally block
+          }
+        }
+        return isPresent;
       }
-      return isCardPresent;
     } catch (CardException e) {
       throw new ReaderIOException("Failed to check card presence. Reader: " + name, e);
     }
-  }
-
-  private void closePhysicalChannelSafely() {
-    try {
-      disconnect();
-    } catch (Exception e) {
-      // NOP
-    }
-  }
-
-  private void resetContext() {
-    card = null;
-    channel = null;
   }
 
   /**
@@ -478,10 +475,10 @@ final class PcscReaderAdapter
    */
   @Override
   public String getPowerOnData() {
-    if (card == null) {
+    if (cachedPowerOnData == null) {
       return "";
     }
-    return HexUtil.toHex(card.getATR().getBytes());
+    return HexUtil.toHex(cachedPowerOnData);
   }
 
   /**
@@ -584,23 +581,10 @@ final class PcscReaderAdapter
       logger.trace("[readerExt={}] Starting waiting card removal", name);
     }
     loopWaitCardRemoval.set(true);
-    try {
-      if (allowPolling && isProtocolInnovatronBPrime) {
-        waitForCardRemovalByPolling();
-      } else {
-        waitForCardRemovalStandard();
-      }
-    } finally {
-      if (loopWaitCardRemoval.get() && isProtocolInnovatronBPrime) {
-        try {
-          disconnect();
-        } catch (Exception e) {
-          logger.warn(
-              "[readerExt={}] Failed to disconnect card during card removal sequence [reason={}]",
-              name,
-              e.getMessage());
-        }
-      }
+    if (allowPolling && isProtocolInnovatronBPrime) {
+      waitForCardRemovalByPolling();
+    } else {
+      waitForCardRemovalStandard();
     }
     if (logger.isTraceEnabled()) {
       if (!loopWaitCardRemoval.get()) {
@@ -618,7 +602,7 @@ final class PcscReaderAdapter
   private void waitForCardRemovalByPolling() {
     try {
       while (loopWaitCardRemoval.get()) {
-        if (!checkCardPresence()) {
+        if (!monitoringTerminal.isCardPresent()) {
           return;
         }
         Thread.sleep(25);
@@ -626,7 +610,7 @@ final class PcscReaderAdapter
           return;
         }
       }
-    } catch (ReaderIOException e) {
+    } catch (CardException e) {
       if (logger.isTraceEnabled()) {
         logger.trace(
             "[readerExt={}] ReaderIOException received while waiting for card removal [reason={}]",
