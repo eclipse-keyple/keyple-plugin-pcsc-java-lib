@@ -120,15 +120,6 @@ public interface PcscReader extends KeypleReaderExtension {
     RESET,
 
     /**
-     * Leaves the card in its current state without performing any reset or power down.
-     *
-     * <p>Corresponds to PC/SC `SCARD_LEAVE_CARD`.
-     *
-     * @since 2.0.0
-     */
-    LEAVE,
-
-    /**
      * Completely powers off the card.
      *
      * <p>Corresponds to PC/SC `SCARD_UNPOWER_CARD`.
@@ -210,14 +201,22 @@ public interface PcscReader extends KeypleReaderExtension {
   PcscReader setIsoProtocol(IsoProtocol isoProtocol);
 
   /**
-   * Changes the action to be taken after disconnection (default value {@link
-   * DisconnectionMode#RESET}).
+   * Changes the action to be taken when {@link
+   * org.eclipse.keyple.core.plugin.spi.reader.ReaderSpi#closePhysicalChannel()} is called (default
+   * value {@link DisconnectionMode#RESET}).
    *
-   * <p>The card is either reset or left as is.
+   * <p>This setting applies to the forced-close path (e.g. non-observable mode, or abnormal
+   * termination). In observable mode, the channel is closed by {@code deselectCard()} (always
+   * SCARD_UNPOWER_CARD) before card-removal detection, so {@code closePhysicalChannel()} is
+   * typically a no-op and this setting has no effect.
+   *
+   * <p>{@link DisconnectionMode#UNPOWER} and {@link DisconnectionMode#EJECT} require the default
+   * jnasmartcardio provider; they silently fall back to {@link DisconnectionMode#RESET} with other
+   * providers.
    *
    * @param disconnectionMode The {@link DisconnectionMode} to use (must be not null).
    * @return This instance.
-   * @throws IllegalArgumentException If disconnectionMode is null
+   * @throws IllegalArgumentException If disconnectionMode is null.
    * @since 2.0.0
    */
   PcscReader setDisconnectionMode(DisconnectionMode disconnectionMode);
