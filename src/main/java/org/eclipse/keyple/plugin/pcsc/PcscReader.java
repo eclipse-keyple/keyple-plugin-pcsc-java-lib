@@ -201,14 +201,13 @@ public interface PcscReader extends KeypleReaderExtension {
   PcscReader setIsoProtocol(IsoProtocol isoProtocol);
 
   /**
-   * Changes the action to be taken when {@link
-   * org.eclipse.keyple.core.plugin.spi.reader.ReaderSpi#closePhysicalChannel()} is called (default
-   * value {@link DisconnectionMode#RESET}).
+   * Changes the action to be taken when the internal {@code closePhysicalChannel()} method is
+   * called (default value {@link DisconnectionMode#RESET}).
    *
    * <p>This setting applies to the forced-close path (e.g. non-observable mode, or abnormal
    * termination). In observable mode, the channel is closed by {@code deselectCard()} (always
-   * SCARD_UNPOWER_CARD) before card-removal detection, so {@code closePhysicalChannel()} is
-   * typically a no-op and this setting has no effect.
+   * SCARD_UNPOWER_CARD) before card-removal detection, so the internal {@code
+   * closePhysicalChannel()} method is typically a no-op and this setting has no effect.
    *
    * <p>{@link DisconnectionMode#UNPOWER} and {@link DisconnectionMode#EJECT} require the default
    * jnasmartcardio provider; they silently fall back to {@link DisconnectionMode#RESET} with other
