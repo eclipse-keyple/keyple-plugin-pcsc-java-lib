@@ -60,6 +60,7 @@ final class PcscReaderAdapter
 
   private final AtomicBoolean loopWaitCardRemoval = new AtomicBoolean();
   private boolean isObservationActive;
+  private boolean isProtocolInnovatronBPrime;
 
   /**
    * Constructor.
@@ -234,6 +235,8 @@ final class PcscReaderAdapter
     if (protocolRule != null && !protocolRule.isEmpty()) {
       String atr = HexUtil.toHex(card.getATR().getBytes());
       isCurrentProtocol = Pattern.compile(protocolRule).matcher(atr).matches();
+      isProtocolInnovatronBPrime =
+          readerProtocol.equals(PcscCardCommunicationProtocol.INNOVATRON_B_PRIME.name());
     } else {
       isCurrentProtocol = false;
     }
@@ -258,6 +261,31 @@ final class PcscReaderAdapter
   @Override
   public void onStopDetection() {
     isObservationActive = false;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @since 3.0.0
+   */
+  @Override
+  public void deselectCard() {
+    try {
+      if (card != null) {
+        if (card instanceof Smartcardio.JnaCard) {
+          // disconnect using the extended mode allowing UNPOWER
+          ((Smartcardio.JnaCard) card).disconnect(getDisposition(DisconnectionMode.UNPOWER));
+          // reset the reader state to avoid bad card detection next time
+          communicationTerminal.connect("*").disconnect(false);
+        } else {
+          card.disconnect(true);
+        }
+      }
+    } catch (CardException e) {
+      logger.warn("Failed to close the physical channel. Reader: " + name, e);
+    } finally {
+      resetContext();
+    }
   }
 
   /**
@@ -312,8 +340,7 @@ final class PcscReaderAdapter
    */
   @Override
   public void closePhysicalChannel() throws ReaderIOException {
-    // If the reader is observed, the actual disconnection will be done in the card removal sequence
-    if (!isObservationActive) {
+    if (!isProtocolInnovatronBPrime || !isObservationActive) {
       disconnect();
     }
   }
@@ -340,9 +367,7 @@ final class PcscReaderAdapter
     try {
       if (card != null) {
         DisconnectionMode effectiveMode =
-            isCurrentProtocol(PcscCardCommunicationProtocol.INNOVATRON_B_PRIME.name())
-                ? DisconnectionMode.UNPOWER
-                : disconnectionMode;
+            isProtocolInnovatronBPrime ? DisconnectionMode.UNPOWER : disconnectionMode;
         if (card instanceof Smartcardio.JnaCard) {
           // disconnect using the extended mode allowing UNPOWER
           ((Smartcardio.JnaCard) card).disconnect(getDisposition(effectiveMode));
@@ -424,7 +449,9 @@ final class PcscReaderAdapter
   public boolean checkCardPresence() throws ReaderIOException {
     try {
       boolean isCardPresent = communicationTerminal.isCardPresent();
-      closePhysicalChannelSafely();
+      if (!isCardPresent && card != null) {
+        closePhysicalChannelSafely();
+      }
       return isCardPresent;
     } catch (CardException e) {
       throw new ReaderIOException("Failed to check card presence. Reader: " + name, e);
@@ -451,6 +478,9 @@ final class PcscReaderAdapter
    */
   @Override
   public String getPowerOnData() {
+    if (card == null) {
+      return "";
+    }
     return HexUtil.toHex(card.getATR().getBytes());
   }
 
@@ -525,8 +555,7 @@ final class PcscReaderAdapter
   @Override
   public void monitorCardPresenceDuringProcessing()
       throws ReaderIOException, TaskCanceledException {
-    doWaitForCardRemoval(
-        !isCurrentProtocol(PcscCardCommunicationProtocol.INNOVATRON_B_PRIME.name()));
+    doWaitForCardRemoval(!isProtocolInnovatronBPrime);
   }
 
   /**
@@ -556,13 +585,13 @@ final class PcscReaderAdapter
     }
     loopWaitCardRemoval.set(true);
     try {
-      if (allowPolling && disconnectionMode == DisconnectionMode.UNPOWER) {
+      if (allowPolling && isProtocolInnovatronBPrime) {
         waitForCardRemovalByPolling();
       } else {
         waitForCardRemovalStandard();
       }
     } finally {
-      if (loopWaitCardRemoval.get()) {
+      if (loopWaitCardRemoval.get() && isProtocolInnovatronBPrime) {
         try {
           disconnect();
         } catch (Exception e) {
@@ -589,16 +618,18 @@ final class PcscReaderAdapter
   private void waitForCardRemovalByPolling() {
     try {
       while (loopWaitCardRemoval.get()) {
-        transmitApdu(pingApdu);
+        if (!checkCardPresence()) {
+          return;
+        }
         Thread.sleep(25);
         if (Thread.interrupted()) {
           return;
         }
       }
-    } catch (CardIOException | ReaderIOException e) {
+    } catch (ReaderIOException e) {
       if (logger.isTraceEnabled()) {
         logger.trace(
-            "[readerExt={}] Expected IOException received while waiting for card removal [reason={}]",
+            "[readerExt={}] ReaderIOException received while waiting for card removal [reason={}]",
             getName(),
             e.getMessage());
       }
