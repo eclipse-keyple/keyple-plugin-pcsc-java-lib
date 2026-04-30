@@ -375,7 +375,7 @@ final class PcscReaderAdapter
         ((Smartcardio.JnaCard) card).disconnect(getDisposition(disconnectionMode));
       } else {
         // UNPOWER and EJECT are not available outside jnasmartcardio: fall back to RESET
-        card.disconnect(true);
+        card.disconnect(disconnectionMode != DisconnectionMode.LEAVE);
       }
     } catch (CardException e) {
       String msg = e.getMessage() != null ? e.getMessage() : "";
@@ -426,11 +426,11 @@ final class PcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * <p>When the channel is closed (canal fermé), attempts a full {@code SCardConnect()} to perform
-   * anti-collision for contactless readers. On success the channel is marked open and a subsequent
-   * call to {@link #openPhysicalChannel()} is a no-op. When the channel is open (canal ouvert),
-   * checks physical presence via {@code SCardGetStatusChange} and calls {@link
-   * #closePhysicalChannel()} internally if the card is no longer present.
+   * <p>When the channel is closed, attempts a full {@code SCardConnect()} to perform anti-collision
+   * for contactless readers. On success the channel is marked open and a subsequent call to {@link
+   * #openPhysicalChannel()} is a no-op. When the channel is open, checks physical presence via
+   * {@code SCardGetStatusChange} and calls {@link #closePhysicalChannel()} internally if the card
+   * is no longer present.
    *
    * @since 2.0.0
    */
@@ -438,7 +438,7 @@ final class PcscReaderAdapter
   public boolean checkCardPresence() throws ReaderIOException {
     try {
       if (!isPhysicalChannelOpen) {
-        // Canal fermé: attempt connection (performs anti-collision for contactless readers)
+        // channel closed: attempt connection (performs anti-collision for contactless readers)
         try {
           isProtocolInnovatronBPrime = false;
           card = communicationTerminal.connect(protocol);
@@ -446,14 +446,14 @@ final class PcscReaderAdapter
             card.beginExclusive();
           }
           channel = card.getBasicChannel();
-          powerOnData = HexUtil.toHex( card.getATR().getBytes());
+          powerOnData = HexUtil.toHex(card.getATR().getBytes());
           isPhysicalChannelOpen = true;
           return true;
         } catch (CardNotPresentException e) {
           return false;
         }
       } else {
-        // Canal ouvert: verify card still responds
+        // channel open: verify card still responds
         boolean isPresent = communicationTerminal.isCardPresent();
         if (!isPresent) {
           try {
@@ -472,7 +472,7 @@ final class PcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   *   * @since 2.0.0
+   * <p>* @since 2.0.0
    */
   @Override
   public String getPowerOnData() {
