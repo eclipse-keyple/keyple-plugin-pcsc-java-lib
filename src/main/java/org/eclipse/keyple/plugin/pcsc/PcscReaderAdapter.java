@@ -403,6 +403,8 @@ final class PcscReaderAdapter
     switch (mode) {
       case RESET:
         return Smartcardio.JnaCard.SCARD_RESET_CARD;
+      case LEAVE:
+        return Smartcardio.JnaCard.SCARD_LEAVE_CARD;
       case UNPOWER:
         return Smartcardio.JnaCard.SCARD_UNPOWER_CARD;
       case EJECT:
