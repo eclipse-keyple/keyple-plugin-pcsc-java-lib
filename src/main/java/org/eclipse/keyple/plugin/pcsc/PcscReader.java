@@ -120,6 +120,15 @@ public interface PcscReader extends KeypleReaderExtension {
     RESET,
 
     /**
+     * Leaves the card in its current state without performing any reset or power down.
+     *
+     * <p>Corresponds to PC/SC `SCARD_LEAVE_CARD`.
+     *
+     * @since 2.0.0
+     */
+    LEAVE,
+
+    /**
      * Completely powers off the card.
      *
      * <p>Corresponds to PC/SC `SCARD_UNPOWER_CARD`.
