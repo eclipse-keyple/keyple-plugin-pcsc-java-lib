@@ -53,15 +53,15 @@ final class PcscReaderAdapter
   private CardChannel channel;
   private Boolean isContactless;
   private String protocol = IsoProtocol.ANY.getValue();
-  private boolean isModeExclusive = false;
+  private boolean isModeExclusive;
   private DisconnectionMode disconnectionMode = DisconnectionMode.RESET;
-  private boolean physicalChannelOpen = false;
-  private byte[] cachedPowerOnData = null;
+  private boolean isPhysicalChannelOpen;
+  private String powerOnData = "";
 
   private final AtomicBoolean loopWaitCard = new AtomicBoolean();
   private final AtomicBoolean loopWaitCardRemoval = new AtomicBoolean();
   private boolean isObservationActive;
-  private boolean isProtocolInnovatronBPrime = false;
+  private boolean isProtocolInnovatronBPrime;
 
   /**
    * Constructor.
@@ -234,8 +234,7 @@ final class PcscReaderAdapter
     String protocolRule = pluginAdapter.getProtocolRule(readerProtocol);
     boolean isCurrentProtocol;
     if (protocolRule != null && !protocolRule.isEmpty()) {
-      String atr = cachedPowerOnData != null ? HexUtil.toHex(cachedPowerOnData) : "";
-      isCurrentProtocol = Pattern.compile(protocolRule).matcher(atr).matches();
+      isCurrentProtocol = Pattern.compile(protocolRule).matcher(powerOnData).matches();
       isProtocolInnovatronBPrime =
           readerProtocol.equals(PcscCardCommunicationProtocol.INNOVATRON_B_PRIME.name());
     } else {
@@ -275,7 +274,7 @@ final class PcscReaderAdapter
    */
   @Override
   public void deselectCard() {
-    if (!physicalChannelOpen) {
+    if (!isPhysicalChannelOpen) {
       return;
     }
     try {
@@ -297,8 +296,8 @@ final class PcscReaderAdapter
             "[readerExt={}] deselectCard: card already removed [reason={}]", name, e.getMessage());
       }
     } finally {
-      // cachedPowerOnData is intentionally kept: card is physically present in HALT state
-      physicalChannelOpen = false;
+      // powerOnData is intentionally kept: card is physically present in HALT state
+      isPhysicalChannelOpen = false;
       card = null;
       channel = null;
     }
@@ -324,7 +323,7 @@ final class PcscReaderAdapter
    */
   @Override
   public void openPhysicalChannel() throws ReaderIOException, CardIOException {
-    if (physicalChannelOpen) {
+    if (isPhysicalChannelOpen) {
       return;
     }
     isProtocolInnovatronBPrime = false;
@@ -345,8 +344,8 @@ final class PcscReaderAdapter
         }
       }
       channel = card.getBasicChannel();
-      cachedPowerOnData = card.getATR().getBytes();
-      physicalChannelOpen = true;
+      powerOnData = HexUtil.toHex(card.getATR().getBytes());
+      isPhysicalChannelOpen = true;
     } catch (CardNotPresentException e) {
       throw new CardIOException("Card removed. Reader: " + name, e);
     } catch (CardException e) {
@@ -368,7 +367,7 @@ final class PcscReaderAdapter
    */
   @Override
   public void closePhysicalChannel() throws ReaderIOException {
-    if (!physicalChannelOpen) {
+    if (!isPhysicalChannelOpen) {
       return;
     }
     try {
@@ -386,10 +385,10 @@ final class PcscReaderAdapter
         throw new ReaderIOException("Failed to close the physical channel. Reader: " + name, e);
       }
     } finally {
-      physicalChannelOpen = false;
+      isPhysicalChannelOpen = false;
       card = null;
       channel = null;
-      cachedPowerOnData = null;
+      powerOnData = "";
     }
   }
 
@@ -421,7 +420,7 @@ final class PcscReaderAdapter
    */
   @Override
   public boolean isPhysicalChannelOpen() {
-    return physicalChannelOpen;
+    return isPhysicalChannelOpen;
   }
 
   /**
@@ -438,7 +437,7 @@ final class PcscReaderAdapter
   @Override
   public boolean checkCardPresence() throws ReaderIOException {
     try {
-      if (!physicalChannelOpen) {
+      if (!isPhysicalChannelOpen) {
         // Canal fermé: attempt connection (performs anti-collision for contactless readers)
         try {
           isProtocolInnovatronBPrime = false;
@@ -447,8 +446,8 @@ final class PcscReaderAdapter
             card.beginExclusive();
           }
           channel = card.getBasicChannel();
-          cachedPowerOnData = card.getATR().getBytes();
-          physicalChannelOpen = true;
+          powerOnData = HexUtil.toHex( card.getATR().getBytes());
+          isPhysicalChannelOpen = true;
           return true;
         } catch (CardNotPresentException e) {
           return false;
@@ -473,14 +472,11 @@ final class PcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0.0
+   *   * @since 2.0.0
    */
   @Override
   public String getPowerOnData() {
-    if (cachedPowerOnData == null) {
-      return "";
-    }
-    return HexUtil.toHex(cachedPowerOnData);
+    return powerOnData;
   }
 
   /**
