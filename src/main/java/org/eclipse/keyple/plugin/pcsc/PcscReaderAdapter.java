@@ -150,6 +150,7 @@ final class PcscReaderAdapter
     // activate loop
     loopWaitCard.set(true);
 
+    boolean interrupted = false;
     try {
       while (loopWaitCard.get()) {
         if (monitoringTerminal.waitForCardPresent(cardMonitoringCycleDuration)) {
@@ -157,9 +158,17 @@ final class PcscReaderAdapter
           if (logger.isTraceEnabled()) {
             logger.trace("[readerExt={}] Card inserted", getName());
           }
+          if (!isPhysicalChannelOpen) {
+            // channel closed: attempt connection (performs anti-collision for contactless readers)
+            try {
+              connectCard();
+            } catch (CardNotPresentException e) {
+            }
+          }
           return;
         }
         if (Thread.interrupted()) {
+          interrupted = true;
           break;
         }
       }
@@ -170,8 +179,26 @@ final class PcscReaderAdapter
       // here, it is a communication failure with the reader
       throw new ReaderIOException("Failed to wait for a card insertion. Reader: " + name, e);
     }
+    if (interrupted) {
+      throw new TaskCanceledException(
+          "The wait for a card insertion task has been cancelled (interrupted). Reader: " + name,
+          new InterruptedException());
+    }
     throw new TaskCanceledException(
         "The wait for a card insertion task has been cancelled. Reader: " + name);
+  }
+
+  private void connectCard() throws CardException {
+    isProtocolInnovatronBPrime = false;
+    card = communicationTerminal.connect(protocol);
+    if (isModeExclusive) {
+      card.beginExclusive();
+    }
+    channel = card.getBasicChannel();
+    powerOnData = HexUtil.toHex(card.getATR().getBytes());
+    isPhysicalChannelOpen = true;
+    isProtocolInnovatronBPrime =
+        isCurrentProtocol(PcscCardCommunicationProtocol.INNOVATRON_B_PRIME.name());
   }
 
   /**
@@ -274,7 +301,7 @@ final class PcscReaderAdapter
    */
   @Override
   public void deselectCard() {
-    if (!isPhysicalChannelOpen) {
+    if (!isPhysicalChannelOpen || isProtocolInnovatronBPrime) {
       return;
     }
     try {
@@ -314,65 +341,28 @@ final class PcscReaderAdapter
   }
 
   /**
-   * {@inheritDoc}
+   * Closes the physical channel with the card.
    *
-   * <p>No-op if the channel was already opened by {@link #checkCardPresence()} during
-   * anti-collision.
-   *
-   * @since 2.0.0
-   */
-  @Override
-  public void openPhysicalChannel() throws ReaderIOException, CardIOException {
-    if (isPhysicalChannelOpen) {
-      return;
-    }
-    isProtocolInnovatronBPrime = false;
-    try {
-      if (logger.isDebugEnabled()) {
-        logger.debug(
-            "[readerExt={}] Opening card physical channel [protocol={}]", getName(), protocol);
-      }
-      card = communicationTerminal.connect(protocol);
-      if (isModeExclusive) {
-        card.beginExclusive();
-        if (logger.isDebugEnabled()) {
-          logger.debug("[readerExt={}] Card physical channel opened [mode=EXCLUSIVE]", getName());
-        }
-      } else {
-        if (logger.isDebugEnabled()) {
-          logger.debug("[readerExt={}] Card physical channel opened [mode=SHARED]", getName());
-        }
-      }
-      channel = card.getBasicChannel();
-      powerOnData = HexUtil.toHex(card.getATR().getBytes());
-      isPhysicalChannelOpen = true;
-    } catch (CardNotPresentException e) {
-      throw new CardIOException("Card removed. Reader: " + name, e);
-    } catch (CardException e) {
-      throw new ReaderIOException("Failed to open the physical channel. Reader: " + name, e);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * <p>Forced close using the configured {@link DisconnectionMode}. No-op if the channel is already
-   * closed. For contactless readers, {@link #deselectCard()} (SCARD_UNPOWER_CARD) should be called
-   * first for a protocol-clean HALT transition; this method is then a no-op in normal flow.
+   * <p>No-op if the channel is already closed. For contactless readers, {@link #deselectCard()}
+   * (SCARD_UNPOWER_CARD) should be called first for a protocol-clean HALT transition; this method
+   * is then a no-op in normal flow.
    *
    * <p>UNPOWER and EJECT modes require jnasmartcardio; they silently fall back to RESET with other
    * providers.
    *
+   * @throws ReaderIOException If the communication with the reader has failed.
    * @since 2.0.0
    */
-  @Override
-  public void closePhysicalChannel() throws ReaderIOException {
+  void closePhysicalChannel() throws ReaderIOException {
     if (!isPhysicalChannelOpen) {
       return;
     }
     try {
       if (card instanceof Smartcardio.JnaCard) {
-        ((Smartcardio.JnaCard) card).disconnect(getDisposition(disconnectionMode));
+        ((Smartcardio.JnaCard) card)
+            .disconnect(
+                getDisposition(
+                    isProtocolInnovatronBPrime ? DisconnectionMode.UNPOWER : disconnectionMode));
       } else {
         // UNPOWER and EJECT are not available outside jnasmartcardio: fall back to RESET
         card.disconnect(disconnectionMode != DisconnectionMode.LEAVE);
@@ -416,54 +406,37 @@ final class PcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0.0
-   */
-  @Override
-  public boolean isPhysicalChannelOpen() {
-    return isPhysicalChannelOpen;
-  }
-
-  /**
-   * {@inheritDoc}
+   * <p>Checks whether a card is present and activates communication with it.
    *
    * <p>When the channel is closed, attempts a full {@code SCardConnect()} to perform anti-collision
-   * for contactless readers. On success the channel is marked open and a subsequent call to {@link
-   * #openPhysicalChannel()} is a no-op. When the channel is open, checks physical presence via
-   * {@code SCardGetStatusChange} and calls {@link #closePhysicalChannel()} internally if the card
-   * is no longer present.
+   * for contactless readers. On success the channel is marked open and {@link #getPowerOnData()}
+   * returns the ATR. When the channel is open, checks physical presence via {@code
+   * SCardGetStatusChange} and calls {@link #closePhysicalChannel()} internally if the card is no
+   * longer present.
    *
-   * @since 2.0.0
+   * @since 3.0.0
    */
   @Override
-  public boolean checkCardPresence() throws ReaderIOException {
+  public boolean isCardPresent() throws ReaderIOException {
     try {
-      if (!isPhysicalChannelOpen) {
-        // channel closed: attempt connection (performs anti-collision for contactless readers)
-        try {
-          isProtocolInnovatronBPrime = false;
-          card = communicationTerminal.connect(protocol);
-          if (isModeExclusive) {
-            card.beginExclusive();
+      boolean isPresent = communicationTerminal.isCardPresent();
+      if (isPresent) {
+        if (!isPhysicalChannelOpen) {
+          // channel closed: attempt connection (performs anti-collision for contactless readers)
+          try {
+            connectCard();
+          } catch (CardNotPresentException e) {
+            isPresent = false;
           }
-          channel = card.getBasicChannel();
-          powerOnData = HexUtil.toHex(card.getATR().getBytes());
-          isPhysicalChannelOpen = true;
-          return true;
-        } catch (CardNotPresentException e) {
-          return false;
         }
       } else {
-        // channel open: verify card still responds
-        boolean isPresent = communicationTerminal.isCardPresent();
-        if (!isPresent) {
-          try {
-            closePhysicalChannel();
-          } catch (ReaderIOException ignored) {
-            // card already gone; flags are reset in closePhysicalChannel finally block
-          }
+        try {
+          closePhysicalChannel();
+        } catch (ReaderIOException ignored) {
+          // card already gone; flags are reset in closePhysicalChannel finally block
         }
-        return isPresent;
       }
+      return isPresent;
     } catch (CardException e) {
       throw new ReaderIOException("Failed to check card presence. Reader: " + name, e);
     }
@@ -472,7 +445,7 @@ final class PcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * <p>* @since 2.0.0
+   * @since 2.0.0
    */
   @Override
   public String getPowerOnData() {
@@ -581,6 +554,7 @@ final class PcscReaderAdapter
     loopWaitCardRemoval.set(true);
     if (allowPolling && isProtocolInnovatronBPrime) {
       waitForCardRemovalByPolling();
+
     } else {
       waitForCardRemovalStandard();
     }
@@ -600,20 +574,18 @@ final class PcscReaderAdapter
   private void waitForCardRemovalByPolling() {
     try {
       while (loopWaitCardRemoval.get()) {
-        if (!monitoringTerminal.isCardPresent()) {
+        try {
+          if (!isCardPresent()) {
+            return;
+          }
+        } catch (ReaderIOException ignored) {
           return;
         }
         Thread.sleep(25);
         if (Thread.interrupted()) {
+          Thread.currentThread().interrupt();
           return;
         }
-      }
-    } catch (CardException e) {
-      if (logger.isTraceEnabled()) {
-        logger.trace(
-            "[readerExt={}] ReaderIOException received while waiting for card removal [reason={}]",
-            getName(),
-            e.getMessage());
       }
     } catch (InterruptedException e) {
       if (logger.isTraceEnabled()) {

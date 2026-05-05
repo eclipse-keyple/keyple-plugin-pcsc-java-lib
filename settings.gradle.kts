@@ -1,5 +1,7 @@
 rootProject.name = "keyple-plugin-pcsc-java-lib"
 
+include("validation-app")
+
 pluginManagement {
   repositories {
     gradlePluginPortal()
