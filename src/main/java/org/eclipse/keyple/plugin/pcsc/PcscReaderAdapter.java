@@ -118,14 +118,14 @@ final class PcscReaderAdapter
 
       // Terminal not found in new context, fall back to same terminal
       logger.warn(
-          "[readerExt={}] Could not find terminal in separate context, using shared context (may cause issues on Linux)",
+          "[readerExt={}] Terminal not found in monitoring context, falling back to shared context (may cause issues on Linux)",
           terminalName);
       return communicationTerminal;
 
     } catch (Exception e) {
       // Failed to create separate context, fall back to same terminal
       logger.warn(
-          "[readerExt={}] Could not create separate monitoring context [reason={}], using shared context (may cause issues on Linux)",
+          "[readerExt={}] Monitoring context creation failed [reason={}], falling back to shared context (may cause issues on Linux)",
           terminalName,
           e.getMessage());
       return communicationTerminal;
@@ -208,9 +208,7 @@ final class PcscReaderAdapter
   public void activateProtocol(String readerProtocol) {
     if (logger.isTraceEnabled()) {
       logger.trace(
-          "[readerExt={}] Activating protocol takes no action [protocol={}]",
-          getName(),
-          readerProtocol);
+          "[readerExt={}] Protocol activation is a no-op [protocol={}]", getName(), readerProtocol);
     }
   }
 
@@ -223,7 +221,7 @@ final class PcscReaderAdapter
   public void deactivateProtocol(String readerProtocol) {
     if (logger.isTraceEnabled()) {
       logger.trace(
-          "[readerExt={}] de-activating protocol takes no action [protocol={}]",
+          "[readerExt={}] Protocol deactivation is a no-op [protocol={}]",
           getName(),
           readerProtocol);
     }
@@ -266,9 +264,9 @@ final class PcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * <p>Sends S(DESELECT) to put the PICC in HALT state (via SCARD_UNPOWER_CARD). The ATR cache is
-   * preserved so the framework can still log it after deselection while the card remains physically
-   * present.
+   * <p>Sends S(DESELECT) to put the PICC in HALT state (via SCARD_UNPOWER_CARD). No-op for
+   * Innovatron B'Prime cards. The ATR is preserved so the framework can access it while the card
+   * remains physically present.
    *
    * @since 3.0.0
    */
@@ -293,7 +291,9 @@ final class PcscReaderAdapter
       // Card already removed before deselect: treat silently (spec §4.3 pt 5)
       if (logger.isDebugEnabled()) {
         logger.debug(
-            "[readerExt={}] deselectCard: card already removed [reason={}]", name, e.getMessage());
+            "[readerExt={}] Card already removed before deselect [reason={}]",
+            name,
+            e.getMessage());
       }
     } finally {
       // powerOnData is intentionally kept: card is physically present in HALT state
@@ -324,14 +324,10 @@ final class PcscReaderAdapter
   }
 
   /**
-   * Closes the physical channel with the card.
+   * Disconnects the card and resets the card state fields.
    *
-   * <p>No-op if the channel is already closed. For contactless readers, {@link #deselectCard()}
-   * (SCARD_UNPOWER_CARD) should be called first for a protocol-clean HALT transition; this method
-   * is then a no-op in normal flow.
-   *
-   * <p>UNPOWER and EJECT modes require jnasmartcardio; they silently fall back to RESET with other
-   * providers.
+   * <p>No-op if no card is connected. UNPOWER and EJECT modes require jnasmartcardio; they fall
+   * back to RESET with other providers.
    */
   private void disconnectCard() throws CardException {
     if (card == null) {
@@ -383,13 +379,9 @@ final class PcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * <p>Checks whether a card is present and activates communication with it.
-   *
-   * <p>When the channel is closed, attempts a full {@code SCardConnect()} to perform anti-collision
-   * for contactless readers. On success the channel is marked open and {@link #getPowerOnData()}
-   * returns the ATR. When the channel is open, checks physical presence via {@code
-   * SCardGetStatusChange} and calls {@link #disconnectCard()} internally if the card is no longer
-   * present.
+   * <p>Checks physical card presence via {@code SCardGetStatusChange}. If present, connects via
+   * {@code SCardConnect()} and updates {@link #getPowerOnData()}. If absent, cleans up the card
+   * state.
    *
    * @since 3.0.0
    */
@@ -434,24 +426,21 @@ final class PcscReaderAdapter
       try {
         apduResponseData = channel.transmit(new CommandAPDU(apduCommandData)).getBytes();
       } catch (CardNotPresentException e) {
-        throw new CardIOException(
-            "Card is not present. Unable to transmit APDU. Reader: " + name, e);
+        throw new CardIOException("Card not present. APDU transmit failed. Reader: " + name, e);
       } catch (CardException e) {
         if (e.getMessage().contains("CARD")
             || e.getMessage().contains("NOT_TRANSACTED")
             || e.getMessage().contains("INVALID_ATR")) {
           throw new CardIOException(
-              "Failed to communicate with card. Unable to transmit APDU. Reader: " + name, e);
+              "Card communication error. APDU transmit failed. Reader: " + name, e);
         } else {
           throw new ReaderIOException(
-              "Failed to communicate with card reader. Unable to transmit APDU. Reader: " + name,
-              e);
+              "Reader communication error. APDU transmit failed. Reader: " + name, e);
         }
       } catch (IllegalStateException | IllegalArgumentException e) {
         // card could have been removed prematurely
         throw new CardIOException(
-            "Card could have been removed prematurely. Unable to transmit APDU. Reader: " + name,
-            e);
+            "Card removed prematurely. APDU transmit failed. Reader: " + name, e);
       }
     } else {
       // could occur if the card was removed
@@ -520,7 +509,7 @@ final class PcscReaderAdapter
       throws ReaderIOException, TaskCanceledException {
     boolean usePolling = allowPolling && isProtocolInnovatronBPrime;
     if (logger.isTraceEnabled()) {
-      logger.trace("[readerExt={}] Starting waiting card removal", name);
+      logger.trace("[readerExt={}] Starting card removal wait", name);
     }
     isWaitingForRemoval.set(true);
     if (usePolling) {
@@ -565,7 +554,7 @@ final class PcscReaderAdapter
     } catch (InterruptedException e) {
       if (logger.isTraceEnabled()) {
         logger.trace(
-            "[readerExt={}] InterruptedException received while waiting for card removal: {}",
+            "[readerExt={}] Interrupted while waiting for card removal [reason={}]",
             getName(),
             e.getMessage());
       }
@@ -646,7 +635,7 @@ final class PcscReaderAdapter
   public PcscReader setIsoProtocol(IsoProtocol isoProtocol) {
     Assert.getInstance().notNull(isoProtocol, "isoProtocol");
     logger.info(
-        "[readerExt={}] Set ISO protocol [protocol={}, value={}]",
+        "[readerExt={}] Set ISO protocol [name={}, value={}]",
         getName(),
         isoProtocol.name(),
         isoProtocol.getValue());
