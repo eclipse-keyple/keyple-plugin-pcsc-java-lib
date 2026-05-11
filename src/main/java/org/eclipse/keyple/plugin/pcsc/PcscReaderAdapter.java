@@ -83,20 +83,14 @@ final class PcscReaderAdapter
   }
 
   /**
-   * Creates a separate CardTerminal instance for monitoring operations using a dedicated PC/SC
-   * context.
+   * Returns a CardTerminal dedicated to monitoring operations (waitForCardPresent/Absent).
    *
-   * <p>Under Linux with pcsc-lite, sharing the same SCARDCONTEXT between blocking monitoring calls
-   * (waitForCardPresent/Absent) and communication operations (transmit) can cause thread contention
-   * and SCARD_E_SHARING_VIOLATION errors due to the self-pipe trick mechanism used for
-   * cancellation.
+   * <p>A separate PC/SC context avoids SCARD_E_SHARING_VIOLATION on Linux, where pcsc-lite does not
+   * safely handle concurrent access from multiple threads on the same SCARDCONTEXT. Falls back to
+   * the communication terminal if a separate context cannot be created.
    *
-   * <p>This method attempts to create a new TerminalFactory instance to obtain a separate context.
-   * If this fails (e.g., on older JRE versions or with certain security providers), it falls back
-   * to using the same terminal, which may cause issues on Linux but will still work on Windows.
-   *
-   * @param terminalName The name of the terminal to create a monitoring instance for.
-   * @return A CardTerminal instance for monitoring, either with a separate context or the same one.
+   * @param terminalName name of the terminal to look up.
+   * @return a CardTerminal for monitoring, possibly shared with the communication terminal.
    */
   private CardTerminal createMonitoringTerminal(String terminalName) {
     try {
@@ -130,63 +124,6 @@ final class PcscReaderAdapter
           e.getMessage());
       return communicationTerminal;
     }
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @since 2.0.0
-   */
-  @Override
-  public void waitForCardInsertion() throws TaskCanceledException, ReaderIOException {
-
-    if (logger.isTraceEnabled()) {
-      logger.trace(
-          "[readerExt={}] Starting waiting card insertion [loopLatencyMs={}]",
-          getName(),
-          cardMonitoringCycleDuration);
-    }
-
-    // activate loop
-    isWaitingForInsertion.set(true);
-
-    try {
-      while (isWaitingForInsertion.get()) {
-        if (monitoringTerminal.waitForCardPresent(cardMonitoringCycleDuration)) {
-          // card inserted
-          if (logger.isTraceEnabled()) {
-            logger.trace("[readerExt={}] Card inserted", getName());
-          }
-          try {
-            connectCard();
-            return;
-          } catch (CardNotPresentException e) {
-          }
-        }
-        if (Thread.interrupted()) {
-          isWaitingForInsertion.set(false);
-        }
-      }
-      if (logger.isTraceEnabled()) {
-        logger.trace("[readerExt={}] Waiting card insertion stopped", getName());
-      }
-    } catch (CardException | RuntimeException e) {
-      // here, it is a communication failure with the reader
-      throw new ReaderIOException("Failed to wait for a card insertion. Reader: " + name, e);
-    }
-    throw new TaskCanceledException(
-        "The wait for a card insertion task has been cancelled. Reader: " + name,
-        new InterruptedException());
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @since 2.0.0
-   */
-  @Override
-  public void stopWaitForCardInsertion() {
-    isWaitingForInsertion.set(false);
   }
 
   /**
@@ -247,133 +184,8 @@ final class PcscReaderAdapter
    * @since 2.0.0
    */
   @Override
-  public void onStartDetection() {
-    isObservationActive = true;
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @since 2.0.0
-   */
-  @Override
-  public void onStopDetection() {
-    isObservationActive = false;
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * <p>Sends S(DESELECT) to put the PICC in HALT state (via SCARD_UNPOWER_CARD). No-op for
-   * Innovatron B'Prime cards. The ATR is preserved so the framework can access it while the card
-   * remains physically present.
-   *
-   * @since 3.0.0
-   */
-  @Override
-  public void deselectCard() {
-    if (card == null || isProtocolInnovatronBPrime) {
-      return;
-    }
-    try {
-      if (card instanceof Smartcardio.JnaCard) {
-        ((Smartcardio.JnaCard) card).disconnect(getDisposition(DisconnectionMode.UNPOWER));
-        // reset the driver state to avoid stale reader state after UNPOWER on some drivers
-        try {
-          communicationTerminal.connect("*").disconnect(false);
-        } catch (CardException ignored) {
-          // NOP
-        }
-      } else {
-        card.disconnect(true);
-      }
-    } catch (CardException e) {
-      // Card already removed before deselect: treat silently (spec §4.3 pt 5)
-      if (logger.isDebugEnabled()) {
-        logger.debug(
-            "[readerExt={}] Card already removed before deselect [reason={}]",
-            name,
-            e.getMessage());
-      }
-    } finally {
-      // powerOnData is intentionally kept: card is physically present in HALT state
-      card = null;
-      channel = null;
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @since 2.0.0
-   */
-  @Override
   public String getName() {
     return name;
-  }
-
-  private void connectCard() throws CardException {
-    card = communicationTerminal.connect(protocol);
-    if (isModeExclusive) {
-      card.beginExclusive();
-    }
-    channel = card.getBasicChannel();
-    powerOnData = HexUtil.toHex(card.getATR().getBytes());
-    isProtocolInnovatronBPrime =
-        isCurrentProtocol(PcscCardCommunicationProtocol.INNOVATRON_B_PRIME.name());
-  }
-
-  /**
-   * Disconnects the card and resets the card state fields.
-   *
-   * <p>No-op if no card is connected. UNPOWER and EJECT modes require jnasmartcardio; they fall
-   * back to RESET with other providers.
-   */
-  private void disconnectCard() throws CardException {
-    if (card == null) {
-      return;
-    }
-    try {
-      if (card instanceof Smartcardio.JnaCard) {
-        ((Smartcardio.JnaCard) card)
-            .disconnect(
-                getDisposition(
-                    isProtocolInnovatronBPrime ? DisconnectionMode.UNPOWER : disconnectionMode));
-      } else {
-        // UNPOWER and EJECT are not available outside jnasmartcardio: fall back to RESET
-        card.disconnect(disconnectionMode != DisconnectionMode.LEAVE);
-      }
-    } catch (CardException e) {
-      String msg = e.getMessage() != null ? e.getMessage() : "";
-      if (!msg.contains("REMOVED") && !msg.contains("NO_SMARTCARD")) {
-        throw e;
-      }
-    } finally {
-      card = null;
-      channel = null;
-      powerOnData = "";
-    }
-  }
-
-  /**
-   * Maps a DisconnectionMode to the corresponding SCARD_* constant.
-   *
-   * @param mode The disconnection mode.
-   * @return The corresponding SCARD_* value.
-   */
-  private static int getDisposition(DisconnectionMode mode) {
-    switch (mode) {
-      case RESET:
-        return Smartcardio.JnaCard.SCARD_RESET_CARD;
-      case LEAVE:
-        return Smartcardio.JnaCard.SCARD_LEAVE_CARD;
-      case UNPOWER:
-        return Smartcardio.JnaCard.SCARD_UNPOWER_CARD;
-      case EJECT:
-        return Smartcardio.JnaCard.SCARD_EJECT_CARD;
-      default:
-        throw new IllegalArgumentException("Unknown DisconnectionMode: " + mode);
-    }
   }
 
   /**
@@ -480,6 +292,124 @@ final class PcscReaderAdapter
    * @since 2.0.0
    */
   @Override
+  public void onStartDetection() {
+    isObservationActive = true;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @since 2.0.0
+   */
+  @Override
+  public void onStopDetection() {
+    isObservationActive = false;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Unpowers the card (SCARD_UNPOWER_CARD) to put it in HALT state. No-op for Innovatron B'Prime
+   * cards. The ATR is preserved so the framework can access it while the card remains physically
+   * present.
+   *
+   * @since 3.0.0
+   */
+  @Override
+  public void deselectCard() {
+    if (card == null || isProtocolInnovatronBPrime) {
+      return;
+    }
+    try {
+      if (card instanceof Smartcardio.JnaCard) {
+        ((Smartcardio.JnaCard) card).disconnect(getDisposition(DisconnectionMode.UNPOWER));
+        // reset the driver state to avoid stale reader state after UNPOWER on some drivers
+        try {
+          communicationTerminal.connect("*").disconnect(false);
+        } catch (CardException ignored) {
+          // NOP
+        }
+      } else {
+        card.disconnect(true);
+      }
+    } catch (CardException e) {
+      // Card already removed before deselect: treat silently (spec §4.3 pt 5)
+      if (logger.isDebugEnabled()) {
+        logger.debug(
+            "[readerExt={}] Card already removed before deselect [reason={}]",
+            name,
+            e.getMessage());
+      }
+    } finally {
+      // powerOnData is intentionally kept: card is physically present in HALT state
+      card = null;
+      channel = null;
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @since 2.0.0
+   */
+  @Override
+  public void waitForCardInsertion() throws TaskCanceledException, ReaderIOException {
+
+    if (logger.isTraceEnabled()) {
+      logger.trace(
+          "[readerExt={}] Starting waiting card insertion [loopLatencyMs={}]",
+          getName(),
+          cardMonitoringCycleDuration);
+    }
+
+    // activate loop
+    isWaitingForInsertion.set(true);
+
+    try {
+      while (isWaitingForInsertion.get()) {
+        if (monitoringTerminal.waitForCardPresent(cardMonitoringCycleDuration)) {
+          // card inserted
+          if (logger.isTraceEnabled()) {
+            logger.trace("[readerExt={}] Card inserted", getName());
+          }
+          try {
+            connectCard();
+            return;
+          } catch (CardNotPresentException e) {
+          }
+        }
+        if (Thread.interrupted()) {
+          isWaitingForInsertion.set(false);
+        }
+      }
+      if (logger.isTraceEnabled()) {
+        logger.trace("[readerExt={}] Waiting card insertion stopped", getName());
+      }
+    } catch (CardException | RuntimeException e) {
+      // here, it is a communication failure with the reader
+      throw new ReaderIOException("Failed to wait for a card insertion. Reader: " + name, e);
+    }
+    throw new TaskCanceledException(
+        "The wait for a card insertion task has been cancelled. Reader: " + name,
+        new InterruptedException());
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @since 2.0.0
+   */
+  @Override
+  public void stopWaitForCardInsertion() {
+    isWaitingForInsertion.set(false);
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @since 2.0.0
+   */
+  @Override
   public void monitorCardPresenceDuringProcessing()
       throws ReaderIOException, TaskCanceledException {
     doWaitForCardRemoval(false);
@@ -503,78 +433,6 @@ final class PcscReaderAdapter
   @Override
   public void waitForCardRemoval() throws ReaderIOException, TaskCanceledException {
     doWaitForCardRemoval(true);
-  }
-
-  private void doWaitForCardRemoval(boolean allowPolling)
-      throws ReaderIOException, TaskCanceledException {
-    boolean usePolling = allowPolling && isProtocolInnovatronBPrime;
-    if (logger.isTraceEnabled()) {
-      logger.trace("[readerExt={}] Starting card removal wait", name);
-    }
-    isWaitingForRemoval.set(true);
-    if (usePolling) {
-      awaitCardRemovalByPolling();
-    } else {
-      awaitCardRemovalBlocking();
-    }
-    // clean up
-    try {
-      disconnectCard();
-    } catch (CardException | RuntimeException e) {
-      throw new ReaderIOException("Failed to disconnect card. Reader: " + name, e);
-    }
-    if (logger.isTraceEnabled()) {
-      if (!isWaitingForRemoval.get()) {
-        logger.trace("[readerExt={}] Waiting card removal stopped", name);
-      } else {
-        logger.trace("[readerExt={}] Card removed", name);
-      }
-    }
-    if (!isWaitingForRemoval.get()) {
-      throw new TaskCanceledException("Card removal wait task cancelled. Reader: " + name);
-    }
-  }
-
-  private void awaitCardRemovalByPolling() throws ReaderIOException {
-    try {
-      while (isWaitingForRemoval.get()) {
-        transmitApdu(pingApdu);
-        Thread.sleep(25);
-        if (Thread.interrupted()) {
-          isWaitingForRemoval.set(false);
-        }
-      }
-    } catch (CardIOException e) {
-      if (logger.isTraceEnabled()) {
-        logger.trace(
-            "[readerExt={}] Expected IOException received while waiting for card removal [reason={}]",
-            getName(),
-            e.getMessage());
-      }
-    } catch (InterruptedException e) {
-      if (logger.isTraceEnabled()) {
-        logger.trace(
-            "[readerExt={}] Interrupted while waiting for card removal [reason={}]",
-            getName(),
-            e.getMessage());
-      }
-      Thread.currentThread().interrupt();
-    }
-  }
-
-  private void awaitCardRemovalBlocking() throws ReaderIOException {
-    try {
-      while (isWaitingForRemoval.get()) {
-        if (monitoringTerminal.waitForCardAbsent(cardMonitoringCycleDuration)) {
-          return;
-        }
-        if (Thread.interrupted()) {
-          isWaitingForRemoval.set(false);
-        }
-      }
-    } catch (CardException e) {
-      throw new ReaderIOException("Failed to wait for the card removal. Reader: " + name, e);
-    }
   }
 
   /**
@@ -660,7 +518,7 @@ final class PcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0.0
+   * @since 2.1.0
    */
   @Override
   public byte[] transmitControlCommand(int commandId, byte[] command) {
@@ -684,10 +542,154 @@ final class PcscReaderAdapter
   /**
    * {@inheritDoc}
    *
-   * @since 2.0.0
+   * @since 2.1.0
    */
   @Override
   public int getIoctlCcidEscapeCommandId() {
     return isWindows ? 3500 : 1;
+  }
+
+  private void connectCard() throws CardException {
+    card = communicationTerminal.connect(protocol);
+    if (isModeExclusive) {
+      card.beginExclusive();
+    }
+    channel = card.getBasicChannel();
+    powerOnData = HexUtil.toHex(card.getATR().getBytes());
+    isProtocolInnovatronBPrime =
+        isCurrentProtocol(PcscCardCommunicationProtocol.INNOVATRON_B_PRIME.name());
+  }
+
+  /**
+   * Disconnects the card and resets the card state fields.
+   *
+   * <p>No-op if no card is connected. UNPOWER and EJECT modes require jnasmartcardio; they fall
+   * back to RESET with other providers.
+   */
+  private void disconnectCard() throws CardException {
+    if (card == null) {
+      return;
+    }
+    try {
+      if (card instanceof Smartcardio.JnaCard) {
+        ((Smartcardio.JnaCard) card)
+            .disconnect(
+                getDisposition(
+                    isProtocolInnovatronBPrime ? DisconnectionMode.UNPOWER : disconnectionMode));
+        if(isProtocolInnovatronBPrime || disconnectionMode == DisconnectionMode.UNPOWER) {
+          logger.debug("[readerExt={}] Resetting the driver state", name);
+          try {
+            communicationTerminal.connect("*").disconnect(false);
+          } catch (CardException e) {
+            //
+          }
+        }
+      } else {
+        // UNPOWER and EJECT are not available outside jnasmartcardio: fall back to RESET
+        card.disconnect(disconnectionMode != DisconnectionMode.LEAVE);
+      }
+    } catch (CardException e) {
+      String msg = e.getMessage() != null ? e.getMessage() : "";
+      if (!msg.contains("REMOVED") && !msg.contains("NO_SMARTCARD")) {
+        throw e;
+      }
+    } finally {
+      card = null;
+      channel = null;
+      powerOnData = "";
+    }
+  }
+
+  /**
+   * Maps a DisconnectionMode to the corresponding SCARD_* constant.
+   *
+   * @param mode The disconnection mode.
+   * @return The corresponding SCARD_* value.
+   */
+  private static int getDisposition(DisconnectionMode mode) {
+    switch (mode) {
+      case RESET:
+        return Smartcardio.JnaCard.SCARD_RESET_CARD;
+      case LEAVE:
+        return Smartcardio.JnaCard.SCARD_LEAVE_CARD;
+      case UNPOWER:
+        return Smartcardio.JnaCard.SCARD_UNPOWER_CARD;
+      case EJECT:
+        return Smartcardio.JnaCard.SCARD_EJECT_CARD;
+      default:
+        throw new IllegalArgumentException("Unknown DisconnectionMode: " + mode);
+    }
+  }
+
+  private void doWaitForCardRemoval(boolean allowPolling)
+      throws ReaderIOException, TaskCanceledException {
+    boolean usePolling = allowPolling && isProtocolInnovatronBPrime;
+    if (logger.isTraceEnabled()) {
+      logger.trace("[readerExt={}] Starting card removal wait", name);
+    }
+    isWaitingForRemoval.set(true);
+    if (usePolling) {
+      awaitCardRemovalByPolling();
+    } else {
+      awaitCardRemovalBlocking();
+    }
+    // clean up
+    try {
+      disconnectCard();
+    } catch (CardException | RuntimeException e) {
+      throw new ReaderIOException("Failed to disconnect card. Reader: " + name, e);
+    }
+    if (logger.isTraceEnabled()) {
+      if (!isWaitingForRemoval.get()) {
+        logger.trace("[readerExt={}] Card removal wait stopped", name);
+      } else {
+        logger.trace("[readerExt={}] Card removed", name);
+      }
+    }
+    if (!isWaitingForRemoval.get()) {
+      throw new TaskCanceledException("Card removal wait task cancelled. Reader: " + name);
+    }
+  }
+
+  private void awaitCardRemovalByPolling() throws ReaderIOException {
+    try {
+      while (isWaitingForRemoval.get()) {
+        transmitApdu(pingApdu);
+        Thread.sleep(25);
+        if (Thread.interrupted()) {
+          isWaitingForRemoval.set(false);
+        }
+      }
+    } catch (CardIOException e) {
+      if (logger.isTraceEnabled()) {
+        logger.trace(
+            "[readerExt={}] Expected IOException received while waiting for card removal [reason={}]",
+            getName(),
+            e.getMessage());
+      }
+    } catch (InterruptedException e) {
+      if (logger.isTraceEnabled()) {
+        logger.trace(
+            "[readerExt={}] Interrupted while waiting for card removal [reason={}]",
+            getName(),
+            e.getMessage());
+      }
+      Thread.currentThread().interrupt();
+    }
+  }
+
+  private void awaitCardRemovalBlocking() throws ReaderIOException {
+    try {
+      while (isWaitingForRemoval.get()) {
+        if (monitoringTerminal.waitForCardAbsent(cardMonitoringCycleDuration)) {
+          return;
+        }
+        if (Thread.interrupted()) {
+          isWaitingForRemoval.set(false);
+        }
+      }
+    } catch (CardException e) {
+      throw new ReaderIOException("Failed to wait for the card removal. Reader: " + name, e);
+    }
   }
 }
