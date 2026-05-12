@@ -57,7 +57,7 @@ public final class PcscPluginFactoryBuilder {
         "(?i).*(contactless|ask logo|acs acr122).*";
     private Pattern contactlessReaderIdentificationFilterPattern =
         Pattern.compile(DEFAULT_CONTACTLESS_READER_FILTER);
-    private final Map<String, String> protocolRulesMap;
+    private final Map<String, String> customProtocolRules;
     private int cardMonitoringCycleDuration = 500; // default value 500 ms
     private Provider provider = new Smartcardio(); // jnasmartcardio is the default provider
 
@@ -67,34 +67,7 @@ public final class PcscPluginFactoryBuilder {
      * the map is an empty map.
      */
     private Builder() {
-      protocolRulesMap = new HashMap<>();
-    }
-
-    /**
-     * Sets a filter based on regular expressions to make the plugin able to identify a contact
-     * reader from its name.
-     *
-     * <p>Readers whose names match the provided regular expression will be considered contact type
-     * readers.
-     *
-     * <p>For example, the string ".*less.*" could identify all readers having "less" in their name
-     * as contactless readers.
-     *
-     * <p>Names are not always as explicit, so it is sometimes better to test the brand and model.
-     * <br>
-     * Commonly used contact readers include "Cherry TC" or "Identive".<br>
-     * Thus, an application using these readers should call this method with {@code ".*(Cherry
-     * TC|Identive).*"} as an argument.
-     *
-     * @param contactReaderIdentificationFilter A string a regular expression.
-     * @return This builder.
-     * @since 2.0.0
-     * @deprecated Useless method that will be removed soon, see {@link
-     *     #useContactlessReaderIdentificationFilter(String)}
-     */
-    @Deprecated
-    public Builder useContactReaderIdentificationFilter(String contactReaderIdentificationFilter) {
-      return this;
+      customProtocolRules = new HashMap<>();
     }
 
     /**
@@ -109,7 +82,6 @@ public final class PcscPluginFactoryBuilder {
      * @param contactlessReaderIdentificationFilter A regular expression.
      * @return This builder.
      * @throws IllegalArgumentException If the provided string is null, empty or invalid.
-     * @see #useContactReaderIdentificationFilter(String)
      * @since 2.0.0
      */
     public Builder useContactlessReaderIdentificationFilter(
@@ -147,9 +119,9 @@ public final class PcscPluginFactoryBuilder {
       Assert.getInstance().notEmpty(readerProtocolName, "readerProtocolName");
       if (protocolRule == null) {
         // disable the protocol by defining a regex that always fails.
-        protocolRulesMap.put(readerProtocolName, "X");
+        customProtocolRules.put(readerProtocolName, "X");
       } else {
-        protocolRulesMap.put(readerProtocolName, protocolRule);
+        customProtocolRules.put(readerProtocolName, protocolRule);
       }
       return this;
     }
@@ -209,7 +181,7 @@ public final class PcscPluginFactoryBuilder {
       return new PcscPluginFactoryAdapter(
           provider,
           contactlessReaderIdentificationFilterPattern,
-          protocolRulesMap,
+          customProtocolRules,
           cardMonitoringCycleDuration);
     }
   }
