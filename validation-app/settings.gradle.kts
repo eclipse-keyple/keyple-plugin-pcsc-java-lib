@@ -1,4 +1,6 @@
-rootProject.name = "keyple-plugin-pcsc-java-lib"
+rootProject.name = "keyple-plugin-pcsc-validation-app"
+
+includeBuild("..")
 
 pluginManagement {
   repositories {
