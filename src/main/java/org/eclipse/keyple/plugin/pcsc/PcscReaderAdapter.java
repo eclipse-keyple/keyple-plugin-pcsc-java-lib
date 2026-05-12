@@ -50,18 +50,19 @@ final class PcscReaderAdapter
   private final boolean isWindows;
   private final int cardMonitoringCycleDuration;
   private final byte[] pingApdu = HexUtil.toByteArray("00C0000000"); // GET RESPONSE
-  private Card card;
-  private CardChannel channel;
+
   private Boolean isContactless;
-  private String protocol = IsoProtocol.ANY.getValue();
   private boolean isModeExclusive;
   private DisconnectionMode disconnectionMode = DisconnectionMode.RESET;
+  private String protocol = IsoProtocol.ANY.getValue();
+
+  private Card card;
+  private CardChannel channel;
   private String powerOnData = "";
+  private boolean isProtocolInnovatronBPrime;
 
   private final AtomicBoolean isWaitingForInsertion = new AtomicBoolean();
   private final AtomicBoolean isWaitingForRemoval = new AtomicBoolean();
-  private boolean isObservationActive;
-  private boolean isProtocolInnovatronBPrime;
 
   /**
    * Constructor.
@@ -199,21 +200,27 @@ final class PcscReaderAdapter
    */
   @Override
   public boolean isCardPresent() throws ReaderIOException {
+    boolean isPresent;
     try {
-      boolean isPresent = communicationTerminal.isCardPresent();
-      if (isPresent) {
-        try {
-          connectCard();
-        } catch (CardNotPresentException e) {
-          isPresent = false;
-        }
-      } else {
-        disconnectCard();
-      }
-      return isPresent;
+      isPresent = communicationTerminal.isCardPresent();
     } catch (CardException | RuntimeException e) {
       throw new ReaderIOException("Failed to check card presence. Reader: " + name, e);
     }
+    if (isPresent) {
+      try {
+        connectCard();
+      } catch (CardException e) {
+        // Two cases are possible:
+        // 1) the card was removed between card presence detection and the card connection attempt,
+        // 2) the reader entered a desynchronized state following a card presentation immediately
+        //    followed by card removal before application startup (observed with B PRIME cards
+        //    and some Paragon ID readers).
+        isPresent = false;
+      }
+    } else {
+      disconnectCardSafely();
+    }
+    return isPresent;
   }
 
   /**
@@ -292,9 +299,7 @@ final class PcscReaderAdapter
    * @since 2.0.0
    */
   @Override
-  public void onStartDetection() {
-    isObservationActive = true;
-  }
+  public void onStartDetection() {}
 
   /**
    * {@inheritDoc}
@@ -302,9 +307,7 @@ final class PcscReaderAdapter
    * @since 2.0.0
    */
   @Override
-  public void onStopDetection() {
-    isObservationActive = false;
-  }
+  public void onStopDetection() {}
 
   /**
    * {@inheritDoc}
@@ -323,12 +326,7 @@ final class PcscReaderAdapter
     try {
       if (card instanceof Smartcardio.JnaCard) {
         ((Smartcardio.JnaCard) card).disconnect(getDisposition(DisconnectionMode.UNPOWER));
-        // reset the driver state to avoid stale reader state after UNPOWER on some drivers
-        try {
-          communicationTerminal.connect("*").disconnect(false);
-        } catch (CardException ignored) {
-          // NOP
-        }
+        triggerPowerOnCycleSafely();
       } else {
         card.disconnect(true);
       }
@@ -344,6 +342,22 @@ final class PcscReaderAdapter
       // powerOnData is intentionally kept: card is physically present in HALT state
       card = null;
       channel = null;
+    }
+  }
+
+  /**
+   * Triggers a physical power-on cycle to reset the driver/reader state. After an UNPOWER command,
+   * some CCID drivers or readers may remain in a "stale" or "cold" state. This method forces the
+   * PC/SC layer to re-energize the slot by initiating an ephemeral connection and immediately
+   * releasing it while leaving the power on (SCARD_LEAVE_CARD).
+   */
+  private void triggerPowerOnCycleSafely() {
+    try {
+      // Initiating a connection forces the "Power on on demand" mechanism
+      // We disconnect with 'false' (SCARD_LEAVE_CARD) to keep the slot powered
+      communicationTerminal.connect("*").disconnect(false);
+    } catch (CardException ignored) { // NOSONAR
+      // If the card is gone, the driver state is naturally reset by the stack
     }
   }
 
@@ -368,14 +382,25 @@ final class PcscReaderAdapter
     try {
       while (isWaitingForInsertion.get()) {
         if (monitoringTerminal.waitForCardPresent(cardMonitoringCycleDuration)) {
-          // card inserted
-          if (logger.isTraceEnabled()) {
-            logger.trace("[readerExt={}] Card inserted", getName());
-          }
           try {
             connectCard();
+            // card inserted
+            if (logger.isTraceEnabled()) {
+              logger.trace("[readerExt={}] Card inserted", getName());
+            }
             return;
-          } catch (CardNotPresentException e) {
+          } catch (CardException e) {
+            // Two cases are possible:
+            // 1) the card was removed between card presence detection and the card connection
+            //    attempt,
+            // 2) the reader entered a desynchronized state following a card presentation
+            //    immediately followed by card removal before application startup (observed with B
+            //    PRIME cards and some Paragon ID readers).
+            try {
+              Thread.sleep(500);
+            } catch (InterruptedException ex) {
+              Thread.currentThread().interrupt();
+            }
           }
         }
         if (Thread.interrupted()) {
@@ -566,7 +591,7 @@ final class PcscReaderAdapter
    * <p>No-op if no card is connected. UNPOWER and EJECT modes require jnasmartcardio; they fall
    * back to RESET with other providers.
    */
-  private void disconnectCard() throws CardException {
+  private void disconnectCardSafely() {
     if (card == null) {
       return;
     }
@@ -576,22 +601,17 @@ final class PcscReaderAdapter
             .disconnect(
                 getDisposition(
                     isProtocolInnovatronBPrime ? DisconnectionMode.UNPOWER : disconnectionMode));
-        if(isProtocolInnovatronBPrime || disconnectionMode == DisconnectionMode.UNPOWER) {
-          logger.debug("[readerExt={}] Resetting the driver state", name);
-          try {
-            communicationTerminal.connect("*").disconnect(false);
-          } catch (CardException e) {
-            //
-          }
+        if (isProtocolInnovatronBPrime || disconnectionMode == DisconnectionMode.UNPOWER) {
+          triggerPowerOnCycleSafely();
         }
       } else {
         // UNPOWER and EJECT are not available outside jnasmartcardio: fall back to RESET
         card.disconnect(disconnectionMode != DisconnectionMode.LEAVE);
       }
-    } catch (CardException e) {
+    } catch (CardException | RuntimeException e) {
       String msg = e.getMessage() != null ? e.getMessage() : "";
       if (!msg.contains("REMOVED") && !msg.contains("NO_SMARTCARD")) {
-        throw e;
+        logger.warn("[readerExt={}] Disconnect failed [reason={}]", name, e.getMessage());
       }
     } finally {
       card = null;
@@ -634,11 +654,7 @@ final class PcscReaderAdapter
       awaitCardRemovalBlocking();
     }
     // clean up
-    try {
-      disconnectCard();
-    } catch (CardException | RuntimeException e) {
-      throw new ReaderIOException("Failed to disconnect card. Reader: " + name, e);
-    }
+    disconnectCardSafely();
     if (logger.isTraceEnabled()) {
       if (!isWaitingForRemoval.get()) {
         logger.trace("[readerExt={}] Card removal wait stopped", name);
