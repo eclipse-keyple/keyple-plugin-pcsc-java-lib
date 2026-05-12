@@ -6,7 +6,7 @@ plugins {
   java
   `maven-publish`
   signing
-  id("com.diffplug.spotless") version "6.25.0"
+  id("com.diffplug.spotless") version "8.2.1"
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,7 +14,7 @@ plugins {
 ///////////////////////////////////////////////////////////////////////////////
 
 dependencies {
-  implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+  implementation(fileTree("libs") { include("*.jar") })
   implementation("org.eclipse.keyple:keyple-common-java-api:2.0.2")
   implementation("org.eclipse.keyple:keyple-plugin-java-api:3.0.0-SNAPSHOT") { isChanging = true }
   implementation("org.eclipse.keyple:keyple-util-java-lib:2.4.1")
@@ -87,7 +87,8 @@ tasks {
       overview = "src/main/javadoc/overview.html"
       windowTitle = "$titleProperty - ${project.version}"
       header(
-          "<div style=\"margin-top: 7px\">$javadocLogo $titleProperty - ${project.version}</div>")
+          "<div style=\"margin-top: 7px\">$javadocLogo $titleProperty - ${project.version}</div>"
+      )
       docTitle("$titleProperty - ${project.version}")
       use(true)
       bottom(javadocCopyright)
@@ -115,7 +116,9 @@ tasks {
               "Specification-Vendor" to (project.findProperty("organization.name") as String),
               "Created-By" to
                   "${System.getProperty("java.version")} (${System.getProperty("java.vendor")})",
-              "Build-Jdk" to System.getProperty("java.version")))
+              "Build-Jdk" to System.getProperty("java.version"),
+          )
+      )
     }
   }
   named<Jar>("sourcesJar") {
@@ -124,7 +127,9 @@ tasks {
       attributes(
           mapOf(
               "Implementation-Title" to "${project.findProperty("title") as String} Sources",
-              "Implementation-Version" to project.version))
+              "Implementation-Version" to project.version,
+          )
+      )
     }
   }
   named<Jar>("javadocJar") {
@@ -134,7 +139,9 @@ tasks {
       attributes(
           mapOf(
               "Implementation-Title" to "${project.findProperty("title") as String} Documentation",
-              "Implementation-Version" to project.version))
+              "Implementation-Version" to project.version,
+          )
+      )
     }
   }
 }
@@ -177,7 +184,9 @@ publishing {
             mapOf(
                 "project.build.sourceEncoding" to "UTF-8",
                 "maven.compiler.source" to javaSourceLevel,
-                "maven.compiler.target" to javaTargetLevel))
+                "maven.compiler.target" to javaTargetLevel,
+            )
+        )
       }
     }
   }
