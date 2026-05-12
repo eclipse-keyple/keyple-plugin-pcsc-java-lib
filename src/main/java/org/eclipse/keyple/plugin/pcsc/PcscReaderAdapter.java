@@ -29,7 +29,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implementation of {@link PcscReaderAdapter}.
+ * Adapter implementing {@link PcscReader} on top of {@code javax.smartcardio}.
+ *
+ * <p>Each instance wraps a single {@link javax.smartcardio.CardTerminal} and exposes the full
+ * Keyple reader SPI: card presence detection, APDU exchange, configurable disconnection, and
+ * observable insertion/removal waiting.
+ *
+ * <p>Two separate {@link javax.smartcardio.CardTerminal} handles are maintained internally — one
+ * for communication ({@code connect/transmit}) and one for monitoring ({@code
+ * waitForCardPresent/Absent}) — to avoid {@code SCARD_E_SHARING_VIOLATION} on Linux, where
+ * pcsc-lite does not robustly handle concurrent access on a single {@code SCARDCONTEXT}.
  *
  * @since 2.0.0
  */
@@ -95,7 +104,9 @@ final class PcscReaderAdapter
    */
   private CardTerminal createMonitoringTerminal(String terminalName) {
     try {
-      // Attempt to create a new TerminalFactory instance to get a separate PC/SC context
+      // The separate SCARDCONTEXT comes from the terminals() call: jnasmartcardio creates a new
+      // JnaCardTerminals (and calls SCardEstablishContext) on each invocation, independently of the
+      // factory singleton returned by getDefault().
       TerminalFactory monitoringFactory = TerminalFactory.getDefault();
       CardTerminals monitoringTerminals = monitoringFactory.terminals();
 
@@ -172,9 +183,9 @@ final class PcscReaderAdapter
    */
   @Override
   public boolean isCurrentProtocol(String readerProtocol) {
-    String protocolRule = pluginAdapter.getProtocolRule(readerProtocol);
-    if (protocolRule != null && !protocolRule.isEmpty()) {
-      return Pattern.compile(protocolRule).matcher(powerOnData).matches();
+    Pattern pattern = pluginAdapter.getCompiledProtocolRule(readerProtocol);
+    if (pattern != null) {
+      return pattern.matcher(powerOnData).matches();
     }
     return false;
   }
@@ -247,9 +258,8 @@ final class PcscReaderAdapter
       } catch (CardNotPresentException e) {
         throw new CardIOException("Card not present. APDU transmit failed. Reader: " + name, e);
       } catch (CardException e) {
-        if (e.getMessage().contains("CARD")
-            || e.getMessage().contains("NOT_TRANSACTED")
-            || e.getMessage().contains("INVALID_ATR")) {
+        String msg = e.getMessage() != null ? e.getMessage() : "";
+        if (msg.contains("CARD") || msg.contains("NOT_TRANSACTED") || msg.contains("INVALID_ATR")) {
           throw new CardIOException(
               "Card communication error. APDU transmit failed. Reader: " + name, e);
         } else {
@@ -643,6 +653,9 @@ final class PcscReaderAdapter
 
   private void doWaitForCardRemoval(boolean allowPolling)
       throws ReaderIOException, TaskCanceledException {
+    // Polling (APDU ping) is used for B Prime removal only in the post-processing phase
+    // (waitForCardRemoval). During processing (allowPolling=false), the blocking wait is
+    // sufficient: card removal will surface as a CardIOException on the next APDU exchange.
     boolean usePolling = allowPolling && isProtocolInnovatronBPrime;
     if (logger.isTraceEnabled()) {
       logger.trace("[readerExt={}] Starting card removal wait", name);

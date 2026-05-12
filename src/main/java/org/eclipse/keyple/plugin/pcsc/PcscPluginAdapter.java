@@ -35,22 +35,31 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
 
   private static final Logger logger = LoggerFactory.getLogger(PcscPluginAdapter.class);
 
-  /**
-   * Singleton instance of the class
-   *
-   * <p>'volatile' qualifier ensures that read access to the object will only be allowed once the
-   * object has been fully initialized. <br>
-   * This qualifier is required for "lazy-singleton" pattern with double-check method, to be
-   * thread-safe.
-   */
-  private static volatile PcscPluginAdapter INSTANCE; // NOSONAR: lazy-singleton pattern.
-
   private static final int MONITORING_CYCLE_DURATION_MS = 1000;
 
-  private static final Map<String, String> protocolRulesMap = new ConcurrentHashMap<>();
+  private final Map<String, String> protocolRulesMap = new ConcurrentHashMap<>();
+  private final Map<String, Pattern> compiledProtocolRulesMap = new ConcurrentHashMap<>();
 
-  // initializes the protocol rules map with default values
-  static {
+  private CardTerminals terminals;
+  private volatile boolean isCardTerminalsInitialized;
+
+  private final Pattern contactlessReaderIdentificationFilterPattern;
+  private final int cardMonitoringCycleDuration;
+
+  /** Constructor. */
+  PcscPluginAdapter(
+      Provider provider,
+      Pattern contactlessReaderIdentificationFilterPattern,
+      int cardMonitoringCycleDuration,
+      Map<String, String> customProtocolRules) {
+
+    Security.insertProviderAt(provider, 1);
+
+    this.contactlessReaderIdentificationFilterPattern =
+        contactlessReaderIdentificationFilterPattern;
+
+    this.cardMonitoringCycleDuration = cardMonitoringCycleDuration;
+
     // contactless protocols
     protocolRulesMap.put(
         PcscCardCommunicationProtocol.ISO_14443_4.name(),
@@ -71,44 +80,26 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
         PcscCardCommunicationProtocol.ST25_SRT512.name(),
         PcscCardCommunicationProtocol.ST25_SRT512.getDefaultRule());
 
-    // contacts protocols
+    // contact protocols
     protocolRulesMap.put(
         PcscCardCommunicationProtocol.ISO_7816_3.name(),
         PcscCardCommunicationProtocol.ISO_7816_3.getDefaultRule());
 
-    // legacy protocols for compatibility
-    protocolRulesMap.put(
-        PcscSupportedContactProtocol.ISO_7816_3_T0.name(),
-        PcscSupportedContactProtocol.ISO_7816_3_T0.getDefaultRule());
-    protocolRulesMap.put(
-        PcscSupportedContactProtocol.ISO_7816_3_T1.name(),
-        PcscSupportedContactProtocol.ISO_7816_3_T1.getDefaultRule());
-  }
-
-  private CardTerminals terminals;
-  private boolean isCardTerminalsInitialized;
-
-  private Pattern contactlessReaderIdentificationFilterPattern;
-  private int cardMonitoringCycleDuration;
-
-  /** Constructor. */
-  PcscPluginAdapter() {}
-
-  /**
-   * Gets the single instance.
-   *
-   * @return This instance.
-   * @since 2.0.0
-   */
-  static PcscPluginAdapter getInstance() {
-    if (INSTANCE == null) {
-      synchronized (PcscPluginAdapter.class) {
-        if (INSTANCE == null) {
-          INSTANCE = new PcscPluginAdapter();
-        }
-      }
+    if (!customProtocolRules.isEmpty()) {
+      logger.info(
+          "Customizing protocol identification rules [rules={}]",
+          JsonUtil.toJson(customProtocolRules));
+      protocolRulesMap.putAll(customProtocolRules);
+    } else {
+      logger.info("Using default protocol identification rules");
     }
-    return INSTANCE;
+
+    protocolRulesMap.forEach(
+        (name, rule) -> {
+          if (rule != null && !rule.isEmpty()) {
+            compiledProtocolRulesMap.put(name, Pattern.compile(rule));
+          }
+        });
   }
 
   /**
@@ -161,7 +152,7 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
    */
   @Override
   public String getName() {
-    return PcscPluginFactoryAdapter.PLUGIN_NAME;
+    return PcscConstants.PLUGIN_NAME;
   }
 
   /**
@@ -176,9 +167,8 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
       logger.trace("Searching available readers");
     }
     for (CardTerminal terminal : getCardTerminalList()) {
-      readerSpis.add(createReader(terminal));
-    }
-    for (ReaderSpi readerSpi : readerSpis) {
+      ReaderSpi readerSpi = createReader(terminal);
+      readerSpis.add(readerSpi);
       logger.info("Reader found [name={}]", readerSpi.getName());
     }
     return readerSpis;
@@ -212,14 +202,14 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
       }
       return terminals.list();
     } catch (Exception e) {
-      if (e.getMessage().contains("SCARD_E_NO_READERS_AVAILABLE")) {
+      String msg = e.getMessage() != null ? e.getMessage() : "";
+      if (msg.contains("SCARD_E_NO_READERS_AVAILABLE")) {
         logger.error("No reader available");
-      } else if (e.getMessage().contains("SCARD_E_NO_SERVICE")
-          || e.getMessage().contains("SCARD_E_SERVICE_STOPPED")) {
+      } else if (msg.contains("SCARD_E_NO_SERVICE") || msg.contains("SCARD_E_SERVICE_STOPPED")) {
         logger.error("No running smart card service");
         // the CardTerminals object is no more valid
         isCardTerminalsInitialized = false;
-      } else if (e.getMessage().contains("SCARD_F_COMM_ERROR")) {
+      } else if (msg.contains("SCARD_F_COMM_ERROR")) {
         logger.error("Reader communication error occurred");
       } else {
         throw new PluginIOException("Could not access terminals list", e);
@@ -266,6 +256,17 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
   }
 
   /**
+   * Gets the pre-compiled pattern associated to the provided protocol.
+   *
+   * @param readerProtocol The reader protocol.
+   * @return Null if no rule is defined for the provided protocol.
+   * @since 2.0.0
+   */
+  Pattern getCompiledProtocolRule(String readerProtocol) {
+    return compiledProtocolRulesMap.get(readerProtocol);
+  }
+
+  /**
    * Attempts to determine the transmission mode of the reader whose name is provided.<br>
    * This determination is made by a test based on a regular expression.
    *
@@ -275,63 +276,5 @@ final class PcscPluginAdapter implements PcscPlugin, ObservablePluginSpi {
    */
   boolean isContactless(String readerName) {
     return contactlessReaderIdentificationFilterPattern.matcher(readerName).matches();
-  }
-
-  /**
-   * Sets the filter to identify contactless readers.
-   *
-   * @param contactlessReaderIdentificationFilterPattern A regular expression pattern.
-   * @return The object instance.
-   * @since 2.0.0
-   */
-  PcscPluginAdapter setContactlessReaderIdentificationFilterPattern(
-      Pattern contactlessReaderIdentificationFilterPattern) {
-    this.contactlessReaderIdentificationFilterPattern =
-        contactlessReaderIdentificationFilterPattern;
-    return this;
-  }
-
-  /**
-   * Adds a map of rules to the current default map.
-   *
-   * <p>Already existing items are overridden, new items are added.
-   *
-   * @param protocolRulesMap The regex based filter.
-   * @return The object instance.
-   * @since 2.0.0
-   */
-  PcscPluginAdapter addProtocolRulesMap(Map<String, String> protocolRulesMap) {
-    if (!protocolRulesMap.isEmpty()) {
-      logger.info(
-          "Adding protocol identification rules [rules={}]", JsonUtil.toJson(protocolRulesMap));
-    } else {
-      logger.info("Using default protocol identification rules");
-    }
-    PcscPluginAdapter.protocolRulesMap.putAll(protocolRulesMap);
-    return this;
-  }
-
-  /**
-   * Sets the cycle duration for card presence/absence monitoring.
-   *
-   * @param cardMonitoringCycleDuration The duration of the card monitoring cycle in milliseconds.
-   * @return The object instance.
-   * @since 2.3.0
-   */
-  PcscPluginAdapter setCardMonitoringCycleDuration(int cardMonitoringCycleDuration) {
-    this.cardMonitoringCycleDuration = cardMonitoringCycleDuration;
-    return this;
-  }
-
-  /**
-   * Sets the security provider to be used and inserts it at the first position.
-   *
-   * @param provider The security provider to be set.
-   * @return The object instance.
-   * @since 2.4.0
-   */
-  PcscPluginAdapter setProvider(Provider provider) {
-    Security.insertProviderAt(provider, 1);
-    return this;
   }
 }

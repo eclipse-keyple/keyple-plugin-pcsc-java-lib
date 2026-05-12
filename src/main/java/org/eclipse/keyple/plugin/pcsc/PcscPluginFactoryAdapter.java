@@ -26,18 +26,10 @@ import org.eclipse.keyple.core.plugin.spi.PluginSpi;
  */
 final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactorySpi {
 
-  static final String PLUGIN_NAME = "PcscPlugin";
-
-  /**
-   * The plugin name
-   *
-   * @since 2.0.0
-   */
-  private final Pattern contactlessReaderIdentificationFilterPattern;
-
-  private final Map<String, String> protocolRulesMap;
-  private final int cardMonitoringCycleDuration;
   private final Provider provider;
+  private final Pattern contactlessReaderIdentificationFilterPattern;
+  private final int cardMonitoringCycleDuration;
+  private final Map<String, String> customProtocolRules;
 
   /**
    * Creates an instance, sets the fields from the factory builder.
@@ -47,12 +39,12 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
   PcscPluginFactoryAdapter(
       Provider provider,
       Pattern contactlessReaderIdentificationFilterPattern,
-      Map<String, String> protocolRulesMap,
+      Map<String, String> customProtocolRules,
       int cardMonitoringCycleDuration) {
     this.provider = provider;
     this.contactlessReaderIdentificationFilterPattern =
         contactlessReaderIdentificationFilterPattern;
-    this.protocolRulesMap = protocolRulesMap;
+    this.customProtocolRules = customProtocolRules;
     this.cardMonitoringCycleDuration = cardMonitoringCycleDuration;
   }
 
@@ -83,7 +75,7 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
    */
   @Override
   public String getPluginName() {
-    return PLUGIN_NAME;
+    return PcscConstants.PLUGIN_NAME;
   }
 
   /**
@@ -93,12 +85,10 @@ final class PcscPluginFactoryAdapter implements PcscPluginFactory, PluginFactory
    */
   @Override
   public PluginSpi getPlugin() {
-    PcscPluginAdapter plugin = PcscPluginAdapter.getInstance();
-    return plugin
-        .setProvider(provider)
-        .setContactlessReaderIdentificationFilterPattern(
-            contactlessReaderIdentificationFilterPattern)
-        .addProtocolRulesMap(protocolRulesMap)
-        .setCardMonitoringCycleDuration(cardMonitoringCycleDuration);
+    return new PcscPluginAdapter(
+        provider,
+        contactlessReaderIdentificationFilterPattern,
+        cardMonitoringCycleDuration,
+        customProtocolRules);
   }
 }

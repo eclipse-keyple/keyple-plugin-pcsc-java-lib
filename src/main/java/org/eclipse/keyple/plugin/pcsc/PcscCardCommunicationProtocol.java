@@ -151,7 +151,7 @@ public enum PcscCardCommunicationProtocol {
    * Gets the default rule associated to the protocol.
    *
    * @return The regular expression pattern as a String
-   * @since 2.0.0
+   * @since 2.5.0
    */
   String getDefaultRule() {
     return defaultRule;
